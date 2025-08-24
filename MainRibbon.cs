@@ -11,7 +11,7 @@ using Word = Microsoft.Office.Interop.Word;
 
 namespace WordMan_VSTO
 {
-    public partial class MainRibbon
+    public partial class MainRibbon : Microsoft.Office.Tools.Ribbon.RibbonBase
     {
 
         private void MainRibbon_Load(object sender, RibbonUIEventArgs e)
@@ -755,6 +755,10 @@ namespace WordMan_VSTO
             System.Windows.Forms.MessageBox.Show("交叉引用与文献引用已取消高亮！");
         }
 
+        private void 版本_Click(object sender, RibbonControlEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/eyinwei/WordMan_VSTO");
+        }
     }
 }
 

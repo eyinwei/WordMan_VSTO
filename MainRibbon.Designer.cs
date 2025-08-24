@@ -36,33 +36,33 @@
         {
             this.WordMan = this.Factory.CreateRibbonTab();
             this.文本处理 = this.Factory.CreateRibbonGroup();
-            this.separator1 = this.Factory.CreateRibbonSeparator();
-            this.separator2 = this.Factory.CreateRibbonSeparator();
-            this.表格处理 = this.Factory.CreateRibbonGroup();
-            this.公式编号 = this.Factory.CreateRibbonGroup();
-            this.图片处理 = this.Factory.CreateRibbonGroup();
-            this.其他 = this.Factory.CreateRibbonGroup();
-            this.版本 = this.Factory.CreateRibbonLabel();
             this.去除断行 = this.Factory.CreateRibbonButton();
             this.去除空格 = this.Factory.CreateRibbonButton();
             this.去除空行 = this.Factory.CreateRibbonButton();
             this.英标转中标 = this.Factory.CreateRibbonButton();
             this.中标转英标 = this.Factory.CreateRibbonButton();
             this.自动加空格 = this.Factory.CreateRibbonButton();
+            this.separator1 = this.Factory.CreateRibbonSeparator();
             this.去除缩进 = this.Factory.CreateRibbonButton();
             this.缩进2字符 = this.Factory.CreateRibbonButton();
+            this.separator2 = this.Factory.CreateRibbonSeparator();
             this.希腊字母 = this.Factory.CreateRibbonButton();
             this.常用符号 = this.Factory.CreateRibbonButton();
+            this.表格处理 = this.Factory.CreateRibbonGroup();
             this.三线表 = this.Factory.CreateRibbonButton();
             this.插入N行 = this.Factory.CreateRibbonButton();
             this.插入N列 = this.Factory.CreateRibbonButton();
+            this.公式编号 = this.Factory.CreateRibbonGroup();
             this.编号 = this.Factory.CreateRibbonButton();
             this.toggleButton1 = this.Factory.CreateRibbonToggleButton();
             this.toggleButton2 = this.Factory.CreateRibbonToggleButton();
             this.toggleButton3 = this.Factory.CreateRibbonToggleButton();
+            this.图片处理 = this.Factory.CreateRibbonGroup();
+            this.其他 = this.Factory.CreateRibbonGroup();
             this.域名高亮 = this.Factory.CreateRibbonButton();
             this.取消高亮 = this.Factory.CreateRibbonButton();
             this.另存PDF = this.Factory.CreateRibbonButton();
+            this.版本 = this.Factory.CreateRibbonButton();
             this.WordMan.SuspendLayout();
             this.文本处理.SuspendLayout();
             this.表格处理.SuspendLayout();
@@ -96,50 +96,6 @@
             this.文本处理.Items.Add(this.常用符号);
             this.文本处理.Label = "文本处理";
             this.文本处理.Name = "文本处理";
-            // 
-            // separator1
-            // 
-            this.separator1.Name = "separator1";
-            // 
-            // separator2
-            // 
-            this.separator2.Name = "separator2";
-            // 
-            // 表格处理
-            // 
-            this.表格处理.Items.Add(this.三线表);
-            this.表格处理.Items.Add(this.插入N行);
-            this.表格处理.Items.Add(this.插入N列);
-            this.表格处理.Label = "表格处理";
-            this.表格处理.Name = "表格处理";
-            // 
-            // 公式编号
-            // 
-            this.公式编号.Items.Add(this.编号);
-            this.公式编号.Items.Add(this.toggleButton1);
-            this.公式编号.Items.Add(this.toggleButton2);
-            this.公式编号.Items.Add(this.toggleButton3);
-            this.公式编号.Label = "公式编号";
-            this.公式编号.Name = "公式编号";
-            // 
-            // 图片处理
-            // 
-            this.图片处理.Label = "图片处理";
-            this.图片处理.Name = "图片处理";
-            // 
-            // 其他
-            // 
-            this.其他.Items.Add(this.域名高亮);
-            this.其他.Items.Add(this.取消高亮);
-            this.其他.Items.Add(this.另存PDF);
-            this.其他.Items.Add(this.版本);
-            this.其他.Label = "其他";
-            this.其他.Name = "其他";
-            // 
-            // 版本
-            // 
-            this.版本.Label = "版本 V1.0";
-            this.版本.Name = "版本";
             // 
             // 去除断行
             // 
@@ -189,6 +145,10 @@
             this.自动加空格.ShowImage = true;
             this.自动加空格.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.自动加空格_Click);
             // 
+            // separator1
+            // 
+            this.separator1.Name = "separator1";
+            // 
             // 去除缩进
             // 
             this.去除缩进.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
@@ -207,6 +167,10 @@
             this.缩进2字符.ShowImage = true;
             this.缩进2字符.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.缩进2字符_Click);
             // 
+            // separator2
+            // 
+            this.separator2.Name = "separator2";
+            // 
             // 希腊字母
             // 
             this.希腊字母.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
@@ -224,6 +188,14 @@
             this.常用符号.OfficeImageId = "EquationOperatorGallery";
             this.常用符号.ShowImage = true;
             this.常用符号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.常用符号_Click);
+            // 
+            // 表格处理
+            // 
+            this.表格处理.Items.Add(this.三线表);
+            this.表格处理.Items.Add(this.插入N行);
+            this.表格处理.Items.Add(this.插入N列);
+            this.表格处理.Label = "表格处理";
+            this.表格处理.Name = "表格处理";
             // 
             // 三线表
             // 
@@ -249,6 +221,15 @@
             this.插入N列.OfficeImageId = "EquationMatrixInsertColumnAfter";
             this.插入N列.ShowImage = true;
             this.插入N列.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.插入N列_Click);
+            // 
+            // 公式编号
+            // 
+            this.公式编号.Items.Add(this.编号);
+            this.公式编号.Items.Add(this.toggleButton1);
+            this.公式编号.Items.Add(this.toggleButton2);
+            this.公式编号.Items.Add(this.toggleButton3);
+            this.公式编号.Label = "公式编号";
+            this.公式编号.Name = "公式编号";
             // 
             // 编号
             // 
@@ -286,6 +267,20 @@
             this.toggleButton3.ShowImage = true;
             this.toggleButton3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.toggleButton3_Click);
             // 
+            // 图片处理
+            // 
+            this.图片处理.Label = "图片处理";
+            this.图片处理.Name = "图片处理";
+            // 
+            // 其他
+            // 
+            this.其他.Items.Add(this.域名高亮);
+            this.其他.Items.Add(this.取消高亮);
+            this.其他.Items.Add(this.另存PDF);
+            this.其他.Items.Add(this.版本);
+            this.其他.Label = "其他";
+            this.其他.Name = "其他";
+            // 
             // 域名高亮
             // 
             this.域名高亮.Label = "域名高亮";
@@ -310,6 +305,12 @@
             this.另存PDF.OfficeImageId = "P";
             this.另存PDF.ShowImage = true;
             this.另存PDF.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.另存PDF_Click);
+            // 
+            // 版本
+            // 
+            this.版本.Label = "版本 V1.1";
+            this.版本.Name = "版本";
+            this.版本.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.版本_Click);
             // 
             // MainRibbon
             // 
@@ -345,7 +346,6 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 希腊字母;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 常用符号;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup 其他;
-        internal Microsoft.Office.Tools.Ribbon.RibbonLabel 版本;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 另存PDF;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup 公式编号;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 编号;
@@ -362,13 +362,11 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup 图片处理;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 域名高亮;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 取消高亮;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 版本;
     }
 
     partial class ThisRibbonCollection
     {
-        internal MainRibbon Ribbon1
-        {
-            get { return this.GetRibbon<MainRibbon>(); }
-        }
+
     }
 }

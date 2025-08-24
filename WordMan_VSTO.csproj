@@ -31,7 +31,7 @@
     <ResolveComReferenceSilent>true</ResolveComReferenceSilent>
     <TargetFrameworkProfile />
     <IsWebBootstrapper>False</IsWebBootstrapper>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <BootstrapperEnabled>false</BootstrapperEnabled>
     <BootstrapperComponentsLocation>Relative</BootstrapperComponentsLocation>
     <PublishUrl>D:\Users\YW\Desktop\</PublishUrl>
     <InstallUrl />
@@ -283,6 +283,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>F5DCF9E8A3F9FC95DD6C56AEAF7A0ACB4980DF6A</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <!-- Include the build rules for a C# project. -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

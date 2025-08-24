@@ -1,0 +1,28 @@
+D:\Users\YW\Documents\WordMan_VSTO\bin\Debug\WordMan_VSTO.dll
+D:\Users\YW\Documents\WordMan_VSTO\bin\Debug\WordMan_VSTO.pdb
+D:\Users\YW\Documents\WordMan_VSTO\bin\Debug\WordMan_VSTO.dll.manifest
+D:\Users\YW\Documents\WordMan_VSTO\bin\Debug\WordMan_VSTO.vsto
+D:\Users\YW\Documents\WordMan_VSTO\bin\Debug\Microsoft.Office.Tools.Common.v4.0.Utilities.dll
+D:\Users\YW\Documents\WordMan_VSTO\obj\Debug\WordMan_VSTO.csproj.AssemblyReference.cache
+D:\Users\YW\Documents\WordMan_VSTO\obj\Debug\WordMan_VSTO.Properties.Resources.resources
+D:\Users\YW\Documents\WordMan_VSTO\obj\Debug\WordMan_VSTO.RibbonWordMan.resources
+D:\Users\YW\Documents\WordMan_VSTO\obj\Debug\WordMan_VSTO.csproj.GenerateResource.cache
+D:\Users\YW\Documents\WordMan_VSTO\obj\Debug\WordMan_VSTO.csproj.CoreCompileInputs.cache
+D:\Users\YW\Documents\WordMan_VSTO\obj\Debug\WordMan_.66925126.Up2Date
+D:\Users\YW\Documents\WordMan_VSTO\obj\Debug\WordMan_VSTO.dll
+D:\Users\YW\Documents\WordMan_VSTO\obj\Debug\WordMan_VSTO.pdb
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\bin\Debug\WordMan_VSTO.dll
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\bin\Debug\WordMan_VSTO.pdb
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\bin\Debug\WordMan_VSTO.dll.manifest
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\bin\Debug\WordMan_VSTO.vsto
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\bin\Debug\Microsoft.Office.Tools.Common.v4.0.Utilities.dll
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.csproj.AssemblyReference.cache
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.Properties.Resources.resources
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.csproj.GenerateResource.cache
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.csproj.CoreCompileInputs.cache
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_.66925126.Up2Date
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.dll
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.pdb
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.GreekLetterForm.resources
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.CommonSymbolForm.resources
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.MainRibbon.resources

@@ -52,12 +52,16 @@
             this.三线表 = this.Factory.CreateRibbonButton();
             this.插入N行 = this.Factory.CreateRibbonButton();
             this.插入N列 = this.Factory.CreateRibbonButton();
-            this.公式编号 = this.Factory.CreateRibbonGroup();
-            this.编号 = this.Factory.CreateRibbonButton();
-            this.toggleButton1 = this.Factory.CreateRibbonToggleButton();
-            this.toggleButton2 = this.Factory.CreateRibbonToggleButton();
-            this.toggleButton3 = this.Factory.CreateRibbonToggleButton();
+            this.公式处理 = this.Factory.CreateRibbonGroup();
+            this.公式编号 = this.Factory.CreateRibbonButton();
+            this.公式样式1 = this.Factory.CreateRibbonToggleButton();
+            this.公式样式2 = this.Factory.CreateRibbonToggleButton();
+            this.公式样式3 = this.Factory.CreateRibbonToggleButton();
             this.图片处理 = this.Factory.CreateRibbonGroup();
+            this.图片编号 = this.Factory.CreateRibbonButton();
+            this.图注样式1 = this.Factory.CreateRibbonToggleButton();
+            this.图注样式2 = this.Factory.CreateRibbonToggleButton();
+            this.图注样式3 = this.Factory.CreateRibbonToggleButton();
             this.其他 = this.Factory.CreateRibbonGroup();
             this.域名高亮 = this.Factory.CreateRibbonButton();
             this.取消高亮 = this.Factory.CreateRibbonButton();
@@ -66,7 +70,8 @@
             this.WordMan.SuspendLayout();
             this.文本处理.SuspendLayout();
             this.表格处理.SuspendLayout();
-            this.公式编号.SuspendLayout();
+            this.公式处理.SuspendLayout();
+            this.图片处理.SuspendLayout();
             this.其他.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -74,7 +79,7 @@
             // 
             this.WordMan.Groups.Add(this.文本处理);
             this.WordMan.Groups.Add(this.表格处理);
-            this.WordMan.Groups.Add(this.公式编号);
+            this.WordMan.Groups.Add(this.公式处理);
             this.WordMan.Groups.Add(this.图片处理);
             this.WordMan.Groups.Add(this.其他);
             this.WordMan.Label = "WordMan";
@@ -222,55 +227,94 @@
             this.插入N列.ShowImage = true;
             this.插入N列.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.插入N列_Click);
             // 
+            // 公式处理
+            // 
+            this.公式处理.Items.Add(this.公式编号);
+            this.公式处理.Items.Add(this.公式样式1);
+            this.公式处理.Items.Add(this.公式样式2);
+            this.公式处理.Items.Add(this.公式样式3);
+            this.公式处理.Label = "公式处理";
+            this.公式处理.Name = "公式处理";
+            // 
             // 公式编号
             // 
-            this.公式编号.Items.Add(this.编号);
-            this.公式编号.Items.Add(this.toggleButton1);
-            this.公式编号.Items.Add(this.toggleButton2);
-            this.公式编号.Items.Add(this.toggleButton3);
+            this.公式编号.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
             this.公式编号.Label = "公式编号";
             this.公式编号.Name = "公式编号";
+            this.公式编号.OfficeImageId = "DataTypeCalculatedColumn";
+            this.公式编号.ScreenTip = "公式编号";
+            this.公式编号.ShowImage = true;
+            this.公式编号.SuperTip = "公式编号右对齐（用于单独一条公式）";
+            this.公式编号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.公式编号_Click);
             // 
-            // 编号
+            // 公式样式1
             // 
-            this.编号.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.编号.Label = "编号";
-            this.编号.Name = "编号";
-            this.编号.OfficeImageId = "DataTypeCalculatedColumn";
-            this.编号.ScreenTip = "公式编号";
-            this.编号.ShowImage = true;
-            this.编号.SuperTip = "公式编号右对齐（用于单独一条公式）";
-            this.编号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.编号_Click);
+            this.公式样式1.Checked = true;
+            this.公式样式1.Label = "（ 1 ）";
+            this.公式样式1.Name = "公式样式1";
+            this.公式样式1.OfficeImageId = "LineNumbersMenu";
+            this.公式样式1.ShowImage = true;
+            this.公式样式1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.公式样式1_Click);
             // 
-            // toggleButton1
+            // 公式样式2
             // 
-            this.toggleButton1.Checked = true;
-            this.toggleButton1.Label = "（ 1 ）";
-            this.toggleButton1.Name = "toggleButton1";
-            this.toggleButton1.OfficeImageId = "LineNumbersMenu";
-            this.toggleButton1.ShowImage = true;
-            this.toggleButton1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.toggleButton1_Click);
+            this.公式样式2.Label = "（1-1）";
+            this.公式样式2.Name = "公式样式2";
+            this.公式样式2.OfficeImageId = "LineNumbersMenu";
+            this.公式样式2.ShowImage = true;
+            this.公式样式2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.公式样式2_Click);
             // 
-            // toggleButton2
+            // 公式样式3
             // 
-            this.toggleButton2.Label = "（1-1）";
-            this.toggleButton2.Name = "toggleButton2";
-            this.toggleButton2.OfficeImageId = "LineNumbersMenu";
-            this.toggleButton2.ShowImage = true;
-            this.toggleButton2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.toggleButton2_Click);
-            // 
-            // toggleButton3
-            // 
-            this.toggleButton3.Label = "（1.1）";
-            this.toggleButton3.Name = "toggleButton3";
-            this.toggleButton3.OfficeImageId = "LineNumbersMenu";
-            this.toggleButton3.ShowImage = true;
-            this.toggleButton3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.toggleButton3_Click);
+            this.公式样式3.Label = "（1.1）";
+            this.公式样式3.Name = "公式样式3";
+            this.公式样式3.OfficeImageId = "LineNumbersMenu";
+            this.公式样式3.ShowImage = true;
+            this.公式样式3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.公式样式3_Click);
             // 
             // 图片处理
             // 
+            this.图片处理.Items.Add(this.图片编号);
+            this.图片处理.Items.Add(this.图注样式1);
+            this.图片处理.Items.Add(this.图注样式2);
+            this.图片处理.Items.Add(this.图注样式3);
             this.图片处理.Label = "图片处理";
             this.图片处理.Name = "图片处理";
+            // 
+            // 图片编号
+            // 
+            this.图片编号.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.图片编号.Label = "图片编号";
+            this.图片编号.Name = "图片编号";
+            this.图片编号.OfficeImageId = "ContentControlPicture";
+            this.图片编号.ScreenTip = "公式编号";
+            this.图片编号.ShowImage = true;
+            this.图片编号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.图片编号_Click);
+            // 
+            // 图注样式1
+            // 
+            this.图注样式1.Checked = true;
+            this.图注样式1.Label = "图 1  ";
+            this.图注样式1.Name = "图注样式1";
+            this.图注样式1.OfficeImageId = "GroupMeetingsToolAppointmentNotesOptions";
+            this.图注样式1.ShowImage = true;
+            this.图注样式1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.图注样式1_Click);
+            // 
+            // 图注样式2
+            // 
+            this.图注样式2.Label = "图 1-1";
+            this.图注样式2.Name = "图注样式2";
+            this.图注样式2.OfficeImageId = "GroupMeetingsToolAppointmentNotesOptions";
+            this.图注样式2.ShowImage = true;
+            this.图注样式2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.图注样式2_Click);
+            // 
+            // 图注样式3
+            // 
+            this.图注样式3.Label = "图 1.1";
+            this.图注样式3.Name = "图注样式3";
+            this.图注样式3.OfficeImageId = "GroupMeetingsToolAppointmentNotesOptions";
+            this.图注样式3.ShowImage = true;
+            this.图注样式3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.图注样式3_Click);
             // 
             // 其他
             // 
@@ -308,7 +352,7 @@
             // 
             // 版本
             // 
-            this.版本.Label = "版本 V1.1";
+            this.版本.Label = "版本 V1.2";
             this.版本.Name = "版本";
             this.版本.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.版本_Click);
             // 
@@ -324,8 +368,10 @@
             this.文本处理.PerformLayout();
             this.表格处理.ResumeLayout(false);
             this.表格处理.PerformLayout();
-            this.公式编号.ResumeLayout(false);
-            this.公式编号.PerformLayout();
+            this.公式处理.ResumeLayout(false);
+            this.公式处理.PerformLayout();
+            this.图片处理.ResumeLayout(false);
+            this.图片处理.PerformLayout();
             this.其他.ResumeLayout(false);
             this.其他.PerformLayout();
             this.ResumeLayout(false);
@@ -347,14 +393,14 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 常用符号;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup 其他;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 另存PDF;
-        internal Microsoft.Office.Tools.Ribbon.RibbonGroup 公式编号;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton 编号;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup 公式处理;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 公式编号;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 中标转英标;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 英标转中标;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 自动加空格;
-        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton toggleButton2;
-        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton toggleButton3;
-        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton toggleButton1;
+        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 公式样式2;
+        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 公式样式3;
+        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 公式样式1;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup 表格处理;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 三线表;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 插入N行;
@@ -363,6 +409,10 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 域名高亮;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 取消高亮;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 版本;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 图片编号;
+        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 图注样式1;
+        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 图注样式2;
+        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 图注样式3;
     }
 
     partial class ThisRibbonCollection

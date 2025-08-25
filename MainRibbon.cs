@@ -17,7 +17,6 @@ namespace WordMan_VSTO
         private void MainRibbon_Load(object sender, RibbonUIEventArgs e)
         {
         }
-
         private void 去除断行_Click(object sender, RibbonControlEventArgs e)
         {
             var app = Globals.ThisAddIn.Application;
@@ -74,7 +73,6 @@ namespace WordMan_VSTO
             rng.Find.Execute(" ", ReplaceWith: "", Replace: Word.WdReplace.wdReplaceAll);
             rng.Find.Execute("　", ReplaceWith: "", Replace: Word.WdReplace.wdReplaceAll);
         }
-
         private void 去除空行_Click(object sender, RibbonControlEventArgs e)
         {
             // 获取Word应用程序对象
@@ -95,7 +93,6 @@ namespace WordMan_VSTO
                 }
             }
         }
-
         private void 去除缩进_Click(object sender, RibbonControlEventArgs e)
         {
             var selection = Globals.ThisAddIn.Application.Selection;
@@ -116,7 +113,6 @@ namespace WordMan_VSTO
                 paraFormat.RightIndent = 0f;
             }
         }
-
         private void 缩进2字符_Click(object sender, RibbonControlEventArgs e)
         {
             var selection = Globals.ThisAddIn.Application.Selection;
@@ -126,19 +122,16 @@ namespace WordMan_VSTO
                 paraFormat.CharacterUnitFirstLineIndent = 2f;
             }
         }
-
         private void 希腊字母_Click(object sender, RibbonControlEventArgs e)
         {
             GreekLetterForm form = new GreekLetterForm();
             form.Show();
         }
-
         private void 常用符号_Click(object sender, RibbonControlEventArgs e)
         {
             CommonSymbolForm form = new CommonSymbolForm();
             form.Show();
         }
-
         private void 另存PDF_Click(object sender, RibbonControlEventArgs e)
         {
             var app = Globals.ThisAddIn.Application;
@@ -213,8 +206,6 @@ namespace WordMan_VSTO
                     System.Windows.Forms.MessageBoxIcon.Error);
             }
         }
-
-
         private void 英中标点互转_Click(object sender, RibbonControlEventArgs e, bool englishToChinese)
         {
             var app = Globals.ThisAddIn.Application;
@@ -296,8 +287,7 @@ namespace WordMan_VSTO
                 ReplacePairQuotes(rng, "'", "‘", "’");
             }
         }
-
-        // 调用方式
+            
         private void 英标转中标_Click(object sender, RibbonControlEventArgs e)
         {
             英中标点互转_Click(sender, e, true);
@@ -306,7 +296,6 @@ namespace WordMan_VSTO
         {
             英中标点互转_Click(sender, e, false);
         }
-
 
         private void 自动加空格_Click(object sender, RibbonControlEventArgs e)
         {
@@ -342,9 +331,6 @@ namespace WordMan_VSTO
             }
         }
 
-
-
-
         public enum FormulaNumberStyle
         {
             Parenthesis1,    // (1)
@@ -353,29 +339,29 @@ namespace WordMan_VSTO
         }
         private FormulaNumberStyle CurrentStyle = FormulaNumberStyle.Parenthesis1;
 
-        private void toggleButton1_Click(object sender, RibbonControlEventArgs e)
+        private void 公式样式1_Click(object sender, RibbonControlEventArgs e)
         {
-            toggleButton1.Checked = true;
-            toggleButton2.Checked = false;
-            toggleButton3.Checked = false;
+            公式样式1.Checked = true;
+            公式样式2.Checked = false;
+            公式样式3.Checked = false;
             CurrentStyle = FormulaNumberStyle.Parenthesis1;
         }
-        private void toggleButton2_Click(object sender, RibbonControlEventArgs e)
+        private void 公式样式2_Click(object sender, RibbonControlEventArgs e)
         {
-            toggleButton1.Checked = false;
-            toggleButton2.Checked = true;
-            toggleButton3.Checked = false;
+            公式样式1.Checked = false;
+            公式样式2.Checked = true;
+            公式样式3.Checked = false;
             CurrentStyle = FormulaNumberStyle.Parenthesis1_1;
         }
-        private void toggleButton3_Click(object sender, RibbonControlEventArgs e)
+        private void 公式样式3_Click(object sender, RibbonControlEventArgs e)
         {
-            toggleButton1.Checked = false;
-            toggleButton2.Checked = false;
-            toggleButton3.Checked = true;
+            公式样式1.Checked = false;
+            公式样式2.Checked = false;
+            公式样式3.Checked = true;
             CurrentStyle = FormulaNumberStyle.Parenthesis1_1dot;
         }
 
-        private void 编号_Click(object sender, RibbonControlEventArgs e)
+        private void 公式编号_Click(object sender, RibbonControlEventArgs e)
         {
             var app = Globals.ThisAddIn.Application;
             var sel = app.Selection;
@@ -438,7 +424,7 @@ namespace WordMan_VSTO
                     insertRange.InsertAfter("-");
                     insertRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
 
-                    var seqField2 = insertRange.Fields.Add(insertRange, Word.WdFieldType.wdFieldSequence, seqName, false);
+                    var seqField2 = insertRange.Fields.Add(insertRange, Word.WdFieldType.wdFieldSequence, seqName+ "\\s 1", false);
                     insertRange = seqField2.Result.Duplicate;
                     insertRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
                     break;
@@ -452,7 +438,7 @@ namespace WordMan_VSTO
                     insertRange.InsertAfter(".");
                     insertRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
 
-                    var seqField3 = insertRange.Fields.Add(insertRange, Word.WdFieldType.wdFieldSequence, seqName, false);
+                    var seqField3 = insertRange.Fields.Add(insertRange, Word.WdFieldType.wdFieldSequence, seqName + "\\s 1", false);
                     insertRange = seqField3.Result.Duplicate;
                     insertRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
                     break;
@@ -460,8 +446,6 @@ namespace WordMan_VSTO
 
             insertRange.InsertAfter(rightBracket);
         }
-
-
 
 
         private void 三线表_Click(object sender, Microsoft.Office.Tools.Ribbon.RibbonControlEventArgs e)
@@ -534,7 +518,6 @@ namespace WordMan_VSTO
         table.PreferredWidth = 100f;
         table.AutoFitBehavior(Word.WdAutoFitBehavior.wdAutoFitWindow);
     }
-
 
 
         private void 插入N行_Click(object sender, RibbonControlEventArgs e)
@@ -759,6 +742,155 @@ namespace WordMan_VSTO
         {
             System.Diagnostics.Process.Start("https://github.com/eyinwei/WordMan_VSTO");
         }
+
+        enum PictureNumberStyle
+        {
+            Arabic,     // 图 1
+            Dash,       // 图 1-1
+            Dot         // 图 1.1
+        }
+        PictureNumberStyle CurrentPicStyle = PictureNumberStyle.Arabic;
+        private void 图注样式1_Click(object sender, RibbonControlEventArgs e)
+        {
+            图注样式1.Checked = true;
+            图注样式2.Checked = false;
+            图注样式3.Checked = false;
+            CurrentPicStyle = PictureNumberStyle.Arabic;
+        }
+        private void 图注样式2_Click(object sender, RibbonControlEventArgs e)
+        {
+            图注样式1.Checked = false;
+            图注样式2.Checked = true;
+            图注样式3.Checked = false;
+            CurrentPicStyle = PictureNumberStyle.Dash;
+        }
+        private void 图注样式3_Click(object sender, RibbonControlEventArgs e)
+        {
+            图注样式1.Checked = false;
+            图注样式2.Checked = false;
+            图注样式3.Checked = true;
+            CurrentPicStyle = PictureNumberStyle.Dot;
+        }
+
+        private void 图片编号_Click(object sender, RibbonControlEventArgs e)
+        {
+            var app = Globals.ThisAddIn.Application;
+            var sel = app.Selection;
+            var doc = app.ActiveDocument;
+
+            HashSet<int> handledParagraphs = new HashSet<int>();
+            List<Word.Paragraph> targetParas = new List<Word.Paragraph>();
+
+            // 选区有图片
+            foreach (Word.InlineShape ils in sel.Range.InlineShapes)
+            {
+                var para = ils.Range.Paragraphs.First;
+                if (!handledParagraphs.Contains(para.Range.Start))
+                {
+                    targetParas.Add(para);
+                    handledParagraphs.Add(para.Range.Start);
+                }
+            }
+            foreach (Word.Shape s in sel.Range.ShapeRange)
+            {
+                var para = s.Anchor.Paragraphs.First;
+                if (!handledParagraphs.Contains(para.Range.Start))
+                {
+                    targetParas.Add(para);
+                    handledParagraphs.Add(para.Range.Start);
+                }
+            }
+
+            // 若未选中图片，则取光标所在段落
+            if (targetParas.Count == 0 && sel.Paragraphs.Count > 0)
+            {
+                var para = sel.Paragraphs.First;
+                if (!handledParagraphs.Contains(para.Range.Start))
+                {
+                    targetParas.Add(para);
+                    handledParagraphs.Add(para.Range.Start);
+                }
+            }
+
+
+
+            // 必须逆序处理，防止段落因插入而错位
+            for (int i = targetParas.Count - 1; i >= 0; i--)
+            {
+                InsertCaptionIfNotExists(targetParas[i], CurrentPicStyle);
+            }
+        }
+
+        private void InsertCaptionIfNotExists(Word.Paragraph picPara, PictureNumberStyle numberStyle)
+        {
+            if (picPara == null) return;
+
+            var doc = picPara.Range.Application.ActiveDocument;
+
+            // 1. 检查后面是否已有题注
+            var nextPara = picPara.Next() as Word.Paragraph;
+            if (nextPara != null)
+            {
+                string nextText = nextPara.Range.Text.TrimStart();
+                if ((nextPara.get_Style() is Word.Style style && style.NameLocal == "题注")
+                    || nextText.StartsWith("图"))
+                {
+                    return; // 已有题注
+                }
+            }
+
+            // 2. 插入空段并获得新段落
+            var afterPicRange = picPara.Range.Duplicate;
+            afterPicRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
+            afterPicRange.InsertParagraphAfter();
+            var captionPara = picPara.Next() as Word.Paragraph;
+            if (captionPara == null) return;
+
+            // 3. 清空新段内容
+            var captionRange = captionPara.Range.Duplicate;
+            captionRange.End -= 1; // 去除段落标记
+            captionRange.Text = "";
+
+            // 4. 插入“图 ”（带空格）
+            var insertRange = doc.Range(captionRange.Start, captionRange.Start);
+            insertRange.InsertAfter("图 ");
+            insertRange.SetRange(insertRange.Start + 2, insertRange.Start + 2); // 定位到空格后
+
+            // 5. 插入编号
+            switch (numberStyle)
+            {
+                case PictureNumberStyle.Arabic:
+                    insertRange.Fields.Add(insertRange, Word.WdFieldType.wdFieldSequence, "图 \\* ARABIC", false);
+                    break;
+
+                case PictureNumberStyle.Dash:
+                case PictureNumberStyle.Dot:
+                    {
+                        // 插入章节号域
+                        var styleRefField = insertRange.Fields.Add(
+                            insertRange, Word.WdFieldType.wdFieldStyleRef, "1 \\s", false);
+                        // 跳出域
+                        styleRefField.Result.Select();
+                        var selection = insertRange.Application.Selection;
+                        selection.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
+                        selection.EndKey(Word.WdUnits.wdLine, Word.WdMovementType.wdMove);
+
+                        // 插入分隔符
+                        selection.TypeText(numberStyle == PictureNumberStyle.Dash ? "-" : ".");
+
+                        selection.EndKey(Word.WdUnits.wdLine, Word.WdMovementType.wdMove);
+
+                        // 插入图序号
+                        selection.Range.Fields.Add(
+                            selection.Range, Word.WdFieldType.wdFieldSequence, "图 \\s 1", false);
+                    }
+                    break;
+            }
+
+            // 6. 设置样式为“题注”
+            captionPara.set_Style("题注");
+        }
+
     }
 }
 

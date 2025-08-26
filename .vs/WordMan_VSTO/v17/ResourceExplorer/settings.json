@@ -1,13 +1,17 @@
 {
   "ShowEmptyProjects": false,
   "SelectedGroups": [],
-  "ExpandedProjects": [],
+  "ExpandedProjects": [
+    "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\WordMan_VSTO.csproj"
+  ],
   "EnableSpellChecker": true,
   "ColumnOrder": [
     "name",
     "type",
     "neutral-value",
-    "neutral-comment"
+    "neutral-comment",
+    "file-path",
+    "file-name"
   ],
   "VisibleColumnKeys": [
     "name"

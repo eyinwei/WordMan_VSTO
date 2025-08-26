@@ -15,7 +15,8 @@ namespace WordMan_VSTO
     {
 
         private void MainRibbon_Load(object sender, RibbonUIEventArgs e)
-        {
+        {                                   
+
         }
         private void 去除断行_Click(object sender, RibbonControlEventArgs e)
         {
@@ -891,8 +892,173 @@ namespace WordMan_VSTO
             captionPara.set_Style("题注");
         }
 
+        enum TableNumberStyle
+        {
+            Arabic,     // 表 1
+            Dash,       // 表 1-1
+            Dot         // 表 1.1
+        }
+        TableNumberStyle CurrentTableStyle = TableNumberStyle.Arabic;
+
+        private void 表注样式1_Click(object sender, RibbonControlEventArgs e)
+        {
+            表注样式1.Checked = true;
+            表注样式2.Checked = false;
+            表注样式3.Checked = false;
+            CurrentTableStyle = TableNumberStyle.Arabic;
+        }
+        private void 表注样式2_Click(object sender, RibbonControlEventArgs e)
+        {
+            表注样式1.Checked = false;
+            表注样式2.Checked = true;
+            表注样式3.Checked = false;
+            CurrentTableStyle = TableNumberStyle.Dash;
+        }
+        private void 表注样式3_Click(object sender, RibbonControlEventArgs e)
+        {
+            表注样式1.Checked = false;
+            表注样式2.Checked = false;
+            表注样式3.Checked = true;
+            CurrentTableStyle = TableNumberStyle.Dot;
+        }
+        private void 表格编号_Click(object sender, RibbonControlEventArgs e)
+        {
+            var app = Globals.ThisAddIn.Application;
+            var sel = app.Selection;
+            var doc = app.ActiveDocument;
+
+            HashSet<int> handledTables = new HashSet<int>();
+            List<Word.Table> targetTables = new List<Word.Table>();
+
+            // 1. 选区有表格则全部处理（修复多表格选择问题）
+            // 关键修改：使用table.Range.InRange(sel.Range)判断表格是否完全在选区内
+            foreach (Word.Table table in doc.Tables)
+            {
+                try
+                {
+                    // 检查表格是否被选中（表格范围在选区范围内）
+                    if (table.Range.InRange(sel.Range) && !handledTables.Contains(table.Range.Start))
+                    {
+                        targetTables.Add(table);
+                        handledTables.Add(table.Range.Start);
+                    }
+                }
+                catch { } // 处理表格范围判断可能出现的异常
+            }
+
+            // 2. 若未选中表格，则处理光标所在表格
+            if (targetTables.Count == 0 && sel.Tables.Count > 0)
+            {
+                var table = sel.Tables[1];
+                if (!handledTables.Contains(table.Range.Start))
+                {
+                    targetTables.Add(table);
+                    handledTables.Add(table.Range.Start);
+                }
+            }
+
+            // 必须逆序处理，防止插入错位
+            for (int i = targetTables.Count - 1; i >= 0; i--)
+            {
+                InsertTableCaptionIfNotExists(targetTables[i], CurrentTableStyle);
+            }
+        }
+        private void InsertTableCaptionIfNotExists(Word.Table table, TableNumberStyle numberStyle)
+        {
+            if (table == null) return;
+            var doc = table.Application.ActiveDocument;
+            var app = doc.Application;
+
+            // 获取表格真正的外部起始位置
+            Word.Range tableRange = table.Range;
+            int tableStart = tableRange.Start;
+
+            // 检查是否在表格内部（调整到表格外部）
+            bool isInFirstCell = table.Cell(1, 1).Range.InRange(tableRange);
+            if (isInFirstCell)
+            {
+                tableStart = Math.Max(0, tableStart - 1);
+            }
+
+            // 1. 检查表格前是否已有题注
+            Word.Paragraph prevPara = null;
+            Word.Range beforeTableRange = doc.Range(0, tableStart);
+            if (beforeTableRange.Paragraphs.Count > 0)
+            {
+                prevPara = beforeTableRange.Paragraphs[beforeTableRange.Paragraphs.Count];
+                string prevText = prevPara.Range.Text.TrimStart();
+                if ((prevPara.get_Style() is Word.Style style && style.NameLocal == "题注")
+                    || prevText.StartsWith("表"))
+                {
+                    return; // 已有题注
+                }
+            }
+
+            // 2. 保存原始表格位置用于定位
+            int originalTablePosition = tableRange.Start;
+
+            // 3. 插入题注段落（确保在表格外）
+            // 关键修改：先清除可能的空内容，避免多余空行
+            Word.Range insertRange = doc.Range(tableStart, tableStart);
+            insertRange.Text = ""; // 清除插入位置可能的空内容
+            insertRange.InsertParagraphBefore();
+
+            // 4. 查找刚插入的题注段落
+            Word.Paragraph captionPara = null;
+            foreach (Word.Paragraph para in doc.Paragraphs)
+            {
+                if (para.Range.End == originalTablePosition)
+                {
+                    captionPara = para;
+                    break;
+                }
+            }
+
+            if (captionPara == null) return;
+
+            // 5. 精确控制题注段落内容（解决空行问题）
+            Word.Range captionRange = captionPara.Range.Duplicate;
+            captionRange.End = captionRange.Start + 1; // 仅保留段落起始位置
+            captionRange.Text = ""; // 彻底清空，避免默认空字符
+
+            // 6. 插入"表 "和编号
+            var fieldRange = doc.Range(captionRange.Start, captionRange.Start);
+            fieldRange.InsertAfter("表 ");
+            fieldRange.SetRange(fieldRange.Start + 2, fieldRange.Start + 2);
+
+            switch (numberStyle)
+            {
+                case TableNumberStyle.Arabic:
+                    fieldRange.Fields.Add(fieldRange, Word.WdFieldType.wdFieldSequence, "表 \\* ARABIC", false);
+                    break;
+                case TableNumberStyle.Dash:
+                case TableNumberStyle.Dot:
+                    var styleRefField = fieldRange.Fields.Add(
+                        fieldRange, Word.WdFieldType.wdFieldStyleRef, "1 \\s", false);
+                    styleRefField.Result.Select();
+                    var selection = fieldRange.Application.Selection;
+                    selection.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
+                    selection.EndKey(Word.WdUnits.wdLine, Word.WdMovementType.wdMove);
+
+                    selection.TypeText(numberStyle == TableNumberStyle.Dash ? "-" : ".");
+
+                    selection.EndKey(Word.WdUnits.wdLine, Word.WdMovementType.wdMove);
+
+                    selection.Range.Fields.Add(
+                        selection.Range, Word.WdFieldType.wdFieldSequence, "表 \\s 1", false);
+                    break;
+            }
+
+            // 7. 设置样式为题注并移除可能的多余空行
+            captionPara.set_Style("题注");
+            captionPara.SpaceAfter = 0; // 去除段后间距
+            captionPara.LineSpacingRule = Word.WdLineSpacing.wdLineSpaceSingle; // 单倍行距
+        }
+
+          
+        }
     }
-}
+
 
 
 

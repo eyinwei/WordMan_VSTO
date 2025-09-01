@@ -11,5 +11,5 @@ D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.csproj.Ge
 D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.csproj.CoreCompileInputs.cache
 D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.dll
 D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.pdb
-D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.csprojAssemblyReference.cache
-D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.csproj.CopyComplete
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.csproj.AssemblyReference.cache
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_.66925126.Up2Date

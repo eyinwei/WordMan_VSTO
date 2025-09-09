@@ -34,7 +34,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-
             this.WordMan = this.Factory.CreateRibbonTab();
             this.文本处理 = this.Factory.CreateRibbonGroup();
             this.separator1 = this.Factory.CreateRibbonSeparator();
@@ -55,7 +54,7 @@
             this.缩进2字符 = this.Factory.CreateRibbonButton();
             this.希腊字母 = this.Factory.CreateRibbonButton();
             this.常用符号 = this.Factory.CreateRibbonButton();
-            this.三线表 = this.Factory.CreateRibbonButton();
+            this.设为三线表 = this.Factory.CreateRibbonButton();
             this.插入N行 = this.Factory.CreateRibbonButton();
             this.插入N列 = this.Factory.CreateRibbonButton();
             this.表格编号 = this.Factory.CreateRibbonButton();
@@ -77,6 +76,7 @@
             this.版本 = this.Factory.CreateRibbonButton();
             this.一键排版 = this.Factory.CreateRibbonButton();
             this.另存PDF = this.Factory.CreateRibbonButton();
+            this.创建三线表 = this.Factory.CreateRibbonButton();
             this.WordMan.SuspendLayout();
             this.文本处理.SuspendLayout();
             this.表格处理.SuspendLayout();
@@ -122,7 +122,8 @@
             // 
             // 表格处理
             // 
-            this.表格处理.Items.Add(this.三线表);
+            this.表格处理.Items.Add(this.创建三线表);
+            this.表格处理.Items.Add(this.设为三线表);
             this.表格处理.Items.Add(this.插入N行);
             this.表格处理.Items.Add(this.插入N列);
             this.表格处理.Items.Add(this.separator3);
@@ -262,15 +263,14 @@
             this.常用符号.ShowImage = true;
             this.常用符号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.常用符号_Click);
             // 
-            // 三线表
+            // 设为三线表
             // 
-            this.三线表.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.三线表.Label = "三线表";
-            this.三线表.Name = "三线表";
-            this.三线表.OfficeImageId = "TableCellAlignMiddleCenter";
-            this.三线表.ScreenTip = "设为三线表";
-            this.三线表.ShowImage = true;
-            this.三线表.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.三线表_Click);
+            this.设为三线表.Label = "设为三线表";
+            this.设为三线表.Name = "设为三线表";
+            this.设为三线表.OfficeImageId = "TableCellAlignMiddleCenter";
+            this.设为三线表.ScreenTip = "设为三线表";
+            this.设为三线表.ShowImage = true;
+            this.设为三线表.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.设为三线表_Click);
             // 
             // 插入N行
             // 
@@ -294,7 +294,7 @@
             this.表格编号.Label = "表格编号";
             this.表格编号.Name = "表格编号";
             this.表格编号.OfficeImageId = "AdpDiagramNameOnly";
-            this.表格编号.ScreenTip = "表格上方插入表题";
+            this.表格编号.ScreenTip = "所在表格上方插入表题";
             this.表格编号.ShowImage = true;
             this.表格编号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.表格编号_Click);
             // 
@@ -329,9 +329,8 @@
             this.公式编号.Label = "公式编号";
             this.公式编号.Name = "公式编号";
             this.公式编号.OfficeImageId = "FormulaEvaluate";
-            this.公式编号.ScreenTip = "选中公式进行编号";
+            this.公式编号.ScreenTip = "公式所在行进行编号";
             this.公式编号.ShowImage = true;
-            this.公式编号.SuperTip = "公式编号右对齐（用于单独一条公式）";
             this.公式编号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.公式编号_Click);
             // 
             // 公式样式1
@@ -348,6 +347,7 @@
             this.公式样式2.Label = "（1-1）";
             this.公式样式2.Name = "公式样式2";
             this.公式样式2.OfficeImageId = "LinkBarCustom";
+            this.公式样式2.ScreenTip = "第一个数字来源于一级标题编号";
             this.公式样式2.ShowImage = true;
             this.公式样式2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.公式样式2_Click);
             // 
@@ -356,6 +356,7 @@
             this.公式样式3.Label = "（1.1）";
             this.公式样式3.Name = "公式样式3";
             this.公式样式3.OfficeImageId = "LinkBarCustom";
+            this.公式样式3.ScreenTip = "第一个数字来源于一级标题编号";
             this.公式样式3.ShowImage = true;
             this.公式样式3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.公式样式3_Click);
             // 
@@ -367,6 +368,7 @@
             this.图片编号.OfficeImageId = "ContentControlPicture";
             this.图片编号.ScreenTip = "图片下方插入图题";
             this.图片编号.ShowImage = true;
+            this.图片编号.SuperTip = "选中图标或将光标放于图片后";
             this.图片编号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.图片编号_Click);
             // 
             // 图注样式1
@@ -383,6 +385,7 @@
             this.图注样式2.Label = "图 1-1";
             this.图注样式2.Name = "图注样式2";
             this.图注样式2.OfficeImageId = "GroupOrganizationChartStyleClassic";
+            this.图注样式2.ScreenTip = "第一个数字来源于一级标题编号";
             this.图注样式2.ShowImage = true;
             this.图注样式2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.图注样式2_Click);
             // 
@@ -391,6 +394,7 @@
             this.图注样式3.Label = "图 1.1";
             this.图注样式3.Name = "图注样式3";
             this.图注样式3.OfficeImageId = "GroupOrganizationChartStyleClassic";
+            this.图注样式3.ScreenTip = "第一个数字来源于一级标题编号";
             this.图注样式3.ShowImage = true;
             this.图注样式3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.图注样式3_Click);
             // 
@@ -428,7 +432,7 @@
             // 
             // 版本
             // 
-            this.版本.Label = "版本V1.5";
+            this.版本.Label = "版本V1.6";
             this.版本.Name = "版本";
             this.版本.OfficeImageId = "SaveToOfficeLiveTask";
             this.版本.ShowImage = true;
@@ -447,6 +451,15 @@
             this.另存PDF.OfficeImageId = "MsnLogo";
             this.另存PDF.ShowImage = true;
             this.另存PDF.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.另存PDF_Click);
+            // 
+            // 创建三线表
+            // 
+            this.创建三线表.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.创建三线表.Label = "创建三线表";
+            this.创建三线表.Name = "创建三线表";
+            this.创建三线表.OfficeImageId = "AccessFormModalDialog";
+            this.创建三线表.ShowImage = true;
+            this.创建三线表.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.创建三线表_Click);
             // 
             // MainRibbon
             // 
@@ -494,7 +507,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 公式样式3;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 公式样式1;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup 表格处理;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton 三线表;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 设为三线表;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 插入N行;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 插入N列;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup 图片处理;
@@ -514,6 +527,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator4;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 宽度刷;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 高度刷;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 创建三线表;
     }
 
     partial class ThisRibbonCollection

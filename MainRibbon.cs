@@ -412,44 +412,52 @@ namespace WordMan_VSTO
                 case FormulaNumberStyle.Parenthesis1:
                     // 公式（1） ==> 1 由 SEQ 公式 得到
                     var seqField = insertRange.Fields.Add(insertRange, Word.WdFieldType.wdFieldSequence, seqName, false);
-                    insertRange = seqField.Result.Duplicate;
-                    insertRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
+                    // 确保移动到域的结束位置之后
+                    insertRange.Move(Word.WdUnits.wdCharacter, seqField.Result.Characters.Count);
                     break;
 
                 case FormulaNumberStyle.Parenthesis1_1:
-                    // 公式（1-1） ==> 第一个1由STYLEREF，第2个1由SEQ
                     var srField2 = insertRange.Fields.Add(insertRange, Word.WdFieldType.wdFieldStyleRef, "1 \\s", false);
-                    insertRange = srField2.Result.Duplicate;
-                    insertRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
+                    insertRange.Move(Word.WdUnits.wdCharacter, srField2.Result.Characters.Count);
 
                     insertRange.InsertAfter("-");
                     insertRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
 
-                    var seqField2 = insertRange.Fields.Add(insertRange, Word.WdFieldType.wdFieldSequence, seqName+ "\\s 1", false);
-                    insertRange = seqField2.Result.Duplicate;
-                    insertRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
+                    var seqField2 = insertRange.Fields.Add(insertRange, Word.WdFieldType.wdFieldSequence, seqName + "\\s 1", false);
+                    insertRange.Move(Word.WdUnits.wdCharacter, seqField2.Result.Characters.Count);
                     break;
 
                 case FormulaNumberStyle.Parenthesis1_1dot:
-                    // 公式（1.1） ==> 第一个1由STYLEREF，第2个1由SEQ
                     var srField3 = insertRange.Fields.Add(insertRange, Word.WdFieldType.wdFieldStyleRef, "1 \\s", false);
-                    insertRange = srField3.Result.Duplicate;
-                    insertRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
+                    insertRange.Move(Word.WdUnits.wdCharacter, srField3.Result.Characters.Count);
 
                     insertRange.InsertAfter(".");
                     insertRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
 
                     var seqField3 = insertRange.Fields.Add(insertRange, Word.WdFieldType.wdFieldSequence, seqName + "\\s 1", false);
-                    insertRange = seqField3.Result.Duplicate;
-                    insertRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
+                    insertRange.Move(Word.WdUnits.wdCharacter, seqField3.Result.Characters.Count);
                     break;
             }
 
             insertRange.InsertAfter(rightBracket);
         }
+        private void 创建三线表_Click(object sender, RibbonControlEventArgs e)
+        {
+            var app = Globals.ThisAddIn.Application;
+            var sel = app.Selection;
 
+            // 1. 创建3x2表格
+            Word.Table table = sel.Tables.Add(sel.Range, 3, 3);
 
-        private void 三线表_Click(object sender, Microsoft.Office.Tools.Ribbon.RibbonControlEventArgs e)
+            // 2. 选中整个表格
+            table.Select();
+
+            // 3. 调用已有的设为三线表方法
+            设为三线表_Click(sender, e);
+
+        }
+
+        private void 设为三线表_Click(object sender, Microsoft.Office.Tools.Ribbon.RibbonControlEventArgs e)
     {
         var app = Globals.ThisAddIn.Application;
         var sel = app.Selection;
@@ -1446,6 +1454,7 @@ namespace WordMan_VSTO
             heightBrushTimer?.Dispose();
             heightBrushTimer = null;
         }
+
 
     }
 }

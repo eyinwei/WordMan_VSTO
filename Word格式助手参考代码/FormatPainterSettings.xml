@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FixFormatPainterSetting xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <CurrentID>0</CurrentID>
+  <StoredFormat>
+    <FixFormat>
+      <Id>0</Id>
+      <StyleName>默认</StyleName>
+      <Discription>默认格式刷样式</Discription>
+      <EngFontName>Times New Roman</EngFontName>
+      <ChnFontName>宋体</ChnFontName>
+      <FontSize>10.5</FontSize>
+      <Bold>false</Bold>
+      <Italic>false</Italic>
+      <Underline>false</Underline>
+      <UseColor>true</UseColor>
+      <TextColor>-16162649</TextColor>
+      <Shading>true</Shading>
+      <ShadingColor>-134721</ShadingColor>
+    </FixFormat>
+  </StoredFormat>
+</FixFormatPainterSetting>

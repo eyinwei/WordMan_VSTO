@@ -13,3 +13,4 @@ D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.dll
 D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.pdb
 D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.csproj.AssemblyReference.cache
 D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_.66925126.Up2Date
+D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.TypesettingTaskPane.resources

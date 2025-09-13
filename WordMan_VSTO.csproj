@@ -217,8 +217,27 @@
     <Compile Include="CommonSymbolForm.Designer.cs">
       <DependentUpon>CommonSymbolForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="StyleSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="StyleSettings.Designer.cs">
+      <DependentUpon>StyleSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="StyleSettingsUIDesigner.cs" />
+    <Compile Include="MultiLevelList.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="MultiLevelList.Designer.cs">
+      <DependentUpon>MultiLevelList.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TypesettingTaskPane.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TypesettingTaskPane.Designer.cs">
+      <DependentUpon>TypesettingTaskPane.cs</DependentUpon>
     </Compile>
     <EmbeddedResource Include="CommonSymbolForm.resx">
       <DependentUpon>CommonSymbolForm.cs</DependentUpon>
@@ -238,6 +257,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GreekLetterForm.resx">
       <DependentUpon>GreekLetterForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TypesettingTaskPane.resx">
+      <DependentUpon>TypesettingTaskPane.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

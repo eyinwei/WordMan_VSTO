@@ -1456,6 +1456,16 @@ namespace WordMan_VSTO
         }
 
 
+
+
+        // 排版按钮点击事件
+        private void TypesettingButton_Click(object sender, RibbonControlEventArgs e)
+        {
+            // 仅一行：调用任务窗格的静态方法，剩下的全由任务窗格自己处理
+            TypesettingTaskPane.TriggerShowOrHide();
+        }
+
+
     }
 }
 

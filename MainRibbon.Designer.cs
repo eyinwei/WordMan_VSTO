@@ -36,53 +36,64 @@
         {
             this.WordMan = this.Factory.CreateRibbonTab();
             this.文本处理 = this.Factory.CreateRibbonGroup();
-            this.separator1 = this.Factory.CreateRibbonSeparator();
-            this.separator2 = this.Factory.CreateRibbonSeparator();
-            this.表格处理 = this.Factory.CreateRibbonGroup();
-            this.separator3 = this.Factory.CreateRibbonSeparator();
-            this.公式处理 = this.Factory.CreateRibbonGroup();
-            this.图片处理 = this.Factory.CreateRibbonGroup();
-            this.separator4 = this.Factory.CreateRibbonSeparator();
-            this.其他 = this.Factory.CreateRibbonGroup();
             this.去除断行 = this.Factory.CreateRibbonButton();
             this.去除空格 = this.Factory.CreateRibbonButton();
             this.去除空行 = this.Factory.CreateRibbonButton();
             this.英标转中标 = this.Factory.CreateRibbonButton();
             this.中标转英标 = this.Factory.CreateRibbonButton();
             this.自动加空格 = this.Factory.CreateRibbonButton();
+            this.separator1 = this.Factory.CreateRibbonSeparator();
             this.去除缩进 = this.Factory.CreateRibbonButton();
             this.缩进2字符 = this.Factory.CreateRibbonButton();
+            this.separator2 = this.Factory.CreateRibbonSeparator();
             this.希腊字母 = this.Factory.CreateRibbonButton();
             this.常用符号 = this.Factory.CreateRibbonButton();
+            this.表格处理 = this.Factory.CreateRibbonGroup();
+            this.创建三线表 = this.Factory.CreateRibbonButton();
             this.设为三线表 = this.Factory.CreateRibbonButton();
             this.插入N行 = this.Factory.CreateRibbonButton();
             this.插入N列 = this.Factory.CreateRibbonButton();
+            this.separator3 = this.Factory.CreateRibbonSeparator();
             this.表格编号 = this.Factory.CreateRibbonButton();
             this.表注样式1 = this.Factory.CreateRibbonToggleButton();
             this.表注样式2 = this.Factory.CreateRibbonToggleButton();
             this.表注样式3 = this.Factory.CreateRibbonToggleButton();
+            this.公式处理 = this.Factory.CreateRibbonGroup();
             this.公式编号 = this.Factory.CreateRibbonButton();
             this.公式样式1 = this.Factory.CreateRibbonToggleButton();
             this.公式样式2 = this.Factory.CreateRibbonToggleButton();
             this.公式样式3 = this.Factory.CreateRibbonToggleButton();
+            this.图片处理 = this.Factory.CreateRibbonGroup();
             this.图片编号 = this.Factory.CreateRibbonButton();
             this.图注样式1 = this.Factory.CreateRibbonToggleButton();
             this.图注样式2 = this.Factory.CreateRibbonToggleButton();
             this.图注样式3 = this.Factory.CreateRibbonToggleButton();
+            this.separator4 = this.Factory.CreateRibbonSeparator();
             this.宽度刷 = this.Factory.CreateRibbonToggleButton();
             this.高度刷 = this.Factory.CreateRibbonToggleButton();
+            this.位图化 = this.Factory.CreateRibbonButton();
+            this.全文处理 = this.Factory.CreateRibbonGroup();
+            this.排版工具 = this.Factory.CreateRibbonButton();
+            this.多级列表 = this.Factory.CreateRibbonButton();
+            this.separator5 = this.Factory.CreateRibbonSeparator();
             this.域名高亮 = this.Factory.CreateRibbonButton();
             this.取消高亮 = this.Factory.CreateRibbonButton();
             this.版本 = this.Factory.CreateRibbonButton();
             this.一键排版 = this.Factory.CreateRibbonButton();
+            this.separator6 = this.Factory.CreateRibbonSeparator();
             this.另存PDF = this.Factory.CreateRibbonButton();
-            this.创建三线表 = this.Factory.CreateRibbonButton();
+            this.文档拆分 = this.Factory.CreateRibbonButton();
+            this.文档合并 = this.Factory.CreateRibbonButton();
+            this.快速密级 = this.Factory.CreateRibbonMenu();
+            this.公开 = this.Factory.CreateRibbonButton();
+            this.内部 = this.Factory.CreateRibbonButton();
+            this.移除密级 = this.Factory.CreateRibbonButton();
             this.WordMan.SuspendLayout();
             this.文本处理.SuspendLayout();
             this.表格处理.SuspendLayout();
             this.公式处理.SuspendLayout();
             this.图片处理.SuspendLayout();
-            this.其他.SuspendLayout();
+            this.全文处理.SuspendLayout();
             this.SuspendLayout();
             // 
             // WordMan
@@ -91,7 +102,7 @@
             this.WordMan.Groups.Add(this.表格处理);
             this.WordMan.Groups.Add(this.公式处理);
             this.WordMan.Groups.Add(this.图片处理);
-            this.WordMan.Groups.Add(this.其他);
+            this.WordMan.Groups.Add(this.全文处理);
             this.WordMan.Label = "WordMan";
             this.WordMan.Name = "WordMan";
             // 
@@ -111,67 +122,6 @@
             this.文本处理.Items.Add(this.常用符号);
             this.文本处理.Label = "文本处理";
             this.文本处理.Name = "文本处理";
-            // 
-            // separator1
-            // 
-            this.separator1.Name = "separator1";
-            // 
-            // separator2
-            // 
-            this.separator2.Name = "separator2";
-            // 
-            // 表格处理
-            // 
-            this.表格处理.Items.Add(this.创建三线表);
-            this.表格处理.Items.Add(this.设为三线表);
-            this.表格处理.Items.Add(this.插入N行);
-            this.表格处理.Items.Add(this.插入N列);
-            this.表格处理.Items.Add(this.separator3);
-            this.表格处理.Items.Add(this.表格编号);
-            this.表格处理.Items.Add(this.表注样式1);
-            this.表格处理.Items.Add(this.表注样式2);
-            this.表格处理.Items.Add(this.表注样式3);
-            this.表格处理.Label = "表格处理";
-            this.表格处理.Name = "表格处理";
-            // 
-            // separator3
-            // 
-            this.separator3.Name = "separator3";
-            // 
-            // 公式处理
-            // 
-            this.公式处理.Items.Add(this.公式编号);
-            this.公式处理.Items.Add(this.公式样式1);
-            this.公式处理.Items.Add(this.公式样式2);
-            this.公式处理.Items.Add(this.公式样式3);
-            this.公式处理.Label = "公式处理";
-            this.公式处理.Name = "公式处理";
-            // 
-            // 图片处理
-            // 
-            this.图片处理.Items.Add(this.图片编号);
-            this.图片处理.Items.Add(this.图注样式1);
-            this.图片处理.Items.Add(this.图注样式2);
-            this.图片处理.Items.Add(this.图注样式3);
-            this.图片处理.Items.Add(this.separator4);
-            this.图片处理.Items.Add(this.宽度刷);
-            this.图片处理.Items.Add(this.高度刷);
-            this.图片处理.Label = "图片处理";
-            this.图片处理.Name = "图片处理";
-            // 
-            // separator4
-            // 
-            this.separator4.Name = "separator4";
-            // 
-            // 其他
-            // 
-            this.其他.Items.Add(this.域名高亮);
-            this.其他.Items.Add(this.取消高亮);
-            this.其他.Items.Add(this.版本);
-            this.其他.Items.Add(this.一键排版);
-            this.其他.Items.Add(this.另存PDF);
-            this.其他.Label = "其他";
-            this.其他.Name = "其他";
             // 
             // 去除断行
             // 
@@ -227,6 +177,10 @@
             this.自动加空格.ShowImage = true;
             this.自动加空格.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.自动加空格_Click);
             // 
+            // separator1
+            // 
+            this.separator1.Name = "separator1";
+            // 
             // 去除缩进
             // 
             this.去除缩进.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
@@ -245,6 +199,10 @@
             this.缩进2字符.ShowImage = true;
             this.缩进2字符.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.缩进2字符_Click);
             // 
+            // separator2
+            // 
+            this.separator2.Name = "separator2";
+            // 
             // 希腊字母
             // 
             this.希腊字母.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
@@ -262,6 +220,29 @@
             this.常用符号.OfficeImageId = "EquationOperatorGallery";
             this.常用符号.ShowImage = true;
             this.常用符号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.常用符号_Click);
+            // 
+            // 表格处理
+            // 
+            this.表格处理.Items.Add(this.创建三线表);
+            this.表格处理.Items.Add(this.设为三线表);
+            this.表格处理.Items.Add(this.插入N行);
+            this.表格处理.Items.Add(this.插入N列);
+            this.表格处理.Items.Add(this.separator3);
+            this.表格处理.Items.Add(this.表格编号);
+            this.表格处理.Items.Add(this.表注样式1);
+            this.表格处理.Items.Add(this.表注样式2);
+            this.表格处理.Items.Add(this.表注样式3);
+            this.表格处理.Label = "表格处理";
+            this.表格处理.Name = "表格处理";
+            // 
+            // 创建三线表
+            // 
+            this.创建三线表.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.创建三线表.Label = "创建三线表";
+            this.创建三线表.Name = "创建三线表";
+            this.创建三线表.OfficeImageId = "AccessFormModalDialog";
+            this.创建三线表.ShowImage = true;
+            this.创建三线表.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.创建三线表_Click);
             // 
             // 设为三线表
             // 
@@ -288,12 +269,16 @@
             this.插入N列.ShowImage = true;
             this.插入N列.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.插入N列_Click);
             // 
+            // separator3
+            // 
+            this.separator3.Name = "separator3";
+            // 
             // 表格编号
             // 
             this.表格编号.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
             this.表格编号.Label = "表格编号";
             this.表格编号.Name = "表格编号";
-            this.表格编号.OfficeImageId = "AdpDiagramNameOnly";
+            this.表格编号.OfficeImageId = "TableDesign";
             this.表格编号.ScreenTip = "所在表格上方插入表题";
             this.表格编号.ShowImage = true;
             this.表格编号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.表格编号_Click);
@@ -322,6 +307,15 @@
             this.表注样式3.OfficeImageId = "AdpDiagramNewTable";
             this.表注样式3.ShowImage = true;
             this.表注样式3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.表注样式3_Click);
+            // 
+            // 公式处理
+            // 
+            this.公式处理.Items.Add(this.公式编号);
+            this.公式处理.Items.Add(this.公式样式1);
+            this.公式处理.Items.Add(this.公式样式2);
+            this.公式处理.Items.Add(this.公式样式3);
+            this.公式处理.Label = "公式处理";
+            this.公式处理.Name = "公式处理";
             // 
             // 公式编号
             // 
@@ -359,6 +353,19 @@
             this.公式样式3.ScreenTip = "第一个数字来源于一级标题编号";
             this.公式样式3.ShowImage = true;
             this.公式样式3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.公式样式3_Click);
+            // 
+            // 图片处理
+            // 
+            this.图片处理.Items.Add(this.图片编号);
+            this.图片处理.Items.Add(this.图注样式1);
+            this.图片处理.Items.Add(this.图注样式2);
+            this.图片处理.Items.Add(this.图注样式3);
+            this.图片处理.Items.Add(this.separator4);
+            this.图片处理.Items.Add(this.宽度刷);
+            this.图片处理.Items.Add(this.高度刷);
+            this.图片处理.Items.Add(this.位图化);
+            this.图片处理.Label = "图片处理";
+            this.图片处理.Name = "图片处理";
             // 
             // 图片编号
             // 
@@ -398,6 +405,10 @@
             this.图注样式3.ShowImage = true;
             this.图注样式3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.图注样式3_Click);
             // 
+            // separator4
+            // 
+            this.separator4.Name = "separator4";
+            // 
             // 宽度刷
             // 
             this.宽度刷.Label = "宽度刷";
@@ -413,6 +424,53 @@
             this.高度刷.OfficeImageId = "XDInsertPictureControl";
             this.高度刷.ShowImage = true;
             this.高度刷.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.高度刷_Click);
+            // 
+            // 位图化
+            // 
+            this.位图化.Label = "位图化";
+            this.位图化.Name = "位图化";
+            this.位图化.OfficeImageId = "PasteAsPictureMenu";
+            this.位图化.ShowImage = true;
+            this.位图化.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.位图化_Click);
+            // 
+            // 全文处理
+            // 
+            this.全文处理.Items.Add(this.排版工具);
+            this.全文处理.Items.Add(this.多级列表);
+            this.全文处理.Items.Add(this.separator5);
+            this.全文处理.Items.Add(this.域名高亮);
+            this.全文处理.Items.Add(this.取消高亮);
+            this.全文处理.Items.Add(this.版本);
+            this.全文处理.Items.Add(this.一键排版);
+            this.全文处理.Items.Add(this.separator6);
+            this.全文处理.Items.Add(this.另存PDF);
+            this.全文处理.Items.Add(this.文档拆分);
+            this.全文处理.Items.Add(this.文档合并);
+            this.全文处理.Items.Add(this.快速密级);
+            this.全文处理.Label = "全文处理";
+            this.全文处理.Name = "全文处理";
+            // 
+            // 排版工具
+            // 
+            this.排版工具.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.排版工具.Label = "排版工具";
+            this.排版工具.Name = "排版工具";
+            this.排版工具.OfficeImageId = "HappyFace";
+            this.排版工具.ShowImage = true;
+            this.排版工具.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.TypesettingButton_Click);
+            // 
+            // 多级列表
+            // 
+            this.多级列表.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.多级列表.Label = "多级列表";
+            this.多级列表.Name = "多级列表";
+            this.多级列表.OfficeImageId = "Numbering";
+            this.多级列表.ShowImage = true;
+            this.多级列表.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.多级列表_Click);
+            // 
+            // separator5
+            // 
+            this.separator5.Name = "separator5";
             // 
             // 域名高亮
             // 
@@ -432,7 +490,7 @@
             // 
             // 版本
             // 
-            this.版本.Label = "版本V1.6";
+            this.版本.Label = "版本V2.0";
             this.版本.Name = "版本";
             this.版本.OfficeImageId = "SaveToOfficeLiveTask";
             this.版本.ShowImage = true;
@@ -443,6 +501,10 @@
             this.一键排版.Label = "";
             this.一键排版.Name = "一键排版";
             // 
+            // separator6
+            // 
+            this.separator6.Name = "separator6";
+            // 
             // 另存PDF
             // 
             this.另存PDF.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
@@ -452,14 +514,46 @@
             this.另存PDF.ShowImage = true;
             this.另存PDF.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.另存PDF_Click);
             // 
-            // 创建三线表
+            // 文档拆分
             // 
-            this.创建三线表.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.创建三线表.Label = "创建三线表";
-            this.创建三线表.Name = "创建三线表";
-            this.创建三线表.OfficeImageId = "AccessFormModalDialog";
-            this.创建三线表.ShowImage = true;
-            this.创建三线表.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.创建三线表_Click);
+            this.文档拆分.Label = "文档拆分";
+            this.文档拆分.Name = "文档拆分";
+            this.文档拆分.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.文档拆分_Click);
+            // 
+            // 文档合并
+            // 
+            this.文档合并.Label = "文档合并";
+            this.文档合并.Name = "文档合并";
+            this.文档合并.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.文档合并_Click);
+            // 
+            // 快速密级
+            // 
+            this.快速密级.Items.Add(this.公开);
+            this.快速密级.Items.Add(this.内部);
+            this.快速密级.Items.Add(this.移除密级);
+            this.快速密级.Label = "快速密级";
+            this.快速密级.Name = "快速密级";
+            // 
+            // 公开
+            // 
+            this.公开.Label = "公开";
+            this.公开.Name = "公开";
+            this.公开.ShowImage = true;
+            this.公开.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.公开_Click);
+            // 
+            // 内部
+            // 
+            this.内部.Label = "内部";
+            this.内部.Name = "内部";
+            this.内部.ShowImage = true;
+            this.内部.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.内部_Click);
+            // 
+            // 移除密级
+            // 
+            this.移除密级.Label = "移除";
+            this.移除密级.Name = "移除密级";
+            this.移除密级.ShowImage = true;
+            this.移除密级.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.移除密级_Click);
             // 
             // MainRibbon
             // 
@@ -477,8 +571,8 @@
             this.公式处理.PerformLayout();
             this.图片处理.ResumeLayout(false);
             this.图片处理.PerformLayout();
-            this.其他.ResumeLayout(false);
-            this.其他.PerformLayout();
+            this.全文处理.ResumeLayout(false);
+            this.全文处理.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -496,7 +590,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator2;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 希腊字母;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 常用符号;
-        internal Microsoft.Office.Tools.Ribbon.RibbonGroup 其他;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup 全文处理;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 另存PDF;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup 公式处理;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 公式编号;
@@ -528,6 +622,17 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 宽度刷;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 高度刷;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 创建三线表;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 排版工具;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 位图化;
+        internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator5;
+        internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator6;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 文档拆分;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 文档合并;
+        internal Microsoft.Office.Tools.Ribbon.RibbonMenu 快速密级;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 公开;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 内部;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 移除密级;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 多级列表;
     }
 
     partial class ThisRibbonCollection

@@ -211,16 +211,61 @@
     can be found.
   -->
   <ItemGroup>
-    <Compile Include="CommonSymbolForm.cs">
+    <Compile Include="MultiLevel\ConfigurationManager.cs" />
+    <Compile Include="MultiLevel\MultiLevelDataManager.cs" />
+    <Compile Include="Syboms\CommonSymbolForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CommonSymbolForm.Designer.cs">
+    <Compile Include="Syboms\CommonSymbolForm.Designer.cs">
       <DependentUpon>CommonSymbolForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="StyleSetting\StyleSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="StyleSetting\StyleSettings.Designer.cs">
+      <DependentUpon>StyleSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="StyleSetting\StyleSettingsUIDesigner.cs" />
+    <Compile Include="StyleSetting\StyleFileManager.cs" />
+    <Compile Include="MultiLevel\WordStyleInfo.cs" />
+    <Compile Include="ControlsManager.cs" />
+    <Compile Include="MultiLevel\MultiLevelListForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MultiLevel\MultiLevelListForm.Designer.cs">
+      <DependentUpon>MultiLevelListForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MultiLevel\LevelStyleSettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MultiLevel\LevelStyleSettingsForm.Designer.cs">
+      <DependentUpon>LevelStyleSettingsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <EmbeddedResource Include="CommonSymbolForm.resx">
+    <Compile Include="TypesettingTaskPane.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TypesettingTaskPane.Designer.cs">
+      <DependentUpon>TypesettingTaskPane.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="MultiLevel\LevelStyleSettingsForm.resx">
+      <DependentUpon>LevelStyleSettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MultiLevel\MultiLevelListForm.resx">
+      <DependentUpon>MultiLevelListForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SplitAndMerge\DocumentMergeForm.resx">
+      <DependentUpon>DocumentMergeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SplitAndMerge\DocumentSplitForm.resx">
+      <DependentUpon>DocumentSplitForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="StyleSetting\StyleSettings.resx">
+      <DependentUpon>StyleSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Syboms\CommonSymbolForm.resx">
       <DependentUpon>CommonSymbolForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -236,8 +281,11 @@
     <EmbeddedResource Include="MainRibbon.resx">
       <DependentUpon>MainRibbon.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GreekLetterForm.resx">
+    <EmbeddedResource Include="Syboms\GreekLetterForm.resx">
       <DependentUpon>GreekLetterForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TypesettingTaskPane.resx">
+      <DependentUpon>TypesettingTaskPane.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -254,10 +302,10 @@
     <Compile Include="MainRibbon.Designer.cs">
       <DependentUpon>MainRibbon.cs</DependentUpon>
     </Compile>
-    <Compile Include="GreekLetterForm.cs">
+    <Compile Include="Syboms\GreekLetterForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GreekLetterForm.Designer.cs">
+    <Compile Include="Syboms\GreekLetterForm.Designer.cs">
       <DependentUpon>GreekLetterForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ThisAddIn.cs">
@@ -269,8 +317,17 @@
     <Compile Include="ThisAddIn.Designer.cs">
       <DependentUpon>ThisAddIn.Designer.xml</DependentUpon>
     </Compile>
+    <Compile Include="SplitAndMerge\DocumentSplitter.cs" />
+    <Compile Include="SplitAndMerge\DocumentSplitForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SplitAndMerge\DocumentMerger.cs" />
+    <Compile Include="SplitAndMerge\DocumentMergeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <AppDesigner Include="Properties\" />
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

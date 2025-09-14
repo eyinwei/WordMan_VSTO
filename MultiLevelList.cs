@@ -69,6 +69,28 @@ namespace WordMan_VSTO
         }
     }
 
+    public class StyledTextBox : TextBox
+    {
+        public StyledTextBox()
+        {
+            this.Font = new Font("Microsoft YaHei", 9F);
+            this.BackColor = Color.FromArgb(250, 250, 250); // 更浅的白灰色
+            this.BorderStyle = BorderStyle.FixedSingle;
+            this.Size = new Size(100, 25);
+        }
+    }
+
+    public class StyledComboBox : ComboBox
+    {
+        public StyledComboBox()
+        {
+            this.Font = new Font("Microsoft YaHei", 9F);
+            this.BackColor = Color.FromArgb(250, 250, 250); // 更浅的白灰色
+            this.DropDownStyle = ComboBoxStyle.DropDownList;
+            this.Size = new Size(100, 25);
+        }
+    }
+
     public class NumericUpDownWithUnit : NumericUpDown
     {
         private string _label = "厘米";
@@ -81,7 +103,21 @@ namespace WordMan_VSTO
             {
                 _label = value;
                 if (_unitLabel != null)
+                {
                     _unitLabel.Text = value;
+                    _unitLabel.Visible = true;
+                    UpdateUnitLabelPosition();
+                }
+            }
+        }
+
+        public void ForceUpdateUnitLabel()
+        {
+            if (_unitLabel != null)
+            {
+                _unitLabel.Visible = true;
+                _unitLabel.BringToFront(); // 强制置顶
+                UpdateUnitLabelPosition();
             }
         }
 
@@ -96,34 +132,65 @@ namespace WordMan_VSTO
             this._unitLabel.Text = _label;
             this._unitLabel.AutoSize = true;
             this._unitLabel.Font = new Font("Microsoft YaHei", 8F);
-            this._unitLabel.ForeColor = Color.Gray;
+            this._unitLabel.ForeColor = Color.FromArgb(64, 64, 64); // 浅黑色
             this._unitLabel.BackColor = Color.Transparent;
+            this._unitLabel.BorderStyle = BorderStyle.None; // 移除边框
+            this._unitLabel.Visible = true;
+            this._unitLabel.BringToFront(); // 置顶显示
             this.Controls.Add(_unitLabel);
             this.TextAlign = HorizontalAlignment.Left;
             this.Width = 100;
             this.Height = 25;
-            this.BackColor = Color.FromArgb(245, 245, 245);
+            this.BackColor = Color.FromArgb(250, 250, 250); // 更浅的白灰色
             this.DecimalPlaces = 2;
             this.Increment = 0.01m;
             // 不在这里设置Minimum和Maximum，让调用者设置
-            UpdateUnitLabelPosition();
+            
+            // 延迟设置位置，确保控件完全初始化
+            this.HandleCreated += (s, e) => {
+                this.BeginInvoke(new Action(() => UpdateUnitLabelPosition()));
+            };
         }
 
         private void UpdateUnitLabelPosition()
         {
-            if (_unitLabel != null)
+            if (_unitLabel != null && this.Width > 0 && this.Height > 0)
             {
                 // 计算单位标签的位置，使其显示在输入框右端
-                int labelWidth = (int)_unitLabel.CreateGraphics().MeasureString(_unitLabel.Text, _unitLabel.Font).Width;
-                int rightMargin = 5; // 右边距
-                _unitLabel.Location = new Point(this.Width - labelWidth - rightMargin, (this.Height - _unitLabel.Height) / 2);
+                using (Graphics g = this.CreateGraphics())
+                {
+                    SizeF textSize = g.MeasureString(_unitLabel.Text, _unitLabel.Font);
+                    int labelWidth = (int)textSize.Width;
+                    int labelHeight = (int)textSize.Height;
+                    int rightMargin = 25; // 右边距，为增加减少按钮留出空间
+                    int topMargin = (this.Height - labelHeight) / 2;
+                    _unitLabel.Location = new Point(this.Width - labelWidth - rightMargin, Math.Max(0, topMargin));
+                }
             }
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            // 延迟更新单位标签位置，确保控件完全初始化
+            this.BeginInvoke(new Action(() => UpdateUnitLabelPosition()));
         }
 
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
             UpdateUnitLabelPosition();
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            // 确保单位标签在绘制时也正确显示
+            if (_unitLabel != null && _unitLabel.Visible)
+            {
+                _unitLabel.BringToFront(); // 强制置顶
+                UpdateUnitLabelPosition();
+            }
         }
     }
 
@@ -187,12 +254,14 @@ namespace WordMan_VSTO
             {
                 // 根据级别设置不同的初始值
                 string numberStyle = "1,2,3...";
-                string numberFormat = GenerateNumberFormat(i);
+                string numberFormat = "";
+                decimal numberIndent = 0m;
                 decimal textIndent = 0m; // 默认文本缩进为0
                 string afterNumberType = "空格";
                 decimal tabPosition = 0m;
                 string linkedStyle = "无";
                 
+                // 设置默认编号格式
                 if (i == 1)
                 {
                     numberFormat = "第%1章";
@@ -200,36 +269,52 @@ namespace WordMan_VSTO
                 }
                 else if (i == 2)
                 {
+                    numberFormat = "%1.%2";
                     linkedStyle = "标题 2";
                 }
                 else if (i == 3)
                 {
+                    numberFormat = "%1.%2.%3";
                     linkedStyle = "标题 3";
                 }
                 else if (i == 4)
                 {
-                    numberStyle = "1,2,3...";
-                    numberFormat = "(%4)";
+                    numberFormat = "%4.";
+                    numberIndent = 0.8m; // 四到九级编号缩进0.8厘米
                     linkedStyle = "标题 4";
                 }
                 else if (i == 5)
                 {
+                    numberFormat = "(%5)";
+                    numberIndent = 0.8m;
                     linkedStyle = "标题 5";
                 }
                 else if (i == 6)
                 {
+                    numberStyle = "A,B,C...";
+                    numberFormat = "%6.";
+                    numberIndent = 0.8m;
                     linkedStyle = "标题 6";
                 }
                 else if (i == 7)
                 {
+                    numberStyle = "A,B,C...";
+                    numberFormat = "(%7)";
+                    numberIndent = 0.8m;
                     linkedStyle = "标题 7";
                 }
                 else if (i == 8)
                 {
+                    numberStyle = "a,b,c...";
+                    numberFormat = "%8.";
+                    numberIndent = 0.8m;
                     linkedStyle = "标题 8";
                 }
                 else if (i == 9)
                 {
+                    numberStyle = "a,b,c...";
+                    numberFormat = "(%9)";
+                    numberIndent = 0.8m;
                     linkedStyle = "标题 9";
                 }
                 
@@ -238,7 +323,7 @@ namespace WordMan_VSTO
                     Level = i,
                     NumberStyle = numberStyle,
                     NumberFormat = numberFormat,
-                    NumberIndent = 0.0m,
+                    NumberIndent = numberIndent,
                     TextIndent = textIndent,
                     AfterNumberType = afterNumberType,
                     TabPosition = tabPosition,
@@ -305,48 +390,26 @@ namespace WordMan_VSTO
             };
 
             // 编号样式下拉框
-            var cmbNumberStyle = new ComboBox
+            var cmbNumberStyle = new StyledComboBox
             {
                 Name = "CmbNumStyle" + level,
                 Location = new Point(70, 5),
-                Size = new Size(100, 25),
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Microsoft YaHei", 9F),
-                BackColor = Color.FromArgb(245, 245, 245),
                 Items = { "1,2,3...", "01,02,03...", "A,B,C...", "a,b,c...", "I,II,III...", "i,ii,iii...", "一,二,三...", "壹,贰,叁...", "甲,乙,丙...", "正规编号" }
             };
-            // 根据级别设置默认选择
-            if (level == 4)
-            {
-                cmbNumberStyle.SelectedIndex = 0; // 1,2,3...
-            }
-            else
-            {
-                cmbNumberStyle.SelectedIndex = 0; // 1,2,3...
-            }
+            // 从levelDataList中获取编号样式设置
+            var levelData = levelDataList[level - 1];
+            string[] styleOptions = { "1,2,3...", "01,02,03...", "A,B,C...", "a,b,c...", "I,II,III...", "i,ii,iii...", "一,二,三...", "壹,贰,叁...", "甲,乙,丙...", "正规编号" };
+            int styleIndex = Array.IndexOf(styleOptions, levelData.NumberStyle);
+            cmbNumberStyle.SelectedIndex = styleIndex >= 0 ? styleIndex : 0;
 
             // 编号格式文本框
-            var txtNumberFormat = new TextBox
+            var txtNumberFormat = new StyledTextBox
             {
                 Name = "TextBoxNumFormat" + level,
-                Location = new Point(180, 5),
-                Size = new Size(100, 25),
-                Font = new Font("Microsoft YaHei", 9F),
-                BackColor = Color.FromArgb(245, 245, 245)
+                Location = new Point(180, 5)
             };
-            // 根据级别设置默认格式
-            if (level == 1)
-            {
-                txtNumberFormat.Text = "第%1章";
-            }
-            else if (level == 4)
-            {
-                txtNumberFormat.Text = "(%4)";
-            }
-            else
-            {
-                txtNumberFormat.Text = GenerateNumberFormat(level);
-            }
+            // 从levelDataList中获取编号格式
+            txtNumberFormat.Text = levelData.NumberFormat;
 
             // 编号缩进
             var nudNumberIndent = new NumericUpDownWithUnit
@@ -355,9 +418,13 @@ namespace WordMan_VSTO
                 Location = new Point(290, 5),
                 Size = new Size(100, 25)
             };
+            nudNumberIndent.Label = "厘米"; // 单独设置Label属性
             nudNumberIndent.Minimum = 0;
             nudNumberIndent.Maximum = 50;
-            nudNumberIndent.Value = 0;
+            // 从levelDataList中获取编号缩进
+            nudNumberIndent.Value = levelData.NumberIndent;
+            // 强制更新单位标签显示
+            nudNumberIndent.ForceUpdateUnitLabel();
 
             // 文本缩进
             var nudTextIndent = new NumericUpDownWithUnit
@@ -366,23 +433,25 @@ namespace WordMan_VSTO
                 Location = new Point(400, 5),
                 Size = new Size(100, 25)
             };
+            nudTextIndent.Label = "厘米"; // 单独设置Label属性
             nudTextIndent.Minimum = 0;
             nudTextIndent.Maximum = 50;
-            // 设置默认文本缩进为0
-            nudTextIndent.Value = 0m;
+            // 从levelDataList中获取文本缩进
+            nudTextIndent.Value = levelData.TextIndent;
+            // 强制更新单位标签显示
+            nudTextIndent.ForceUpdateUnitLabel();
 
             // 编号之后下拉框
-            var cmbAfterNumber = new ComboBox
+            var cmbAfterNumber = new StyledComboBox
             {
                 Name = "CmbAfterNumber" + level,
                 Location = new Point(510, 5),
-                Size = new Size(100, 25),
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Microsoft YaHei", 9F),
-                BackColor = Color.FromArgb(245, 245, 245),
                 Items = { "无", "空格", "制表位" }
             };
-            cmbAfterNumber.SelectedIndex = 1; // 默认选择"空格"
+            // 从levelDataList中获取编号之后类型
+            string[] afterNumberOptions = { "无", "空格", "制表位" };
+            int afterNumberIndex = Array.IndexOf(afterNumberOptions, levelData.AfterNumberType);
+            cmbAfterNumber.SelectedIndex = afterNumberIndex >= 0 ? afterNumberIndex : 1;
 
             // 制表位位置
             var nudTabPosition = new NumericUpDownWithUnit
@@ -391,24 +460,27 @@ namespace WordMan_VSTO
                 Location = new Point(620, 5),
                 Size = new Size(100, 25)
             };
+            nudTabPosition.Label = "厘米"; // 单独设置Label属性
             nudTabPosition.Minimum = 0;
             nudTabPosition.Maximum = 50;
-            nudTabPosition.Value = 0m; // 初始值为0
-            nudTabPosition.Enabled = false; // 初始状态禁用，因为默认选择"空格"
+            // 从levelDataList中获取制表位位置
+            nudTabPosition.Value = levelData.TabPosition;
+            // 根据编号之后类型设置制表位位置启用状态
+            nudTabPosition.Enabled = (levelData.AfterNumberType == "制表位");
+            // 强制更新单位标签显示
+            nudTabPosition.ForceUpdateUnitLabel();
 
             // 链接样式下拉框
-            var cmbLinkedStyle = new ComboBox
+            var cmbLinkedStyle = new StyledComboBox
             {
                 Name = "CmbLinkedStyle" + level,
                 Location = new Point(730, 5),
-                Size = new Size(100, 25),
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Microsoft YaHei", 9F),
-                BackColor = Color.FromArgb(245, 245, 245),
                 Items = { "无", "标题 1", "标题 2", "标题 3", "标题 4", "标题 5", "标题 6", "标题 7", "标题 8", "标题 9" }
             };
-            // 根据级别设置默认链接样式
-            cmbLinkedStyle.SelectedIndex = level; // 0=无, 1=标题 1, 2=标题 2, ...
+            // 从levelDataList中获取链接样式
+            string[] linkedStyleOptions = { "无", "标题 1", "标题 2", "标题 3", "标题 4", "标题 5", "标题 6", "标题 7", "标题 8", "标题 9" };
+            int linkedStyleIndex = Array.IndexOf(linkedStyleOptions, levelData.LinkedStyle);
+            cmbLinkedStyle.SelectedIndex = linkedStyleIndex >= 0 ? linkedStyleIndex : 0;
 
             // 添加控件到行面板
             rowPanel.Controls.AddRange(new Control[] { 
@@ -436,13 +508,13 @@ namespace WordMan_VSTO
             if (level < 1 || level > levelDataList.Count) return;
 
             var levelData = levelDataList[level - 1];
-            var cmbNumberStyle = levelsContainer.Controls.Find("CmbNumStyle" + level, true).FirstOrDefault() as ComboBox;
-            var txtNumberFormat = levelsContainer.Controls.Find("TextBoxNumFormat" + level, true).FirstOrDefault() as TextBox;
+            var cmbNumberStyle = levelsContainer.Controls.Find("CmbNumStyle" + level, true).FirstOrDefault() as StyledComboBox;
+            var txtNumberFormat = levelsContainer.Controls.Find("TextBoxNumFormat" + level, true).FirstOrDefault() as StyledTextBox;
             var nudNumberIndent = levelsContainer.Controls.Find("TxtBoxNumIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
             var nudTextIndent = levelsContainer.Controls.Find("TxtBoxTextIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
-            var cmbAfterNumber = levelsContainer.Controls.Find("CmbAfterNumber" + level, true).FirstOrDefault() as ComboBox;
+            var cmbAfterNumber = levelsContainer.Controls.Find("CmbAfterNumber" + level, true).FirstOrDefault() as StyledComboBox;
             var nudTabPosition = levelsContainer.Controls.Find("TxtBoxTabPosition" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
-            var cmbLinkedStyle = levelsContainer.Controls.Find("CmbLinkedStyle" + level, true).FirstOrDefault() as ComboBox;
+            var cmbLinkedStyle = levelsContainer.Controls.Find("CmbLinkedStyle" + level, true).FirstOrDefault() as StyledComboBox;
 
             if (cmbNumberStyle != null) levelData.NumberStyle = cmbNumberStyle.Text;
             if (txtNumberFormat != null) levelData.NumberFormat = txtNumberFormat.Text;
@@ -455,7 +527,7 @@ namespace WordMan_VSTO
 
         private void UpdateTabPositionEnabled(int level)
         {
-            var cmbAfterNumber = levelsContainer.Controls.Find("CmbAfterNumber" + level, true).FirstOrDefault() as ComboBox;
+            var cmbAfterNumber = levelsContainer.Controls.Find("CmbAfterNumber" + level, true).FirstOrDefault() as StyledComboBox;
             var nudTabPosition = levelsContainer.Controls.Find("TxtBoxTabPosition" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
             
             if (cmbAfterNumber != null && nudTabPosition != null)
@@ -489,12 +561,12 @@ namespace WordMan_VSTO
             btnApplySettings.Click += BtnApplySettings_Click;
 
             // 右侧快捷设置事件
-            checkBox1.CheckedChanged += CheckBox_CheckedChanged; // 编号缩进
-            checkBox2.CheckedChanged += CheckBox_CheckedChanged; // 文本缩进
-            checkBox3.CheckedChanged += CheckBox_CheckedChanged; // 制表位位置
-            checkBox4.CheckedChanged += CheckBox4_CheckedChanged; // 递进缩进设置
-            checkBox5.CheckedChanged += CheckBox5_CheckedChanged; // 链接到标题样式
-            checkBox6.CheckedChanged += CheckBox6_CheckedChanged; // 不链接标题样式
+            chkNumberIndent.CheckedChanged += CheckBox_CheckedChanged; // 编号缩进
+            chkTextIndent.CheckedChanged += CheckBox_CheckedChanged; // 文本缩进
+            chkTabPosition.CheckedChanged += CheckBox_CheckedChanged; // 制表位位置
+            chkProgressiveIndent.CheckedChanged += ProgressiveIndent_CheckedChanged; // 递进缩进设置
+            chkLinkTitles.CheckedChanged += LinkTitles_CheckedChanged; // 链接到标题样式
+            chkUnlinkTitles.CheckedChanged += UnlinkTitles_CheckedChanged; // 不链接标题样式
         }
 
         private void CmbLevelCount_SelectedIndexChanged(object sender, EventArgs e)
@@ -545,12 +617,12 @@ namespace WordMan_VSTO
                 {
                     ListLevel listLevel = listTemplate.ListLevels[i];
                     
-                    var cmbNumberStyle = levelsContainer.Controls.Find("CmbNumStyle" + i, true).FirstOrDefault() as ComboBox;
-                    var txtNumberFormat = levelsContainer.Controls.Find("TextBoxNumFormat" + i, true).FirstOrDefault() as TextBox;
+                    var cmbNumberStyle = levelsContainer.Controls.Find("CmbNumStyle" + i, true).FirstOrDefault() as StyledComboBox;
+                    var txtNumberFormat = levelsContainer.Controls.Find("TextBoxNumFormat" + i, true).FirstOrDefault() as StyledTextBox;
                     var nudNumberIndent = levelsContainer.Controls.Find("TxtBoxNumIndent" + i, true).FirstOrDefault() as NumericUpDownWithUnit;
                     var nudTextIndent = levelsContainer.Controls.Find("TxtBoxTextIndent" + i, true).FirstOrDefault() as NumericUpDownWithUnit;
                     var nudAfterIndent = levelsContainer.Controls.Find("TxtBoxAfterNumIndent" + i, true).FirstOrDefault() as NumericUpDownWithUnit;
-                    var cmbLinkedStyle = levelsContainer.Controls.Find("CmbLinkedStyle" + i, true).FirstOrDefault() as ComboBox;
+                    var cmbLinkedStyle = levelsContainer.Controls.Find("CmbLinkedStyle" + i, true).FirstOrDefault() as StyledComboBox;
 
                     if (cmbNumberStyle != null)
                     {
@@ -628,13 +700,13 @@ namespace WordMan_VSTO
                 // 收集数据
                 for (int i = 0; i < levelCount; i++)
                 {
-                    var numberStyleCombo = levelsContainer.Controls.Find("CmbNumStyle" + (i + 1), true).FirstOrDefault() as ComboBox;
-                    var numberFormatText = levelsContainer.Controls.Find("TextBoxNumFormat" + (i + 1), true).FirstOrDefault() as TextBox;
+                    var numberStyleCombo = levelsContainer.Controls.Find("CmbNumStyle" + (i + 1), true).FirstOrDefault() as StyledComboBox;
+                    var numberFormatText = levelsContainer.Controls.Find("TextBoxNumFormat" + (i + 1), true).FirstOrDefault() as StyledTextBox;
                     var numberIndentControl = levelsContainer.Controls.Find("TxtBoxNumIndent" + (i + 1), true).FirstOrDefault() as NumericUpDownWithUnit;
                     var textIndentControl = levelsContainer.Controls.Find("TxtBoxTextIndent" + (i + 1), true).FirstOrDefault() as NumericUpDownWithUnit;
-                    var afterNumberCombo = levelsContainer.Controls.Find("CmbAfterNumber" + (i + 1), true).FirstOrDefault() as ComboBox;
+                    var afterNumberCombo = levelsContainer.Controls.Find("CmbAfterNumber" + (i + 1), true).FirstOrDefault() as StyledComboBox;
                     var tabPositionControl = levelsContainer.Controls.Find("TxtBoxTabPosition" + (i + 1), true).FirstOrDefault() as NumericUpDownWithUnit;
-                    var linkedStyleCombo = levelsContainer.Controls.Find("CmbLinkedStyle" + (i + 1), true).FirstOrDefault() as ComboBox;
+                    var linkedStyleCombo = levelsContainer.Controls.Find("CmbLinkedStyle" + (i + 1), true).FirstOrDefault() as StyledComboBox;
 
                     if (numberStyleCombo != null)
                         numberStyles[i] = numberStyleCombo.SelectedIndex;
@@ -759,16 +831,61 @@ namespace WordMan_VSTO
                 
                 listLevel.NumberFormat = numberFormats[i - 1];
                 
-                // 设置链接样式
+                // 设置链接样式 - 直接使用Word样式对象
+                System.Diagnostics.Debug.WriteLine($"级别 {i}: 尝试链接样式 '{linkedStyles[i - 1]}'");
                 if (linkedStyles[i - 1] != "无" && !string.IsNullOrEmpty(linkedStyles[i - 1]))
                 {
-                    // 将显示文本转换为Word样式名称
-                    string styleName = GetWordStyleName(linkedStyles[i - 1]);
-                    listLevel.LinkedStyle = styleName;
-                    
-                    // 添加调试信息到消息框
-                    string debugInfo = $"级别 {i}: 设置链接样式为 '{styleName}'\n";
-                    System.Diagnostics.Debug.WriteLine(debugInfo);
+                    try
+                    {
+                        // 提取级别数字
+                        int level = 0;
+                        if (int.TryParse(linkedStyles[i - 1].Replace("标题 ", "").Replace("标题", ""), out level) && level >= 1 && level <= 9)
+                        {
+                            // 直接使用WdBuiltinStyle枚举引用内置样式
+                            WdBuiltinStyle builtInStyleEnum;
+                            switch (level)
+                            {
+                                case 1: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading1; break;
+                                case 2: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading2; break;
+                                case 3: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading3; break;
+                                case 4: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading4; break;
+                                case 5: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading5; break;
+                                case 6: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading6; break;
+                                case 7: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading7; break;
+                                case 8: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading8; break;
+                                case 9: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading9; break;
+                                default: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading1; break;
+                            }
+                            
+                            var style = app.ActiveDocument.Styles[builtInStyleEnum];
+                            
+                            if (style != null)
+                            {
+                                listLevel.LinkedStyle = style.NameLocal;
+                                System.Diagnostics.Debug.WriteLine($"级别 {i}: 使用内置样式对象 '{style.NameLocal}' (WdBuiltinStyle: {builtInStyleEnum})");
+                                
+                                // 验证样式是否被正确设置
+                                System.Diagnostics.Debug.WriteLine($"级别 {i}: 验证 - listLevel.LinkedStyle = '{listLevel.LinkedStyle}'");
+                            }
+                            else
+                            {
+                                listLevel.LinkedStyle = "";
+                                System.Diagnostics.Debug.WriteLine($"级别 {i}: 无法找到内置样式对象，级别 {level}");
+                            }
+                        }
+                        else
+                        {
+                            // 如果不是标题样式，尝试通过名称查找
+                            string styleName = GetWordStyleName(linkedStyles[i - 1]);
+                            listLevel.LinkedStyle = styleName;
+                            System.Diagnostics.Debug.WriteLine($"级别 {i}: 通过名称查找样式 '{styleName}'");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"级别 {i}: 设置链接样式时出错: {ex.Message}");
+                        listLevel.LinkedStyle = "";
+                    }
                 }
                 else
                 {
@@ -794,7 +911,10 @@ namespace WordMan_VSTO
                 }
                 
                 listLevel.StartAt = 1;
+
+
                 listLevel.ResetOnHigher = i - 1;
+
             }
             
             // 清空未使用的级别
@@ -851,54 +971,54 @@ namespace WordMan_VSTO
             for (int level = 1; level <= currentLevels; level++)
             {
                 // 1. 统一缩进设置
-                if (checkBox1.Checked) // 编号缩进
+                if (chkNumberIndent.Checked) // 编号缩进
                 {
                     var numberIndentControl = levelsContainer.Controls.Find("TxtBoxNumIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
                     if (numberIndentControl != null)
-                        numberIndentControl.Value = numericUpDown1.Value;
+                        numberIndentControl.Value = numericUpDownWithUnit1.Value;
                 }
                 
-                if (checkBox2.Checked) // 文本缩进
+                if (chkTextIndent.Checked) // 文本缩进
                 {
                     var textIndentControl = levelsContainer.Controls.Find("TxtBoxTextIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
                     if (textIndentControl != null)
-                        textIndentControl.Value = numericUpDown4.Value; // 使用numericUpDown4（文本缩进输入框）
+                        textIndentControl.Value = numericUpDownWithUnit4.Value; // 使用numericUpDownWithUnit4（文本缩进输入框）
                 }
                 
-                if (checkBox3.Checked) // 制表位位置
+                if (chkTabPosition.Checked) // 制表位位置
                 {
                     var tabPositionControl = levelsContainer.Controls.Find("TxtBoxTabPosition" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
                     if (tabPositionControl != null)
-                        tabPositionControl.Value = numericUpDown5.Value; // 使用numericUpDown5（制表位位置输入框）
+                        tabPositionControl.Value = numericUpDownWithUnit5.Value; // 使用numericUpDownWithUnit5（制表位位置输入框）
                 }
 
                 // 2. 递进缩进设置
-                if (checkBox4.Checked) // 递进缩进设置
+                if (chkProgressiveIndent.Checked) // 递进缩进设置
                 {
                     var numberIndentControl = levelsContainer.Controls.Find("TxtBoxNumIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
                     if (numberIndentControl != null)
                     {
                         if (level == 1)
                         {
-                            numberIndentControl.Value = numericUpDown2.Value; // 一级编号缩进
+                            numberIndentControl.Value = numericUpDownWithUnit2.Value; // 一级编号缩进
                         }
                         else
                         {
-                            numberIndentControl.Value = numericUpDown2.Value + numericUpDown3.Value * (level - 1); // 递进计算
+                            numberIndentControl.Value = numericUpDownWithUnit2.Value + numericUpDownWithUnit3.Value * (level - 1); // 递进计算
                         }
                     }
                 }
 
                 // 3. 链接标题样式
-                if (checkBox5.Checked) // 链接到标题样式
+                if (chkLinkTitles.Checked) // 链接到标题样式
                 {
-                    var linkedStyleControl = levelsContainer.Controls.Find("CmbLinkedStyle" + level, true).FirstOrDefault() as ComboBox;
+                    var linkedStyleControl = levelsContainer.Controls.Find("CmbLinkedStyle" + level, true).FirstOrDefault() as StyledComboBox;
                     if (linkedStyleControl != null)
                         linkedStyleControl.SelectedIndex = level;
                 }
-                else if (checkBox6.Checked) // 不链接标题样式
+                else if (chkUnlinkTitles.Checked) // 不链接标题样式
                 {
-                    var linkedStyleControl = levelsContainer.Controls.Find("CmbLinkedStyle" + level, true).FirstOrDefault() as ComboBox;
+                    var linkedStyleControl = levelsContainer.Controls.Find("CmbLinkedStyle" + level, true).FirstOrDefault() as StyledComboBox;
                     if (linkedStyleControl != null)
                         linkedStyleControl.SelectedIndex = 0;
                 }
@@ -910,80 +1030,80 @@ namespace WordMan_VSTO
 
         private void ClearQuickSettings()
         {
-            checkBox1.Checked = false;
-            checkBox2.Checked = false;
-            checkBox3.Checked = false;
-            checkBox4.Checked = false;
-            checkBox5.Checked = false;
-            checkBox6.Checked = false;
-            numericUpDown1.Enabled = false;
-            numericUpDown2.Enabled = false;
-            numericUpDown3.Enabled = false;
-            numericUpDown4.Enabled = false;
-            numericUpDown5.Enabled = false;
+            chkNumberIndent.Checked = false;
+            chkTextIndent.Checked = false;
+            chkTabPosition.Checked = false;
+            chkProgressiveIndent.Checked = false;
+            chkLinkTitles.Checked = false;
+            chkUnlinkTitles.Checked = false;
+            numericUpDownWithUnit1.Enabled = false;
+            numericUpDownWithUnit2.Enabled = false;
+            numericUpDownWithUnit3.Enabled = false;
+            numericUpDownWithUnit4.Enabled = false;
+            numericUpDownWithUnit5.Enabled = false;
         }
 
         private void CheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            // 编号缩进使用numericUpDown1
-            if (checkBox1.Checked) // 编号缩进
+            // 编号缩进使用numericUpDownWithUnit1
+            if (chkNumberIndent.Checked) // 编号缩进
             {
-                numericUpDown1.Enabled = true;
+                numericUpDownWithUnit1.Enabled = true;
             }
-            else if (!checkBox1.Checked && !checkBox2.Checked && !checkBox3.Checked)
+            else if (!chkNumberIndent.Checked && !chkTextIndent.Checked && !chkTabPosition.Checked)
             {
-                numericUpDown1.Enabled = false;
-            }
-            
-            // 文本缩进使用numericUpDown4
-            if (checkBox2.Checked) // 文本缩进
-            {
-                numericUpDown4.Enabled = true;
-            }
-            else if (!checkBox1.Checked && !checkBox2.Checked && !checkBox3.Checked)
-            {
-                numericUpDown4.Enabled = false;
+                numericUpDownWithUnit1.Enabled = false;
             }
             
-            // 制表位位置使用numericUpDown5
-            if (checkBox3.Checked) // 制表位位置
+            // 文本缩进使用numericUpDownWithUnit4
+            if (chkTextIndent.Checked) // 文本缩进
             {
-                numericUpDown5.Enabled = true;
+                numericUpDownWithUnit4.Enabled = true;
             }
-            else if (!checkBox1.Checked && !checkBox2.Checked && !checkBox3.Checked)
+            else if (!chkNumberIndent.Checked && !chkTextIndent.Checked && !chkTabPosition.Checked)
             {
-                numericUpDown5.Enabled = false;
+                numericUpDownWithUnit4.Enabled = false;
+            }
+            
+            // 制表位位置使用numericUpDownWithUnit5
+            if (chkTabPosition.Checked) // 制表位位置
+            {
+                numericUpDownWithUnit5.Enabled = true;
+            }
+            else if (!chkNumberIndent.Checked && !chkTextIndent.Checked && !chkTabPosition.Checked)
+            {
+                numericUpDownWithUnit5.Enabled = false;
             }
         }
 
-        private void CheckBox4_CheckedChanged(object sender, EventArgs e)
+        private void ProgressiveIndent_CheckedChanged(object sender, EventArgs e)
         {
             // 递进缩进设置
-            if (checkBox4.Checked)
+            if (chkProgressiveIndent.Checked)
             {
-                numericUpDown2.Enabled = true;
-                numericUpDown3.Enabled = true;
+                numericUpDownWithUnit2.Enabled = true;
+                numericUpDownWithUnit3.Enabled = true;
             }
             else
             {
-                numericUpDown2.Enabled = false;
-                numericUpDown3.Enabled = false;
+                numericUpDownWithUnit2.Enabled = false;
+                numericUpDownWithUnit3.Enabled = false;
             }
         }
 
-        private void CheckBox5_CheckedChanged(object sender, EventArgs e)
+        private void LinkTitles_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBox5.Checked)
+            if (chkLinkTitles.Checked)
             {
-                checkBox6.Checked = false;
+                chkUnlinkTitles.Checked = false;
             }
         }
 
-        private void CheckBox6_CheckedChanged(object sender, EventArgs e)
+        private void UnlinkTitles_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBox6.Checked)
+            if (chkUnlinkTitles.Checked)
             {
-                checkBox5.Checked = false;
+                chkLinkTitles.Checked = false;
             }
         }
 
@@ -1039,54 +1159,69 @@ namespace WordMan_VSTO
                 return "";
             }
 
-            // 首先尝试通过内置样式索引获取（最可靠的方法）
+            // 直接使用Word内置样式对象引用
             try
             {
-                var builtInStyle = app.ActiveDocument.Styles[WdBuiltinStyle.wdStyleHeading1 + level - 1];
+                // 使用WdBuiltinStyle枚举直接引用内置样式
+                WdBuiltinStyle builtInStyleEnum;
+                switch (level)
+                {
+                    case 1: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading1; break;
+                    case 2: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading2; break;
+                    case 3: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading3; break;
+                    case 4: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading4; break;
+                    case 5: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading5; break;
+                    case 6: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading6; break;
+                    case 7: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading7; break;
+                    case 8: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading8; break;
+                    case 9: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading9; break;
+                    default: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading1; break;
+                }
+                
+                var builtInStyle = app.ActiveDocument.Styles[builtInStyleEnum];
+                
                 if (builtInStyle != null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"找到内置样式: '{builtInStyle.NameLocal}'");
+                    System.Diagnostics.Debug.WriteLine($"使用内置样式对象: '{builtInStyle.NameLocal}' (WdBuiltinStyle: {builtInStyleEnum})");
                     return builtInStyle.NameLocal;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"无法获取内置样式对象: {ex.Message}");
+            }
+
+            // 如果内置样式不可用，尝试通过名称查找
+            try
+            {
+                // 尝试英文名称
+                string englishName = "Heading " + level;
+                var style = app.ActiveDocument.Styles[englishName];
+                if (style != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"找到英文样式: '{style.NameLocal}'");
+                    return style.NameLocal;
                 }
             }
             catch
             {
-                // 内置样式不存在，继续尝试其他方法
+                // 英文样式不存在，继续尝试中文
             }
 
-            // 尝试多种可能的样式名称格式
-            string[] possibleNames = {
-                // 中文格式
-                displayName,                           // 标题 1, 标题 2, ...
-                displayName.Replace("标题 ", "标题"),    // 标题1, 标题2, ...
-                
-                // 英文格式
-                displayName.Replace("标题 ", "Heading "), // Heading 1, Heading 2, ...
-                displayName.Replace("标题 ", "Heading"),  // Heading1, Heading2, ...
-                
-                // 其他可能的格式
-                "Heading " + level,                    // Heading 1, Heading 2, ...
-                "标题 " + level,                       // 标题 1, 标题 2, ...
-                "Heading" + level,                     // Heading1, Heading2, ...
-                "标题" + level,                        // 标题1, 标题2, ...
-            };
-
-            // 检查样式是否存在
-            foreach (string styleName in possibleNames)
+            try
             {
-                try
+                // 尝试中文名称
+                string chineseName = "标题 " + level;
+                var style = app.ActiveDocument.Styles[chineseName];
+                if (style != null)
                 {
-                    var style = app.ActiveDocument.Styles[styleName];
-                    if (style != null)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"找到样式: '{styleName}'");
-                        return styleName;
-                    }
+                    System.Diagnostics.Debug.WriteLine($"找到中文样式: '{style.NameLocal}'");
+                    return style.NameLocal;
                 }
-                catch
-                {
-                    // 样式不存在，继续尝试下一个
-                }
+            }
+            catch
+            {
+                // 中文样式不存在
             }
 
             // 如果都找不到，返回空字符串（表示不链接样式）

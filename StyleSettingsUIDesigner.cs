@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using Word = Microsoft.Office.Interop.Word;
 
 namespace WordMan_VSTO
 {
     /// <summary>
     /// 样式设置窗口UI设计器
     /// 负责创建和管理样式设置窗口的所有UI控件
+    /// 整体布局分为三块：左上角样式列表、右上角样式编辑、下方按钮区域
     /// </summary>
     public class StyleSettingsUIDesigner
     {
@@ -25,353 +27,383 @@ namespace WordMan_VSTO
         /// </summary>
         public void InitializeAllControls()
         {
-            // 1. 样式列表区域（包含当前样式显示）
-            var styleListPanel = CreateStyleListPanel();
-            _form.Controls.Add(styleListPanel);
+            // 设置窗体基本属性
+            _form.Size = new Size(920, 630); 
+            _form.Text = "样式设置";
+            _form.StartPosition = FormStartPosition.CenterScreen;
+            _form.BackColor = Color.FromArgb(248, 249, 250);
+            _form.FormBorderStyle = FormBorderStyle.FixedDialog;
+            _form.MaximizeBox = false;
+            _form.MinimizeBox = false;
 
-            // 2. 样式编辑区域
-            var styleEditGroup = CreateStyleEditGroup();
-            _form.Controls.Add(styleEditGroup);
+            // 1. 第一块：左上角样式列表区域
+            var leftPanel = CreateLeftStyleListPanel();
+            _form.Controls.Add(leftPanel);
 
-            // 3. 按钮面板
-            InitializeButtonPanel();
+            // 2. 第二块：右上角样式编辑区域
+            var rightPanel = CreateRightStyleEditPanel();
+            _form.Controls.Add(rightPanel);
+
+            // 3. 第三块：下方按钮区域
+            var bottomPanel = CreateBottomButtonPanel();
+            _form.Controls.Add(bottomPanel);
         }
 
         /// <summary>
-        /// 创建样式列表面板（包含当前样式显示和样式列表）
+        /// 创建第一块：左上角样式列表区域
+        /// 包含样式列表、内置样式选择、添加/删除样式功能
         /// </summary>
-        private Panel CreateStyleListPanel()
+        private Panel CreateLeftStyleListPanel()
         {
             var panel = new Panel
             {
-                Dock = DockStyle.Top,
-                Height = 300,
+                Location = new Point(10, 10),
+                Size = new Size(200, 500),
                 BackColor = Color.White,
-                Padding = new Padding(15)
-            };
-
-            // 当前样式显示区域
-            var currentStylePanel = new Panel
-            {
-                Dock = DockStyle.Top,
-                Height = 50,
-                BackColor = Color.FromArgb(240, 248, 255),
                 BorderStyle = BorderStyle.FixedSingle
             };
-
-            var currentStyleLabel = new Label
-            {
-                Text = "当前样式：",
-                Location = new Point(15, 15),
-                Size = new Size(80, 20),
-                Font = new Font("微软雅黑", 10F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(64, 64, 64)
-            };
-
-            var currentStyleName = new Label
-            {
-                Name = "lblCurrentStyleName",
-                Text = "公文风格",
-                Location = new Point(100, 15),
-                Size = new Size(200, 20),
-                Font = new Font("微软雅黑", 10F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(0, 120, 215)
-            };
-            _controls["lblCurrentStyleName"] = currentStyleName;
-
-            currentStylePanel.Controls.Add(currentStyleLabel);
-            currentStylePanel.Controls.Add(currentStyleName);
 
             // 样式列表
             var styleList = CreateStyleList();
-            styleList.Dock = DockStyle.Fill;
-            styleList.Margin = new Padding(0, 10, 0, 0);
 
-            panel.Controls.Add(styleList);
-            panel.Controls.Add(currentStylePanel);
-
-            return panel;
-        }
-
-        /// <summary>
-        /// 创建样式列表（DataGridView）
-        /// </summary>
-        private DataGridView CreateStyleList()
-        {
-            var dataGridView = new DataGridView
+            // 内置样式选择按钮
+            var btnSelectBuiltIn = new Button
             {
-                Name = "dgvStyleList",
-                Dock = DockStyle.Fill,
-                BackgroundColor = Color.White,
-                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.EnableResizing,
-                ColumnHeadersHeight = 35,
-                RowTemplate = { Height = 28 },
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                ReadOnly = true,
-                AllowUserToAddRows = false,
-                AllowUserToDeleteRows = false,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                BorderStyle = BorderStyle.FixedSingle,
-                GridColor = Color.FromArgb(230, 230, 230),
-                EnableHeadersVisualStyles = false,
-                Font = new Font("微软雅黑", 9F)
-            };
-
-            // 设置表头样式
-            dataGridView.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-            {
-                BackColor = Color.FromArgb(64, 64, 64),
-                ForeColor = Color.White,
-                Font = new Font("微软雅黑", 9F, FontStyle.Bold),
-                Alignment = DataGridViewContentAlignment.MiddleCenter
-            };
-
-            // 设置行样式
-            dataGridView.DefaultCellStyle = new DataGridViewCellStyle
-            {
-                BackColor = Color.White,
-                ForeColor = Color.FromArgb(64, 64, 64),
+                Name = "btnSelectBuiltIn",
+                Text = "选择内置样式",
+                Location = new Point(10, 370),
+                Size = new Size(180, 30),
                 Font = new Font("微软雅黑", 9F),
-                SelectionBackColor = Color.FromArgb(0, 120, 215),
-                SelectionForeColor = Color.White
+                BackColor = Color.FromArgb(240, 240, 240),
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand
             };
+            _controls["btnSelectBuiltIn"] = btnSelectBuiltIn;
 
-            // 设置交替行颜色
-            dataGridView.AlternatingRowsDefaultCellStyle = new DataGridViewCellStyle
+            // 输入添加样式的名称文本框
+            var txtNewStyleName = new TextBox
             {
-                BackColor = Color.FromArgb(248, 249, 250)
+                Name = "txtNewStyleName",
+                Location = new Point(10, 410),
+                Size = new Size(180, 25),
+                Font = new Font("微软雅黑", 9F),
+                Text = "输入添加样式的名称"
             };
+            _controls["txtNewStyleName"] = txtNewStyleName;
 
-            // 添加列
-            dataGridView.Columns.Add(new DataGridViewTextBoxColumn
+            // 添加样式按钮
+            var btnAddStyle = new Button
             {
-                Name = "Col_StyleName",
-                HeaderText = "样式名",
-                Width = 120,
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
-                Frozen = true
-            });
-            dataGridView.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                Name = "Col_ChnFontName",
-                HeaderText = "中文字体",
-                Width = 100,
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.None
-            });
-            dataGridView.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                Name = "Col_EngFontName",
-                HeaderText = "西文字体",
-                Width = 100,
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.None
-            });
-            dataGridView.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                Name = "Col_FontSize",
-                HeaderText = "字号",
-                Width = 60,
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.None
-            });
-            dataGridView.Columns.Add(new DataGridViewCheckBoxColumn
-            {
-                Name = "Col_Bold",
-                HeaderText = "粗体",
-                Width = 60,
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.None
-            });
-            dataGridView.Columns.Add(new DataGridViewCheckBoxColumn
-            {
-                Name = "Col_Italic",
-                HeaderText = "斜体",
-                Width = 60,
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.None
-            });
-            dataGridView.Columns.Add(new DataGridViewCheckBoxColumn
-            {
-                Name = "Col_Underline",
-                HeaderText = "下划线",
-                Width = 60,
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.None
-            });
-            dataGridView.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                Name = "Col_LineSpace",
-                HeaderText = "行距",
-                Width = 80,
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.None
-            });
-            dataGridView.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                Name = "Col_SpaceBefore",
-                HeaderText = "段前间距",
-                Width = 80,
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.None
-            });
-            dataGridView.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                Name = "Col_SpaceAfter",
-                HeaderText = "段后间距",
-                Width = 80,
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.None
-            });
-            dataGridView.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                Name = "Col_HAlignment",
-                HeaderText = "对齐方式",
-                Width = 80,
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
-            });
-
-            _controls["dgvStyleList"] = dataGridView;
-            return dataGridView;
-        }
-
-        /// <summary>
-        /// 创建样式编辑分组
-        /// </summary>
-        private GroupBox CreateStyleEditGroup()
-        {
-            var group = new GroupBox
-            {
-                Text = "样式编辑设置",
-                Dock = DockStyle.Top,
-                Height = 220,
-                Font = new Font("微软雅黑", 10F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(64, 64, 64),
-                BackColor = Color.White,
-                Padding = new Padding(20, 25, 20, 20)
-            };
-
-            // 创建主容器面板
-            var mainPanel = new Panel
-            {
-                Dock = DockStyle.Fill,
-                BackColor = Color.Transparent
-            };
-
-            // 字体设置区域
-            var fontPanel = CreateFontSettingsPanel();
-            fontPanel.Location = new Point(0, 0);
-            fontPanel.Size = new Size(480, 80);
-
-            // 段落设置区域
-            var paragraphPanel = CreateParagraphSettingsPanel();
-            paragraphPanel.Location = new Point(0, 90);
-            paragraphPanel.Size = new Size(480, 80);
-
-            // 应用按钮
-            var btnSetStyles = new Button
-            {
-                Text = "应用设置",
-                Name = "btnSetStyles",
-                Location = new Point(500, 20),
-                Size = new Size(100, 35),
-                Font = new Font("微软雅黑", 9F, FontStyle.Bold),
+                Name = "btnAddStyle",
+                Text = "添加样式",
+                Location = new Point(10, 445),
+                Size = new Size(85, 30),
+                Font = new Font("微软雅黑", 9F),
                 BackColor = Color.FromArgb(0, 120, 215),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                FlatAppearance = { BorderSize = 0 },
                 Cursor = Cursors.Hand
             };
-            _controls["btnSetStyles"] = btnSetStyles;
+            _controls["btnAddStyle"] = btnAddStyle;
 
-            mainPanel.Controls.Add(fontPanel);
-            mainPanel.Controls.Add(paragraphPanel);
-            mainPanel.Controls.Add(btnSetStyles);
-
-            group.Controls.Add(mainPanel);
-
-            return group;
-        }
-
-        /// <summary>
-        /// 创建字体设置面板
-        /// </summary>
-        private Panel CreateFontSettingsPanel()
-        {
-            var panel = new Panel
+            // 删除样式按钮
+            var btnDeleteStyle = new Button
             {
-                BackColor = Color.FromArgb(248, 249, 250),
-                BorderStyle = BorderStyle.FixedSingle
+                Name = "btnDeleteStyle",
+                Text = "删除样式",
+                Location = new Point(105, 445),
+                Size = new Size(85, 30),
+                Font = new Font("微软雅黑", 9F),
+                BackColor = Color.FromArgb(196, 43, 28),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand
             };
+            _controls["btnDeleteStyle"] = btnDeleteStyle;
 
-            // 标题
-            var titleLabel = new Label
-            {
-                Text = "字体设置",
-                Location = new Point(10, 8),
-                Size = new Size(80, 20),
-                Font = new Font("微软雅黑", 9F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(64, 64, 64)
-            };
-
-            // 中文字体
-            var lblChnFont = CreateLabel("中文字体", 20, 35);
-            var cmbChnFont = CreateFontComboBox("cmbChnFontName", 90, 32);
-
-            // 西文字体
-            var lblEngFont = CreateLabel("西文字体", 250, 35);
-            var cmbEngFont = CreateFontComboBox("cmbEngFontName", 320, 32);
-
-            // 字体大小
-            var lblFontSize = CreateLabel("字体大小", 20, 55);
-            var cmbFontSize = CreateSizeComboBox("cmbFontSize", 90, 32);
-
-            // 字体颜色
-            var lblFontColor = CreateLabel("字体颜色", 250, 55);
-            var btnFontColor = CreateColorButton("btnFontColor", 320, 52);
-
-            panel.Controls.AddRange(new Control[] {
-                titleLabel, lblChnFont, cmbChnFont, lblEngFont, cmbEngFont,
-                lblFontSize, cmbFontSize, lblFontColor, btnFontColor
-            });
+            panel.Controls.Add(styleList);
+            panel.Controls.Add(btnSelectBuiltIn);
+            panel.Controls.Add(txtNewStyleName);
+            panel.Controls.Add(btnAddStyle);
+            panel.Controls.Add(btnDeleteStyle);
 
             return panel;
         }
 
         /// <summary>
-        /// 创建段落设置面板
+        /// 创建样式列表（ListBox）
         /// </summary>
-        private Panel CreateParagraphSettingsPanel()
+        private ListBox CreateStyleList()
+        {
+            var listBox = new ListBox
+            {
+                Name = "lstStyleList",
+                Location = new Point(10, 10),
+                Size = new Size(180, 350),
+                Font = new Font("微软雅黑", 10F),
+                BackColor = Color.White,
+                BorderStyle = BorderStyle.FixedSingle,
+                SelectionMode = SelectionMode.MultiExtended,
+                ItemHeight = 25
+            };
+
+            // 设置样式
+            listBox.DrawMode = DrawMode.OwnerDrawFixed;
+            listBox.DrawItem += (sender, e) =>
+            {
+                if (e.Index < 0) return;
+
+                e.DrawBackground();
+                
+                // 设置选中状态的背景色
+                if ((e.State & DrawItemState.Selected) == DrawItemState.Selected)
+                {
+                    e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(0, 120, 215)), e.Bounds);
+                }
+                else
+                {
+                    e.Graphics.FillRectangle(new SolidBrush(e.Index % 2 == 0 ? Color.White : Color.FromArgb(248, 249, 250)), e.Bounds);
+                }
+
+                // 绘制文本
+                var text = listBox.Items[e.Index].ToString();
+                var textColor = (e.State & DrawItemState.Selected) == DrawItemState.Selected ? Color.White : Color.FromArgb(64, 64, 64);
+                var textRect = new Rectangle(e.Bounds.X + 10, e.Bounds.Y, e.Bounds.Width - 10, e.Bounds.Height);
+                
+                using (var brush = new SolidBrush(textColor))
+                {
+                    e.Graphics.DrawString(text, listBox.Font, brush, textRect, StringFormat.GenericDefault);
+                }
+
+                e.DrawFocusRectangle();
+            };
+
+            // 添加示例样式
+            listBox.Items.AddRange(new string[] {
+                "正文",
+                "标题 1",
+                "标题 2", 
+                "标题 3",
+                "标题 4",
+                "标题",
+                "副标题",
+                "附录标题",
+                "表格标题",
+                "插图标题",
+                "表内文字"
+            });
+
+            _controls["lstStyleList"] = listBox;
+            return listBox;
+        }
+
+        /// <summary>
+        /// 创建第二块：右上角样式编辑区域
+        /// 包含字体设置、段落设置等详细配置
+        /// </summary>
+        private Panel CreateRightStyleEditPanel()
         {
             var panel = new Panel
             {
-                BackColor = Color.FromArgb(248, 249, 250),
+                Location = new Point(220, 10),
+                Size = new Size(670, 500),
+                BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
             };
 
-            // 标题
-            var titleLabel = new Label
+            // 样式设置组
+            var styleSetupGroup = CreateStyleSetupGroup();
+            styleSetupGroup.Location = new Point(10, 10);
+            styleSetupGroup.Size = new Size(650, 480);
+
+            panel.Controls.Add(styleSetupGroup);
+
+            return panel;
+        }
+
+
+        /// <summary>
+        /// 创建样式设置组
+        /// </summary>
+        private GroupBox CreateStyleSetupGroup()
+        {
+            var groupBox = new GroupBox
             {
-                Text = "段落设置",
-                Location = new Point(10, 8),
-                Size = new Size(80, 20),
+                Text = "样式设置",
                 Font = new Font("微软雅黑", 9F, FontStyle.Bold),
                 ForeColor = Color.FromArgb(64, 64, 64)
             };
 
-            // 行距
-            var lblLineSpace = CreateLabel("行距", 20, 35);
-            var cmbLineSpace = CreateLineSpaceComboBox("cmbLineSpace", 90, 32);
+            // 字体设置区域
+            CreateFontControls(groupBox);
 
-            // 段前间距
-            var lblSpaceBefore = CreateLabel("段前间距", 200, 35);
-            var cmbSpaceBefore = CreateSpaceComboBox("cmbSpaceBefore", 280, 32);
+            // 段落设置区域
+            CreateParagraphControls(groupBox);
 
-            // 段后间距
-            var lblSpaceAfter = CreateLabel("段后间距", 20, 55);
-            var cmbSpaceAfter = CreateSpaceComboBox("cmbSpaceAfter", 90, 32);
+            // 样式预览
+            CreateStylePreview(groupBox);
 
-            // 对齐方式
-            var lblHAlignment = CreateLabel("对齐方式", 200, 55);
-            var cmbHAlignment = CreateAlignmentComboBox("cmbHAlignment", 280, 32);
+            return groupBox;
+        }
 
-            panel.Controls.AddRange(new Control[] {
-                titleLabel, lblLineSpace, cmbLineSpace, lblSpaceBefore, cmbSpaceBefore,
-                lblSpaceAfter, cmbSpaceAfter, lblHAlignment, cmbHAlignment
+        /// <summary>
+        /// 创建字体控件
+        /// </summary>
+        private void CreateFontControls(Control parentPanel)
+        {
+            // 第一行：中文字体和西文字体
+            var lblChnFont = CreateLabel("中文字体", 20, 30);
+            var cmbChnFont = CreateFontComboBox("cmbChnFontName", 100, 27);
+
+            var lblEngFont = CreateLabel("西文字体", 350, 30);
+            var cmbEngFont = CreateFontComboBox("cmbEngFontName", 430, 27);
+
+            // 第二行：字体大小、颜色选择器和格式复选框
+            var lblFontSize = CreateLabel("字体大小", 20, 65);
+            var cmbFontSize = CreateSizeComboBox("cmbFontSize", 100, 62);
+
+            // 字体颜色按钮（小方块，无标签）
+            var btnFontColor = new Button
+            {
+                Name = "btnFontColor",
+                Location = new Point(200, 62),
+                Size = new Size(25, 25),
+                BackColor = Color.Black,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                FlatAppearance = { BorderSize = 1, BorderColor = Color.FromArgb(200, 200, 200) },
+                Cursor = Cursors.Hand
+            };
+            _controls["btnFontColor"] = btnFontColor;
+
+            // 格式复选框
+            var chkBold = new CheckBox
+            {
+                Name = "chkBold",
+                Text = "粗体",
+                Location = new Point(350, 65),
+                Size = new Size(60, 20),
+                Font = new Font("微软雅黑", 9F)
+            };
+            _controls["chkBold"] = chkBold;
+
+            var chkItalic = new CheckBox
+            {
+                Name = "chkItalic",
+                Text = "斜体",
+                Location = new Point(420, 65),
+                Size = new Size(60, 20),
+                Font = new Font("微软雅黑", 9F)
+            };
+            _controls["chkItalic"] = chkItalic;
+
+            var chkUnderline = new CheckBox
+            {
+                Name = "chkUnderline",
+                Text = "下划线",
+                Location = new Point(490, 65),
+                Size = new Size(70, 20),
+                Font = new Font("微软雅黑", 9F)
+            };
+            _controls["chkUnderline"] = chkUnderline;
+
+            parentPanel.Controls.AddRange(new Control[] {
+                lblChnFont, cmbChnFont, lblEngFont, cmbEngFont,
+                lblFontSize, cmbFontSize, btnFontColor,
+                chkBold, chkItalic, chkUnderline
             });
+        }
 
-            return panel;
+        /// <summary>
+        /// 创建段落控件
+        /// </summary>
+        private void CreateParagraphControls(Control parentPanel)
+        {
+            // 第一行：段落对齐和段前分页
+            var lblAlignment = CreateLabel("段落对齐", 20, 100);
+            var cmbAlignment = CreateAlignmentComboBox("cmbAlignment", 100, 97);
+
+            var chkPageBreakBefore = new CheckBox
+            {
+                Name = "chkPageBreakBefore",
+                Text = "段前分页",
+                Location = new Point(350, 100),
+                Size = new Size(80, 20),
+                Font = new Font("微软雅黑", 9F)
+            };
+            _controls["chkPageBreakBefore"] = chkPageBreakBefore;
+
+            // 第二行：首行缩进和段落行距
+            var lblFirstIndent = CreateLabel("首行缩进", 20, 135);
+            var txtFirstIndent = new TextBox
+            {
+                Name = "txtFirstIndent",
+                Location = new Point(100, 132),
+                Size = new Size(120, 25),
+                Font = new Font("微软雅黑", 9F),
+                Text = "2字符"
+            };
+            _controls["txtFirstIndent"] = txtFirstIndent;
+
+            var lblLineSpace = CreateLabel("段落行距", 350, 135);
+            var cmbLineSpace = CreateLineSpaceComboBox("cmbLineSpace", 430, 132);
+
+            // 第三行：段前间距和段后间距
+            var lblSpaceBefore = CreateLabel("段前间距", 20, 170);
+            var txtSpaceBefore = new TextBox
+            {
+                Name = "txtSpaceBefore",
+                Location = new Point(100, 167),
+                Size = new Size(120, 25),
+                Font = new Font("微软雅黑", 9F),
+                Text = "0.00行"
+            };
+            _controls["txtSpaceBefore"] = txtSpaceBefore;
+
+            var lblSpaceAfter = CreateLabel("段后间距", 350, 170);
+            var txtSpaceAfter = new TextBox
+            {
+                Name = "txtSpaceAfter",
+                Location = new Point(430, 167),
+                Size = new Size(120, 25),
+                Font = new Font("微软雅黑", 9F),
+                Text = "0.00行"
+            };
+            _controls["txtSpaceAfter"] = txtSpaceAfter;
+
+            parentPanel.Controls.AddRange(new Control[] {
+                lblAlignment, cmbAlignment, chkPageBreakBefore,
+                lblFirstIndent, txtFirstIndent, lblLineSpace, cmbLineSpace,
+                lblSpaceBefore, txtSpaceBefore, lblSpaceAfter, txtSpaceAfter
+            });
+        }
+
+        /// <summary>
+        /// 创建样式预览
+        /// </summary>
+        private void CreateStylePreview(Control parentPanel)
+        {
+            // 样式预览标签
+            var lblPreview = CreateLabel("样式预览", 20, 210);
+            lblPreview.Font = new Font("微软雅黑", 9F, FontStyle.Bold);
+
+            // 样式预览文本框
+            var txtPreview = new TextBox
+            {
+                Name = "txtStylePreview",
+                Location = new Point(20, 235),
+                Size = new Size(610, 140),
+                Multiline = true,
+                ReadOnly = true,
+                Font = new Font("微软雅黑", 12F),
+                Text = "这是样式预览文本，将显示当前设置的字体、段落等效果。",
+                BackColor = Color.FromArgb(248, 249, 250),
+                BorderStyle = BorderStyle.FixedSingle
+            };
+            _controls["txtStylePreview"] = txtPreview;
+
+            parentPanel.Controls.Add(lblPreview);
+            parentPanel.Controls.Add(txtPreview);
         }
 
         /// <summary>
@@ -383,7 +415,7 @@ namespace WordMan_VSTO
             {
                 Text = text,
                 Location = new Point(x, y),
-                Size = new Size(70, 20),
+                Size = new Size(80, 20),
                 Font = new Font("微软雅黑", 9F),
                 ForeColor = Color.FromArgb(64, 64, 64),
                 TextAlign = ContentAlignment.MiddleLeft
@@ -399,7 +431,7 @@ namespace WordMan_VSTO
             {
                 Name = name,
                 Location = new Point(x, y),
-                Size = new Size(100, 25),
+                Size = new Size(120, 25),
                 BorderStyle = BorderStyle.FixedSingle,
                 Font = new Font("微软雅黑", 9F),
                 BackColor = Color.White
@@ -417,7 +449,7 @@ namespace WordMan_VSTO
             {
                 Name = name,
                 Location = new Point(x, y),
-                Size = new Size(120, 28),
+                Size = new Size(120, 25),
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 Font = new Font("微软雅黑", 9F),
                 FlatStyle = FlatStyle.Flat,
@@ -442,7 +474,7 @@ namespace WordMan_VSTO
             {
                 Name = name,
                 Location = new Point(x, y),
-                Size = new Size(80, 28),
+                Size = new Size(80, 25),
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 Font = new Font("微软雅黑", 9F),
                 FlatStyle = FlatStyle.Flat,
@@ -466,7 +498,7 @@ namespace WordMan_VSTO
             {
                 Name = name,
                 Location = new Point(x, y),
-                Size = new Size(100, 28),
+                Size = new Size(120, 25),
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 Font = new Font("微软雅黑", 9F),
                 FlatStyle = FlatStyle.Flat,
@@ -514,7 +546,7 @@ namespace WordMan_VSTO
             {
                 Name = name,
                 Location = new Point(x, y),
-                Size = new Size(100, 28),
+                Size = new Size(120, 25),
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 Font = new Font("微软雅黑", 9F),
                 FlatStyle = FlatStyle.Flat,
@@ -572,114 +604,94 @@ namespace WordMan_VSTO
         }
 
         /// <summary>
-        /// 初始化按钮面板
+        /// 创建第三块：下方按钮区域
+        /// 包含预设样式选择、读取/保存样式、应用样式等功能
         /// </summary>
-        private void InitializeButtonPanel()
+        private Panel CreateBottomButtonPanel()
         {
-            var buttonPanel = new Panel
+            var panel = new Panel
             {
-                Dock = DockStyle.Bottom,
-                Height = 70,
-                Padding = new Padding(20, 15, 20, 15),
+                Location = new Point(10, 520),
+                Size = new Size(880, 60),
                 BackColor = Color.FromArgb(248, 249, 250),
                 BorderStyle = BorderStyle.FixedSingle
             };
 
-            var saveButton = new Button 
-            { 
-                Text = "另存样式", 
-                Name = "btnSaveStyle", 
-                Width = 90, 
-                Height = 35,
-                Margin = new Padding(5),
+            // 预设样式标签
+            var lblPreset = new Label
+            {
+                Text = "预设样式：",
+                Location = new Point(20, 20),
+                Size = new Size(80, 20),
                 Font = new Font("微软雅黑", 9F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(64, 64, 64)
+            };
+
+            // 预设样式下拉框
+            var cmbPresetStyle = new ComboBox
+            {
+                Name = "cmbPresetStyle",
+                Location = new Point(110, 18),
+                Size = new Size(120, 25),
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("微软雅黑", 9F)
+            };
+            cmbPresetStyle.Items.AddRange(new string[] { "公文风格", "默认", "学术风格", "现代风格" });
+            cmbPresetStyle.SelectedIndex = 0;
+            _controls["cmbPresetStyle"] = cmbPresetStyle;
+
+            // 读取样式按钮
+            var btnLoadStyle = new Button
+            {
+                Name = "btnLoadStyle",
+                Text = "读取样式",
+                Location = new Point(250, 18),
+                Size = new Size(80, 25),
+                Font = new Font("微软雅黑", 9F),
                 BackColor = Color.FromArgb(52, 144, 220),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                FlatAppearance = { BorderSize = 0 },
                 Cursor = Cursors.Hand
             };
-            _controls["btnSaveStyle"] = saveButton;
+            _controls["btnLoadStyle"] = btnLoadStyle;
 
-            var loadButton = new Button 
-            { 
-                Text = "加载样式", 
-                Name = "btnLoadStyle", 
-                Width = 90, 
-                Height = 35,
-                Margin = new Padding(5),
-                Font = new Font("微软雅黑", 9F, FontStyle.Bold),
+            // 保存样式按钮
+            var btnSaveStyle = new Button
+            {
+                Name = "btnSaveStyle",
+                Text = "保存样式",
+                Location = new Point(350, 18),
+                Size = new Size(80, 25),
+                Font = new Font("微软雅黑", 9F),
                 BackColor = Color.FromArgb(52, 144, 220),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                FlatAppearance = { BorderSize = 0 },
                 Cursor = Cursors.Hand
             };
-            _controls["btnLoadStyle"] = loadButton;
+            _controls["btnSaveStyle"] = btnSaveStyle;
 
-            var currentButton = new Button 
-            { 
-                Text = "读取当前文档样式", 
-                Name = "btnCurrentStyle", 
-                Width = 130, 
-                Height = 35,
-                Margin = new Padding(5),
-                Font = new Font("微软雅黑", 9F, FontStyle.Bold),
-                BackColor = Color.FromArgb(52, 144, 220),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                FlatAppearance = { BorderSize = 0 },
-                Cursor = Cursors.Hand
-            };
-            _controls["btnCurrentStyle"] = currentButton;
-
-            var applyButton = new Button 
-            { 
-                Text = "应用", 
-                Name = "btnApply", 
-                Width = 80, 
-                Height = 35,
-                Margin = new Padding(5),
-                Font = new Font("微软雅黑", 9F, FontStyle.Bold),
+            // 应用样式按钮（最右下角）
+            var btnApplyStyle = new Button
+            {
+                Name = "btnApplyStyle",
+                Text = "应用样式",
+                Location = new Point(760, 15),
+                Size = new Size(100, 30),
+                Font = new Font("微软雅黑", 10F, FontStyle.Bold),
                 BackColor = Color.FromArgb(0, 120, 215),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                FlatAppearance = { BorderSize = 0 },
                 Cursor = Cursors.Hand
             };
-            _controls["btnApply"] = applyButton;
+            _controls["btnApplyStyle"] = btnApplyStyle;
 
-            var cancelButton = new Button 
-            { 
-                Text = "取消", 
-                Name = "btnCancel", 
-                Width = 80, 
-                Height = 35,
-                Margin = new Padding(5),
-                Font = new Font("微软雅黑", 9F, FontStyle.Bold),
-                BackColor = Color.FromArgb(196, 43, 28),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                FlatAppearance = { BorderSize = 0 },
-                Cursor = Cursors.Hand
-            };
-            _controls["btnCancel"] = cancelButton;
+            panel.Controls.Add(lblPreset);
+            panel.Controls.Add(cmbPresetStyle);
+            panel.Controls.Add(btnLoadStyle);
+            panel.Controls.Add(btnSaveStyle);
+            panel.Controls.Add(btnApplyStyle);
 
-            var flowLayoutPanel = new FlowLayoutPanel 
-            { 
-                Dock = DockStyle.Fill, 
-                FlowDirection = FlowDirection.RightToLeft,
-                Padding = new Padding(0, 10, 0, 0)
-            };
-            
-            flowLayoutPanel.Controls.Add(cancelButton);
-            flowLayoutPanel.Controls.Add(applyButton);
-            flowLayoutPanel.Controls.Add(currentButton);
-            flowLayoutPanel.Controls.Add(loadButton);
-            flowLayoutPanel.Controls.Add(saveButton);
-
-            buttonPanel.Controls.Add(flowLayoutPanel);
-            _form.Controls.Add(buttonPanel);
+            return panel;
         }
 
         /// <summary>
@@ -698,6 +710,205 @@ namespace WordMan_VSTO
         public Dictionary<string, Control> GetAllControls()
         {
             return _controls;
+        }
+
+        /// <summary>
+        /// 调用Word字体对话框
+        /// </summary>
+        public void ShowWordFontDialog()
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                if (app != null)
+                {
+                    // 使用Word的字体对话框
+                    app.Dialogs[Word.WdWordDialog.wdDialogFormatFont].Show();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"调用Word字体对话框失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
+        /// <summary>
+        /// 调用Word段落对话框
+        /// </summary>
+        public void ShowWordParagraphDialog()
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                if (app != null)
+                {
+                    // 使用Word的段落对话框
+                    app.Dialogs[Word.WdWordDialog.wdDialogFormatParagraph].Show();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"调用Word段落对话框失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 调用Word颜色对话框
+        /// </summary>
+        public Color ShowWordColorDialog(Color currentColor)
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                if (app != null)
+                {
+                    // 使用Word的颜色对话框
+                    var colorDialog = app.Dialogs[Word.WdWordDialog.wdDialogFormatFont];
+                    colorDialog.Show();
+                    // 这里需要根据实际Word API来获取选择的颜色
+                    return currentColor;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"调用Word颜色对话框失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return currentColor;
+        }
+
+        /// <summary>
+        /// 更新样式预览
+        /// </summary>
+        public void UpdateStylePreview()
+        {
+            try
+            {
+                var previewTextBox = GetControl<TextBox>("txtStylePreview");
+                if (previewTextBox == null) return;
+
+                // 获取当前字体设置
+                var chnFont = GetControl<ComboBox>("cmbChnFontName")?.Text ?? "仿宋";
+                var engFont = GetControl<ComboBox>("cmbEngFontName")?.Text ?? "Arial";
+                var fontSize = GetControl<ComboBox>("cmbFontSize")?.Text ?? "12";
+                var isBold = GetControl<CheckBox>("chkBold")?.Checked ?? false;
+                var isItalic = GetControl<CheckBox>("chkItalic")?.Checked ?? false;
+                var isUnderline = GetControl<CheckBox>("chkUnderline")?.Checked ?? false;
+
+                // 创建字体
+                var fontStyle = FontStyle.Regular;
+                if (isBold) fontStyle |= FontStyle.Bold;
+                if (isItalic) fontStyle |= FontStyle.Italic;
+                if (isUnderline) fontStyle |= FontStyle.Underline;
+
+                var font = new Font(chnFont, float.Parse(fontSize), fontStyle);
+                previewTextBox.Font = font;
+
+                // 更新预览文本
+                var alignment = GetControl<ComboBox>("cmbAlignment")?.Text ?? "左对齐";
+                var lineSpace = GetControl<ComboBox>("cmbLineSpace")?.Text ?? "单倍行距";
+                var firstIndent = GetControl<TextBox>("txtFirstIndent")?.Text ?? "2字符";
+                var spaceBefore = GetControl<TextBox>("txtSpaceBefore")?.Text ?? "0.00行";
+                var spaceAfter = GetControl<TextBox>("txtSpaceAfter")?.Text ?? "0.00行";
+
+                var previewText = $"字体：{chnFont} {fontSize}号\n" +
+                                $"格式：{(isBold ? "粗体 " : "")}{(isItalic ? "斜体 " : "")}{(isUnderline ? "下划线 " : "")}\n" +
+                                $"对齐：{alignment}\n" +
+                                $"行距：{lineSpace}\n" +
+                                $"缩进：{firstIndent}\n" +
+                                $"间距：段前{spaceBefore} 段后{spaceAfter}";
+
+                previewTextBox.Text = previewText;
+            }
+            catch (Exception ex)
+            {
+                // 预览更新失败时静默处理
+                System.Diagnostics.Debug.WriteLine($"更新样式预览失败：{ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 添加样式到列表
+        /// </summary>
+        public void AddStyleToList(string styleName)
+        {
+            try
+            {
+                var styleList = GetControl<ListBox>("lstStyleList");
+                if (styleList != null && !string.IsNullOrEmpty(styleName))
+                {
+                    if (!styleList.Items.Contains(styleName))
+                    {
+                        styleList.Items.Add(styleName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"添加样式失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 从列表中删除样式
+        /// </summary>
+        public void RemoveStyleFromList(string styleName)
+        {
+            try
+            {
+                var styleList = GetControl<ListBox>("lstStyleList");
+                if (styleList != null && !string.IsNullOrEmpty(styleName))
+                {
+                    styleList.Items.Remove(styleName);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"删除样式失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 获取当前选中的样式名称
+        /// </summary>
+        public string GetSelectedStyleName()
+        {
+            try
+            {
+                var styleList = GetControl<ListBox>("lstStyleList");
+                if (styleList != null && styleList.SelectedItem != null)
+                {
+                    return styleList.SelectedItem.ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"获取选中样式失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// 设置当前选中的样式
+        /// </summary>
+        public void SetSelectedStyle(string styleName)
+        {
+            try
+            {
+                var styleList = GetControl<ListBox>("lstStyleList");
+                if (styleList != null && !string.IsNullOrEmpty(styleName))
+                {
+                    var index = styleList.Items.IndexOf(styleName);
+                    if (index >= 0)
+                    {
+                        styleList.SelectedIndex = index;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"设置选中样式失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

@@ -74,28 +74,52 @@ namespace WordMan_VSTO
         private void BindEvents()
         {
             // 样式列表选择事件
-            var styleList = _uiDesigner.GetControl<DataGridView>("dgvStyleList");
+            var styleList = _uiDesigner.GetControl<ListBox>("lstStyleList");
             if (styleList != null)
-                styleList.SelectionChanged += StyleList_SelectionChanged;
+                styleList.SelectedIndexChanged += StyleList_SelectedIndexChanged;
 
-            // 应用设置按钮事件
-            var setStylesBtn = _uiDesigner.GetControl<Button>("btnSetStyles");
-            if (setStylesBtn != null)
-                setStylesBtn.Click += ApplyButton_Click;
-
-            // 按钮事件
-
-            var currentBtn = _uiDesigner.GetControl<Button>("btnCurrentStyle");
-            if (currentBtn != null)
-                currentBtn.Click += CurrentStyle_Click;
-
-            var applyBtn = _uiDesigner.GetControl<Button>("btnApply");
+            // 应用样式按钮事件
+            var applyBtn = _uiDesigner.GetControl<Button>("btnApplyStyle");
             if (applyBtn != null)
                 applyBtn.Click += ApplyButton_Click;
 
-            var cancelBtn = _uiDesigner.GetControl<Button>("btnCancel");
-            if (cancelBtn != null)
-                cancelBtn.Click += CancelButton_Click;
+            // 读取样式按钮事件
+            var loadBtn = _uiDesigner.GetControl<Button>("btnLoadStyle");
+            if (loadBtn != null)
+                loadBtn.Click += LoadStyle_Click;
+
+            // 保存样式按钮事件
+            var saveBtn = _uiDesigner.GetControl<Button>("btnSaveStyle");
+            if (saveBtn != null)
+                saveBtn.Click += SaveStyle_Click;
+
+            // 添加样式按钮事件
+            var addBtn = _uiDesigner.GetControl<Button>("btnAddStyle");
+            if (addBtn != null)
+                addBtn.Click += AddStyle_Click;
+
+            // 删除样式按钮事件
+            var delBtn = _uiDesigner.GetControl<Button>("btnDeleteStyle");
+            if (delBtn != null)
+                delBtn.Click += DeleteStyle_Click;
+
+            // 选择内置样式按钮事件
+            var selectBuiltInBtn = _uiDesigner.GetControl<Button>("btnSelectBuiltIn");
+            if (selectBuiltInBtn != null)
+                selectBuiltInBtn.Click += SelectBuiltInStyle_Click;
+
+            // 预设样式选择事件
+            var presetCmb = _uiDesigner.GetControl<ComboBox>("cmbPresetStyle");
+            if (presetCmb != null)
+                presetCmb.SelectedIndexChanged += PresetStyle_SelectedIndexChanged;
+
+            // 字体颜色按钮事件
+            var fontColorBtn = _uiDesigner.GetControl<Button>("btnFontColor");
+            if (fontColorBtn != null)
+                fontColorBtn.Click += FontColor_Click;
+
+            // 绑定控件值变化事件
+            BindControlValueChangedEvents();
         }
 
         // 初始化默认样式（按照GB/T 9704-2012标准）
@@ -911,5 +935,362 @@ namespace WordMan_VSTO
                     return WdParagraphAlignment.wdAlignParagraphLeft;
             }
         }
+
+        #region 缺失的事件处理方法
+
+        /// <summary>
+        /// 样式列表选择变化事件
+        /// </summary>
+        private void StyleList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var listBox = sender as ListBox;
+            if (listBox == null || listBox.SelectedIndex == -1) return;
+
+            var selectedStyle = listBox.SelectedItem?.ToString();
+            if (string.IsNullOrEmpty(selectedStyle)) return;
+
+            // 根据选择的样式加载对应设置
+            switch (selectedStyle)
+            {
+                case "正文（无缩进）":
+                    LoadBodyTextSettings(false);
+                    break;
+                case "正文（缩进）":
+                    LoadBodyTextSettings(true);
+                    break;
+                case "一级标题":
+                    LoadTitleSettings("Title1", Title1Settings);
+                    break;
+                case "二级标题":
+                    LoadTitleSettings("Title2", Title2Settings);
+                    break;
+                case "三级标题":
+                    LoadTitleSettings("Title3", Title3Settings);
+                    break;
+                case "四级标题":
+                    LoadTitleSettings("Title4", Title4Settings);
+                    break;
+                case "五级标题":
+                    LoadTitleSettings("Title5", Title5Settings);
+                    break;
+                case "六级标题":
+                    LoadTitleSettings("Title6", Title6Settings);
+                    break;
+                case "表中文本":
+                    LoadTableTextSettings();
+                    break;
+                case "题注":
+                    LoadCaptionSettings();
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 加载样式按钮点击事件
+        /// </summary>
+        private void LoadStyle_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                var doc = app.ActiveDocument;
+                if (doc == null)
+                {
+                    MessageBox.Show("请先打开一个Word文档！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // 从当前文档加载样式
+                Title1Settings = GetStyleFromDocument(doc.Styles["标题 1"]);
+                Title2Settings = GetStyleFromDocument(doc.Styles["标题 2"]);
+                Title3Settings = GetStyleFromDocument(doc.Styles["标题 3"]);
+                Title4Settings = GetStyleFromDocument(doc.Styles["标题 4"]);
+                Title5Settings = GetStyleFromDocument(doc.Styles["标题 5"]);
+                Title6Settings = GetStyleFromDocument(doc.Styles["标题 6"]);
+                BodyTextSettings = GetStyleFromDocument(doc.Styles["正文"]);
+
+                // 加载页面设置
+                LoadPageSettingsFromDocument(doc);
+
+                LoadSettings();
+                MessageBox.Show("已加载当前文档样式！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"加载样式时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 保存样式按钮点击事件
+        /// </summary>
+        private void SaveStyle_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // 获取当前设置
+                var currentStyle = GetCurrentStyleName();
+                
+                // 保存标题样式
+                Title1Settings = GetTitleSettings();
+                Title2Settings = GetTitleSettings();
+                Title3Settings = GetTitleSettings();
+                Title4Settings = GetTitleSettings();
+                Title5Settings = GetTitleSettings();
+                Title6Settings = GetTitleSettings();
+
+                // 保存正文样式
+                BodyTextSettings = GetBodyTextSettings();
+                BodyTextIndentSettings = GetBodyTextIndentSettings();
+
+                // 保存表中文本和题注样式
+                TableTextSettings = GetTableTextSettings();
+                CaptionSettings = GetCaptionSettings();
+
+                // 这里可以添加保存到文件的逻辑
+                MessageBox.Show($"样式「{currentStyle}」已保存！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"保存样式时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 添加样式按钮点击事件
+        /// </summary>
+        private void AddStyle_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // 获取新样式名称
+                string newStyleName = Microsoft.VisualBasic.Interaction.InputBox(
+                    "请输入新样式名称：", "添加样式", "新样式", -1, -1);
+
+                if (string.IsNullOrEmpty(newStyleName))
+                    return;
+
+                // 检查样式名称是否已存在
+                if (_styleNames.Contains(newStyleName))
+                {
+                    MessageBox.Show("样式名称已存在！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // 添加到样式列表
+                _styleNames.Add(newStyleName);
+                
+                // 刷新样式列表显示
+                var styleList = _uiDesigner.GetControl<ListBox>("lstStyleList");
+                if (styleList != null)
+                {
+                    styleList.Items.Add(newStyleName);
+                }
+
+                MessageBox.Show($"样式「{newStyleName}」已添加！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"添加样式时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 删除样式按钮点击事件
+        /// </summary>
+        private void DeleteStyle_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var styleList = _uiDesigner.GetControl<ListBox>("lstStyleList");
+                if (styleList == null || styleList.SelectedIndex == -1)
+                {
+                    MessageBox.Show("请先选择要删除的样式！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                var selectedStyle = styleList.SelectedItem?.ToString();
+                if (string.IsNullOrEmpty(selectedStyle))
+                    return;
+
+                // 确认删除
+                var result = MessageBox.Show($"确定要删除样式「{selectedStyle}」吗？", "确认删除", 
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                
+                if (result == DialogResult.Yes)
+                {
+                    // 从列表中移除
+                    _styleNames.Remove(selectedStyle);
+                    styleList.Items.Remove(selectedStyle);
+                    
+                    MessageBox.Show($"样式「{selectedStyle}」已删除！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"删除样式时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 选择内置样式按钮点击事件
+        /// </summary>
+        private void SelectBuiltInStyle_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                var doc = app.ActiveDocument;
+                if (doc == null)
+                {
+                    MessageBox.Show("请先打开一个Word文档！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // 显示内置样式选择对话框
+                var styleNames = new List<string>();
+                foreach (Style style in doc.Styles)
+                {
+                    if (style.BuiltIn)
+                    {
+                        styleNames.Add(style.NameLocal);
+                    }
+                }
+
+                if (styleNames.Count == 0)
+                {
+                    MessageBox.Show("未找到内置样式！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                // 这里可以添加样式选择对话框的逻辑
+                MessageBox.Show($"找到 {styleNames.Count} 个内置样式", "信息", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"选择内置样式时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 字体颜色按钮点击事件
+        /// </summary>
+        private void FontColor_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (var colorDialog = new ColorDialog())
+                {
+                    colorDialog.Color = Color.Black; // 默认颜色
+                    colorDialog.FullOpen = true;
+                    
+                    if (colorDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        // 更新字体颜色显示
+                        var fontColorBtn = sender as Button;
+                        if (fontColorBtn != null)
+                        {
+                            fontColorBtn.BackColor = colorDialog.Color;
+                            fontColorBtn.Text = $"颜色: {colorDialog.Color.Name}";
+                        }
+                        
+                        MessageBox.Show($"已选择颜色：{colorDialog.Color.Name}", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"选择字体颜色时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 绑定控件值变化事件
+        /// </summary>
+        private void BindControlValueChangedEvents()
+        {
+            try
+            {
+                // 绑定字体相关控件
+                var cmbEngFont = _uiDesigner.GetControl<ComboBox>("cmbEngFontName");
+                if (cmbEngFont != null)
+                    cmbEngFont.SelectedIndexChanged += ControlValueChanged;
+
+                var cmbChnFont = _uiDesigner.GetControl<ComboBox>("cmbChnFontName");
+                if (cmbChnFont != null)
+                    cmbChnFont.SelectedIndexChanged += ControlValueChanged;
+
+                var cmbFontSize = _uiDesigner.GetControl<ComboBox>("cmbFontSize");
+                if (cmbFontSize != null)
+                    cmbFontSize.SelectedIndexChanged += ControlValueChanged;
+
+                // 绑定对齐方式控件
+                var cmbAlign = _uiDesigner.GetControl<ComboBox>("cmbHAlignment");
+                if (cmbAlign != null)
+                    cmbAlign.SelectedIndexChanged += ControlValueChanged;
+
+                // 绑定间距控件
+                var cmbSpaceBefore = _uiDesigner.GetControl<ComboBox>("cmbSpaceBefore");
+                if (cmbSpaceBefore != null)
+                    cmbSpaceBefore.SelectedIndexChanged += ControlValueChanged;
+
+                var cmbSpaceAfter = _uiDesigner.GetControl<ComboBox>("cmbSpaceAfter");
+                if (cmbSpaceAfter != null)
+                    cmbSpaceAfter.SelectedIndexChanged += ControlValueChanged;
+
+                var cmbLineSpace = _uiDesigner.GetControl<ComboBox>("cmbLineSpace");
+                if (cmbLineSpace != null)
+                    cmbLineSpace.SelectedIndexChanged += ControlValueChanged;
+
+                // 绑定缩进控件
+                var txtLeftIndent = _uiDesigner.GetControl<TextBox>("txtLeftIndent");
+                if (txtLeftIndent != null)
+                    txtLeftIndent.TextChanged += ControlValueChanged;
+
+                var txtRightIndent = _uiDesigner.GetControl<TextBox>("txtRightIndent");
+                if (txtRightIndent != null)
+                    txtRightIndent.TextChanged += ControlValueChanged;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"绑定控件事件时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 控件值变化事件处理
+        /// </summary>
+        private void ControlValueChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                // 这里可以添加实时预览逻辑
+                // 当用户修改样式设置时，可以实时更新预览
+                UpdateStylePreview();
+            }
+            catch (Exception ex)
+            {
+                // 静默处理，避免频繁弹窗
+                System.Diagnostics.Debug.WriteLine($"控件值变化处理出错：{ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 更新样式预览
+        /// </summary>
+        private void UpdateStylePreview()
+        {
+            try
+            {
+                // 这里可以添加样式预览逻辑
+                // 例如：更新预览区域的显示
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"更新样式预览出错：{ex.Message}");
+            }
+        }
+
+        #endregion
     }
 }

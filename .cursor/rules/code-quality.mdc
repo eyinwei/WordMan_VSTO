@@ -225,6 +225,44 @@ WordMan_VSTO/
     └── code-quality.mdc
 ```
 
+## 命名空间管理
+
+### 避免类型歧义
+```csharp
+// ❌ 错误 - 歧义引用
+Point location = new Point(100, 200);
+Font font = new Font("Arial", 12);
+Color color = Color.Red;
+
+// ✅ 正确 - 使用别名
+using Font = System.Drawing.Font;
+using Point = System.Drawing.Point;
+using Color = System.Drawing.Color;
+
+Point location = new Point(100, 200);
+Font font = new Font("Arial", 12);
+Color color = Color.Red;
+
+// ✅ 正确 - 完全限定名称
+System.Drawing.Point location = new System.Drawing.Point(100, 200);
+Microsoft.Office.Interop.Word.Point wordPoint = new Microsoft.Office.Interop.Word.Point(100, 200);
+```
+
+### using 语句组织
+```csharp
+// ✅ 正确 - 按功能分组
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+using Microsoft.Office.Interop.Word;
+
+// ❌ 错误 - 混乱的using语句
+using Microsoft.Office.Interop.Word;
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+```
+
 ## 检查清单
 
 在提交代码前，请确保：
@@ -239,3 +277,5 @@ WordMan_VSTO/
 8. ✅ 代码复用良好
 9. ✅ 测试友好
 10. ✅ 文件组织合理
+11. ✅ **避免类型歧义引用**
+12. ✅ **命名空间使用明确**

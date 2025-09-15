@@ -14,7 +14,7 @@ description: VSTO开发最佳实践和Word集成指南
 
 ## VSTO 开发规则
 
-### 1. 必须使用Word API
+### 1. 优先使用Word API
 ```csharp
 // ✅ 正确 - 通过WordAPIHelper获取
 var app = WordAPIHelper.GetWordApplication();
@@ -24,7 +24,7 @@ var doc = WordAPIHelper.GetActiveDocument();
 var app = Globals.ThisAddIn.Application; // 应该通过WordAPIHelper
 ```
 
-### 2. 自定义控件必须集成Word API
+### 2. 自定义控件优先集成Word API
 参考 [MultiLevelList.cs](mdc:MultiLevelList.cs) 中的 `NumericUpDownWithUnit`：
 ```csharp
 public class NumericUpDownWithUnit : NumericUpDown
@@ -100,9 +100,26 @@ catch (Exception ex)
 3. **测试阶段**: 确保Word API调用正常
 4. **优化阶段**: 使用WordAPIHelper统一管理
 
+### 6. 命名空间解析规则
+```csharp
+// ✅ 正确 - 使用别名避免歧义
+using Font = System.Drawing.Font;
+using Point = System.Drawing.Point;
+using Color = System.Drawing.Color;
+using Microsoft.Office.Interop.Word;
+
+// ❌ 错误 - 歧义引用
+Point location = new Point(100, 200); // 编译器不知道是哪个Point
+
+// ✅ 正确 - 明确指定命名空间
+System.Drawing.Point location = new System.Drawing.Point(100, 200);
+Microsoft.Office.Interop.Word.Point wordPoint = new Microsoft.Office.Interop.Word.Point(100, 200);
+```
+
 ## 注意事项
 
 - 所有Word相关操作必须通过Word API
 - 自定义控件必须支持Word API集成
 - 设计器文件必须与代码保持同步
 - 单位转换必须使用Word API确保准确性
+- **必须避免类型歧义引用，明确指定命名空间**

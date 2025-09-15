@@ -1,0 +1,144 @@
+---
+alwaysApply: true
+description: 命名空间解析和类型歧义避免规则
+---
+
+# 命名空间解析和类型歧义避免规则
+
+## 核心原则
+
+**避免类型歧义引用，明确指定命名空间，确保代码编译正确**
+
+## 常见歧义类型
+
+### 1. Point 类型歧义
+```csharp
+// ❌ 错误 - 歧义引用
+Point location = new Point(100, 200); // 编译器不知道是哪个Point
+
+// ✅ 正确 - 明确指定命名空间
+System.Drawing.Point location = new System.Drawing.Point(100, 200);
+Microsoft.Office.Interop.Word.Point wordPoint = new Microsoft.Office.Interop.Word.Point(100, 200);
+```
+
+### 2. Font 类型歧义
+```csharp
+// ❌ 错误 - 歧义引用
+Font font = new Font("Arial", 12);
+
+// ✅ 正确 - 明确指定命名空间
+System.Drawing.Font font = new System.Drawing.Font("Arial", 12);
+```
+
+### 3. Color 类型歧义
+```csharp
+// ❌ 错误 - 歧义引用
+Color color = Color.Red;
+
+// ✅ 正确 - 明确指定命名空间
+System.Drawing.Color color = System.Drawing.Color.Red;
+```
+
+## 推荐的解决方案
+
+### 1. 使用 using 别名
+```csharp
+// 在文件顶部添加别名
+using Font = System.Drawing.Font;
+using Point = System.Drawing.Point;
+using Color = System.Drawing.Color;
+
+// 然后可以直接使用
+Point location = new Point(100, 200);
+Font font = new Font("Arial", 12);
+Color color = Color.Red;
+```
+
+### 2. 完全限定名称
+```csharp
+// 对于不常用的类型，使用完全限定名称
+var wordApp = new Microsoft.Office.Interop.Word.Application();
+var wordPoint = new Microsoft.Office.Interop.Word.Point(100, 200);
+```
+
+### 3. 命名空间组织
+```csharp
+// 按功能组织 using 语句
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+using Microsoft.Office.Interop.Word;
+```
+
+## 文件特定规则
+
+### CustomControls.cs
+```csharp
+// 必须使用别名避免歧义
+using Font = System.Drawing.Font;
+using Point = System.Drawing.Point;
+using Color = System.Drawing.Color;
+using Microsoft.Office.Interop.Word;
+```
+
+### MultiLevelList.cs
+```csharp
+// 必须使用别名避免歧义
+using Font = System.Drawing.Font;
+using Point = System.Drawing.Point;
+using Microsoft.Office.Interop.Word;
+```
+
+### MultiLevelList.Designer.cs
+```csharp
+// 必须使用别名避免歧义
+using System.Drawing;
+using Microsoft.Office.Interop.Word;
+```
+
+## 检查清单
+
+在编写代码时，请确保：
+
+1. ✅ 所有类型引用都是明确的
+2. ✅ 使用 using 别名简化常用类型
+3. ✅ 对于不常用类型使用完全限定名称
+4. ✅ 编译时没有歧义引用错误
+5. ✅ 代码可读性和维护性良好
+
+## 错误示例和修复
+
+### 错误示例
+```csharp
+// 编译错误：CS0104
+Point location = new Point(100, 200);
+Font font = new Font("Arial", 12);
+Color color = Color.Red;
+```
+
+### 修复方案
+```csharp
+// 方案1：使用别名
+using Font = System.Drawing.Font;
+using Point = System.Drawing.Point;
+using Color = System.Drawing.Color;
+
+Point location = new Point(100, 200);
+Font font = new Font("Arial", 12);
+Color color = Color.Red;
+
+// 方案2：完全限定名称
+System.Drawing.Point location = new System.Drawing.Point(100, 200);
+System.Drawing.Font font = new System.Drawing.Font("Arial", 12);
+System.Drawing.Color color = System.Drawing.Color.Red;
+```
+
+## 最佳实践
+
+1. **优先使用别名** - 对于常用类型，使用 using 别名简化代码
+2. **明确命名空间** - 对于不常用类型，使用完全限定名称
+3. **保持一致性** - 在整个项目中保持相同的命名空间使用方式
+4. **及时修复** - 发现歧义引用时立即修复，避免累积问题
+5. **代码审查** - 在代码审查时检查命名空间使用是否正确
+
+**记住：明确的类型引用是代码质量和可维护性的基础！**

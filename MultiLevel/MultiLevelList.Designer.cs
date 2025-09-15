@@ -1,4 +1,6 @@
-﻿namespace WordMan_VSTO
+﻿using System.Drawing;
+
+namespace WordMan_VSTO
 {
     partial class MultiLevelList
     {
@@ -30,16 +32,18 @@
         {
             this.mainPanel = new System.Windows.Forms.Panel();
             this.leftPanel = new System.Windows.Forms.Panel();
-            this.btnSetMultiLevelList = new System.Windows.Forms.Button();
-            this.btnClose = new System.Windows.Forms.Button();
-            this.btnLoadCurrentList = new System.Windows.Forms.Button();
-            this.btnSetLevelStyle = new System.Windows.Forms.Button();
+            this.btnImport = new StandardButton(StandardButton.ButtonType.Small, "导入", new Size(50, 35), new Point(200, 415));
+            this.btnExport = new StandardButton(StandardButton.ButtonType.Small, "导出", new Size(50, 35), new Point(255, 415));            
+            this.btnSetLevelStyle = new StandardButton(StandardButton.ButtonType.Secondary, "设置每级样式", new Size(110, 35), new Point(340, 415));
+            this.btnLoadCurrentList = new StandardButton(StandardButton.ButtonType.Secondary, "载入当前列表", new Size(110, 35), new Point(470, 415));
+            this.btnSetMultiLevelList = new StandardButton(StandardButton.ButtonType.Primary, "应用", new Size(110, 35), new Point(600, 415));
+            this.btnClose = new StandardButton(StandardButton.ButtonType.Secondary, "关闭", new Size(110, 35), new Point(730, 415));
             this.cmbLevelCount = new System.Windows.Forms.ComboBox();
             this.lblLevelCount = new System.Windows.Forms.Label();
             this.levelsScrollPanel = new System.Windows.Forms.Panel();
             this.levelsContainer = new System.Windows.Forms.Panel();
             this.rightPanel = new System.Windows.Forms.Panel();
-            this.btnApplySettings = new System.Windows.Forms.Button();
+            this.btnApplySettings = new StandardButton(StandardButton.ButtonType.Secondary, "应用以上设置", new Size(130, 35), new Point(100, 350));
             this.quickSettingsPanel = new System.Windows.Forms.Panel();
             this.linkStyleGroupBox = new System.Windows.Forms.GroupBox();
             this.chkUnlinkTitles = new System.Windows.Forms.CheckBox();
@@ -61,6 +65,7 @@
             this.lblSection2 = new System.Windows.Forms.Label();
             this.lblSection3 = new System.Windows.Forms.Label();
             this.lblNumberIndent = new System.Windows.Forms.Label();
+
             
             // 设计器友好的静态控件初始化
             this.sampleLevelPanel = new System.Windows.Forms.Panel();
@@ -74,11 +79,11 @@
             this.cmbSampleLinkedStyle = new System.Windows.Forms.ComboBox();
             
             // 自定义控件 - 使用Word API进行单位转换
-            this.numericUpDownWithUnit1 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, NumericUpDownWithUnit.UnitType.Centimeters);
-            this.numericUpDownWithUnit2 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, NumericUpDownWithUnit.UnitType.Centimeters);
-            this.numericUpDownWithUnit3 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, NumericUpDownWithUnit.UnitType.Centimeters);
-            this.numericUpDownWithUnit4 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, NumericUpDownWithUnit.UnitType.Centimeters);
-            this.numericUpDownWithUnit5 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, NumericUpDownWithUnit.UnitType.Centimeters);
+            this.numericUpDownWithUnit1 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, "厘米");
+            this.numericUpDownWithUnit2 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, "厘米");
+            this.numericUpDownWithUnit3 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, "厘米");
+            this.numericUpDownWithUnit4 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, "厘米");
+            this.numericUpDownWithUnit5 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, "厘米");
             this.mainPanel.SuspendLayout();
             this.leftPanel.SuspendLayout();
             this.levelsScrollPanel.SuspendLayout();
@@ -109,6 +114,8 @@
             this.leftPanel.BackColor = System.Drawing.Color.Transparent;
             this.leftPanel.Controls.Add(this.btnSetMultiLevelList);
             this.leftPanel.Controls.Add(this.btnClose);
+            this.leftPanel.Controls.Add(this.btnImport);
+            this.leftPanel.Controls.Add(this.btnExport);
             this.leftPanel.Controls.Add(this.btnLoadCurrentList);
             this.leftPanel.Controls.Add(this.btnSetLevelStyle);
             this.leftPanel.Controls.Add(this.cmbLevelCount);
@@ -124,68 +131,40 @@
             // 
             // btnSetMultiLevelList
             // 
-            this.btnSetMultiLevelList.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
-            this.btnSetMultiLevelList.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
-            this.btnSetMultiLevelList.FlatAppearance.BorderSize = 1;
-            this.btnSetMultiLevelList.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSetMultiLevelList.Font = new System.Drawing.Font("Microsoft YaHei", 10F, System.Drawing.FontStyle.Bold);
-            this.btnSetMultiLevelList.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
-            this.btnSetMultiLevelList.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnSetMultiLevelList.Location = new System.Drawing.Point(540, 415);
             this.btnSetMultiLevelList.Name = "btnSetMultiLevelList";
-            this.btnSetMultiLevelList.Size = new System.Drawing.Size(110, 35);
             this.btnSetMultiLevelList.TabIndex = 4;
-            this.btnSetMultiLevelList.Text = "应用";
-            this.btnSetMultiLevelList.UseVisualStyleBackColor = false;
+            this.btnSetMultiLevelList.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             // 
             // btnClose
             // 
-            this.btnClose.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
-            this.btnClose.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
-            this.btnClose.FlatAppearance.BorderSize = 1;
-            this.btnClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnClose.Font = new System.Drawing.Font("Microsoft YaHei", 10F, System.Drawing.FontStyle.Bold);
-            this.btnClose.ForeColor = System.Drawing.Color.Black;
-            this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnClose.Location = new System.Drawing.Point(660, 415);
             this.btnClose.Name = "btnClose";
-            this.btnClose.Size = new System.Drawing.Size(110, 35);
             this.btnClose.TabIndex = 5;
-            this.btnClose.Text = "关闭";
-            this.btnClose.UseVisualStyleBackColor = false;
+            this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
+            // 
+            // btnImport
+            // 
+            this.btnImport.Name = "btnImport";
+            this.btnImport.TabIndex = 6;
+            this.btnImport.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            // 
+            // btnExport
+            // 
+            this.btnExport.Name = "btnExport";
+            this.btnExport.TabIndex = 7;
+            this.btnExport.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             // 
             // btnLoadCurrentList
             // 
-            this.btnLoadCurrentList.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
-            this.btnLoadCurrentList.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
-            this.btnLoadCurrentList.FlatAppearance.BorderSize = 1;
-            this.btnLoadCurrentList.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnLoadCurrentList.Font = new System.Drawing.Font("Microsoft YaHei", 10F, System.Drawing.FontStyle.Bold);
-            this.btnLoadCurrentList.ForeColor = System.Drawing.Color.Black;
-            this.btnLoadCurrentList.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnLoadCurrentList.Location = new System.Drawing.Point(420, 415);
             this.btnLoadCurrentList.Name = "btnLoadCurrentList";
-            this.btnLoadCurrentList.Size = new System.Drawing.Size(110, 35);
             this.btnLoadCurrentList.TabIndex = 3;
-            this.btnLoadCurrentList.Text = "载入当前列表";
-            this.btnLoadCurrentList.UseVisualStyleBackColor = false;
+            this.btnLoadCurrentList.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             // 
             // btnSetLevelStyle
             // 
-            this.btnSetLevelStyle.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
-            this.btnSetLevelStyle.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
-            this.btnSetLevelStyle.FlatAppearance.BorderSize = 1;
-            this.btnSetLevelStyle.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSetLevelStyle.Font = new System.Drawing.Font("Microsoft YaHei", 10F, System.Drawing.FontStyle.Bold);
-            this.btnSetLevelStyle.ForeColor = System.Drawing.Color.Black;
-            this.btnSetLevelStyle.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnSetLevelStyle.Location = new System.Drawing.Point(300, 415);
             this.btnSetLevelStyle.Name = "btnSetLevelStyle";
-            this.btnSetLevelStyle.Size = new System.Drawing.Size(110, 35);
             this.btnSetLevelStyle.TabIndex = 2;
-            this.btnSetLevelStyle.Text = "设置每级样式";
-            this.btnSetLevelStyle.UseVisualStyleBackColor = false;
+            this.btnSetLevelStyle.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             // 
             // cmbLevelCount
             // 
@@ -259,19 +238,9 @@
             // 
             // btnApplySettings
             // 
-            this.btnApplySettings.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
-            this.btnApplySettings.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
-            this.btnApplySettings.FlatAppearance.BorderSize = 1;
-            this.btnApplySettings.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnApplySettings.Font = new System.Drawing.Font("Microsoft YaHei", 10F, System.Drawing.FontStyle.Bold);
-            this.btnApplySettings.ForeColor = System.Drawing.Color.Black;
-            this.btnApplySettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnApplySettings.Location = new System.Drawing.Point(100, 380);
             this.btnApplySettings.Name = "btnApplySettings";
-            this.btnApplySettings.Size = new System.Drawing.Size(130, 35);
             this.btnApplySettings.TabIndex = 0;
-            this.btnApplySettings.Text = "应用以上设置";
-            this.btnApplySettings.UseVisualStyleBackColor = false;
+            this.btnApplySettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             // 
             // quickSettingsPanel
             // 
@@ -731,16 +700,16 @@
 
         private System.Windows.Forms.Panel mainPanel;
         private System.Windows.Forms.Panel leftPanel;
-        private System.Windows.Forms.Button btnSetMultiLevelList;
-        private System.Windows.Forms.Button btnClose;
-        private System.Windows.Forms.Button btnLoadCurrentList;
-        private System.Windows.Forms.Button btnSetLevelStyle;
+        private StandardButton btnSetMultiLevelList;
+        private StandardButton btnClose;
+        private StandardButton btnLoadCurrentList;
+        private StandardButton btnSetLevelStyle;
         private System.Windows.Forms.ComboBox cmbLevelCount;
         private System.Windows.Forms.Label lblLevelCount;
         private System.Windows.Forms.Panel levelsScrollPanel;
         private System.Windows.Forms.Panel levelsContainer;
         private System.Windows.Forms.Panel rightPanel;
-        private System.Windows.Forms.Button btnApplySettings;
+        private StandardButton btnApplySettings;
         private System.Windows.Forms.Panel quickSettingsPanel;
         private System.Windows.Forms.GroupBox linkStyleGroupBox;
         private System.Windows.Forms.CheckBox chkUnlinkTitles;
@@ -762,6 +731,8 @@
         private System.Windows.Forms.Label lblSection2;
         private System.Windows.Forms.Label lblSection3;
         private System.Windows.Forms.Label lblNumberIndent;
+        private StandardButton btnImport;
+        private StandardButton btnExport;
         
         // 设计器友好的静态控件 - 用于示例级别
         private System.Windows.Forms.Panel sampleLevelPanel;

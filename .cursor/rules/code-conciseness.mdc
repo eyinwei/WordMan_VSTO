@@ -1,0 +1,269 @@
+---
+alwaysApply: true
+description: 代码生成以简洁为主，不需要额外的调试、测试代码，直接实现功能
+---
+
+# 代码简洁性原则
+
+## 核心原则
+
+**代码生成以简洁为主，直接实现功能，避免冗余代码**
+
+## 代码生成标准
+
+### 1. 直接实现功能
+```csharp
+// ✅ 正确 - 直接实现功能
+public static List<string> GetSystemFonts()
+{
+    var app = WordAPIHelper.GetWordApplication();
+    var fonts = new List<string>();
+    foreach (Font font in app.FontNames)
+    {
+        fonts.Add(font.Name);
+    }
+    return fonts;
+}
+
+// ❌ 错误 - 包含调试代码
+public static List<string> GetSystemFonts()
+{
+    try
+    {
+        var app = WordAPIHelper.GetWordApplication();
+        var fonts = new List<string>();
+        foreach (Font font in app.FontNames)
+        {
+            fonts.Add(font.Name);
+            System.Diagnostics.Debug.WriteLine($"添加字体: {font.Name}"); // 不需要
+        }
+        return fonts;
+    }
+    catch (Exception ex)
+    {
+        System.Diagnostics.Debug.WriteLine($"获取字体失败: {ex.Message}"); // 不需要
+        return new List<string>();
+    }
+}
+```
+
+### 2. 避免测试代码
+```csharp
+// ✅ 正确 - 直接实现
+public static void ShowWordFontDialog()
+{
+    var app = WordAPIHelper.GetWordApplication();
+    app.Dialogs[WdWordDialog.wdDialogFormatFont].Show();
+}
+
+// ❌ 错误 - 包含测试代码
+public static void ShowWordFontDialog()
+{
+    var app = WordAPIHelper.GetWordApplication();
+    app.Dialogs[WdWordDialog.wdDialogFormatFont].Show();
+    
+    // 测试代码 - 不需要
+    MessageBox.Show("字体对话框已显示");
+    System.Diagnostics.Debug.WriteLine("字体对话框调用完成");
+}
+```
+
+### 3. 简化异常处理
+```csharp
+// ✅ 正确 - 简洁的异常处理
+public static float ConvertFontSize(string fontSizeText)
+{
+    try
+    {
+        return float.Parse(fontSizeText);
+    }
+    catch
+    {
+        return 12f;
+    }
+}
+
+// ❌ 错误 - 冗余的异常处理
+public static float ConvertFontSize(string fontSizeText)
+{
+    try
+    {
+        var result = float.Parse(fontSizeText);
+        System.Diagnostics.Debug.WriteLine($"字体大小转换成功: {result}");
+        return result;
+    }
+    catch (FormatException ex)
+    {
+        System.Diagnostics.Debug.WriteLine($"格式错误: {ex.Message}");
+        return 12f;
+    }
+    catch (Exception ex)
+    {
+        System.Diagnostics.Debug.WriteLine($"未知错误: {ex.Message}");
+        return 12f;
+    }
+}
+```
+
+### 4. 直接返回结果
+```csharp
+// ✅ 正确 - 直接返回
+public static string DetectUnitFromNumber(double number, string[] validUnits)
+{
+    if (number > 0 && number < 10) return "字符";
+    if (number >= 10 && number < 100) return "磅";
+    return "厘米";
+}
+
+// ❌ 错误 - 冗余的中间变量
+public static string DetectUnitFromNumber(double number, string[] validUnits)
+{
+    string result = "";
+    bool isCharacter = number > 0 && number < 10;
+    bool isPoint = number >= 10 && number < 100;
+    
+    if (isCharacter)
+    {
+        result = "字符";
+        System.Diagnostics.Debug.WriteLine("检测到字符单位");
+    }
+    else if (isPoint)
+    {
+        result = "磅";
+        System.Diagnostics.Debug.WriteLine("检测到磅单位");
+    }
+    else
+    {
+        result = "厘米";
+        System.Diagnostics.Debug.WriteLine("检测到厘米单位");
+    }
+    
+    return result;
+}
+```
+
+## 禁止的代码模式
+
+### 1. 调试输出
+```csharp
+// ❌ 禁止 - 调试输出
+System.Diagnostics.Debug.WriteLine("...");
+Console.WriteLine("...");
+MessageBox.Show("调试信息");
+```
+
+### 2. 测试验证
+```csharp
+// ❌ 禁止 - 测试验证
+if (result != null)
+{
+    MessageBox.Show("测试通过");
+}
+```
+
+### 3. 冗余注释
+```csharp
+// ❌ 禁止 - 冗余注释
+// 这是一个方法
+// 它返回一个字符串
+// 用于显示信息
+public string GetInfo() { return "info"; }
+```
+
+### 4. 临时变量
+```csharp
+// ❌ 禁止 - 不必要的临时变量
+var temp = GetValue();
+var result = temp;
+return result;
+
+// ✅ 正确 - 直接返回
+return GetValue();
+```
+
+## 推荐模式
+
+### 1. 一行实现
+```csharp
+// ✅ 推荐 - 一行实现
+public static bool IsValid(string value) => !string.IsNullOrEmpty(value);
+public static string GetDefaultFont() => "宋体";
+public static int GetDefaultSize() => 12;
+```
+
+### 2. 直接调用
+```csharp
+// ✅ 推荐 - 直接调用
+public static void ShowDialog() => WordAPIHelper.ShowWordFontDialog();
+public static List<string> GetFonts() => WordAPIHelper.GetSystemFonts();
+```
+
+### 3. 简洁的条件判断
+```csharp
+// ✅ 推荐 - 简洁条件
+public static string GetUnit(double value) => 
+    value < 10 ? "字符" : value < 100 ? "磅" : "厘米";
+```
+
+## 代码生成检查清单
+
+在生成代码时，确保：
+
+1. ✅ 直接实现功能，无调试代码
+2. ✅ 无测试验证代码
+3. ✅ 无冗余注释
+4. ✅ 无临时变量
+5. ✅ 异常处理简洁
+6. ✅ 直接返回结果
+7. ✅ 避免中间步骤
+8. ✅ 代码可读性良好
+
+## 示例对比
+
+### 错误示例
+```csharp
+public static void CreateStylePreview(TextBox textBox, string font, string size)
+{
+    try
+    {
+        // 验证参数
+        if (textBox == null)
+        {
+            MessageBox.Show("文本框不能为空");
+            return;
+        }
+        
+        // 获取字体大小
+        var fontSize = float.Parse(size);
+        System.Diagnostics.Debug.WriteLine($"字体大小: {fontSize}");
+        
+        // 设置字体
+        textBox.Font = new Font(font, fontSize);
+        System.Diagnostics.Debug.WriteLine($"字体设置完成: {font}");
+        
+        // 设置文本
+        textBox.Text = "预览文本";
+        System.Diagnostics.Debug.WriteLine("预览文本设置完成");
+        
+        MessageBox.Show("样式预览创建成功");
+    }
+    catch (Exception ex)
+    {
+        System.Diagnostics.Debug.WriteLine($"错误: {ex.Message}");
+        MessageBox.Show($"创建失败: {ex.Message}");
+    }
+}
+```
+
+### 正确示例
+```csharp
+public static void CreateStylePreview(TextBox textBox, string font, string size)
+{
+    textBox.Font = new Font(font, float.Parse(size));
+    textBox.Text = "预览文本";
+}
+```
+
+---
+
+**记住：代码生成以简洁为主，直接实现功能，避免任何调试、测试或冗余代码！**

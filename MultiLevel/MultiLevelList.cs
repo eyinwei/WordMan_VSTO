@@ -1,598 +1,20 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Drawing.Drawing2D;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Microsoft.Office.Interop.Word;
 using Font = System.Drawing.Font;
 using Point = System.Drawing.Point;
+using Color = System.Drawing.Color;
 
 namespace WordMan_VSTO
 {
-    public class RoundedButton : Button
-    {
-        private int borderRadius = 8;
-        private bool isHovered = false;
 
-        public int BorderRadius
-        {
-            get { return borderRadius; }
-            set { borderRadius = value; this.Invalidate(); }
-        }
 
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            base.OnPaint(e);
-            GraphicsPath path = new GraphicsPath();
-            System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, this.Width - 1, this.Height - 1);
-            path = AddRoundedRectangle(rect, borderRadius);
-            this.Region = new Region(path);
-            
-            // 绘制轮廓线
-            Color borderColor = isHovered ? Color.FromArgb(100, 100, 100) : Color.FromArgb(200, 200, 200);
-            using (Pen borderPen = new Pen(borderColor, 1))
-            {
-                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                e.Graphics.DrawPath(borderPen, path);
-            }
-        }
 
-        protected override void OnMouseEnter(EventArgs e)
-        {
-            base.OnMouseEnter(e);
-            isHovered = true;
-            this.Invalidate();
-        }
-
-        protected override void OnMouseLeave(EventArgs e)
-        {
-            base.OnMouseLeave(e);
-            isHovered = false;
-            this.Invalidate();
-        }
-
-        private GraphicsPath AddRoundedRectangle(System.Drawing.Rectangle rect, int radius)
-        {
-            GraphicsPath path = new GraphicsPath();
-            int diameter = radius * 2;
-            path.AddArc(rect.X, rect.Y, diameter, diameter, 180, 90);
-            path.AddArc(rect.Right - diameter, rect.Y, diameter, diameter, 270, 90);
-            path.AddArc(rect.Right - diameter, rect.Bottom - diameter, diameter, diameter, 0, 90);
-            path.AddArc(rect.X, rect.Bottom - diameter, diameter, diameter, 90, 90);
-            path.CloseFigure();
-            return path;
-        }
-    }
-
-    public class StyledTextBox : TextBox
-    {
-        public StyledTextBox()
-        {
-            this.Font = new Font("Microsoft YaHei", 9F);
-            this.BackColor = Color.FromArgb(250, 250, 250); // 更浅的白灰色
-            this.BorderStyle = BorderStyle.FixedSingle;
-            this.Size = new Size(100, 25);
-        }
-    }
-
-    public class StyledComboBox : ComboBox
-    {
-        public StyledComboBox()
-        {
-            this.Font = new Font("Microsoft YaHei", 9F);
-            this.BackColor = Color.FromArgb(250, 250, 250); // 更浅的白灰色
-            this.DropDownStyle = ComboBoxStyle.DropDownList;
-            this.Size = new Size(100, 25);
-        }
-    }
-
-    public class NumericUpDownWithUnit : NumericUpDown
-    {
-        private string _label = "厘米";
-        private Label _unitLabel;
-        private Microsoft.Office.Interop.Word.Application _wordApp;
-        private UnitType _currentUnit = UnitType.Centimeters;
-
-        public enum UnitType
-        {
-            Characters,    // 字符
-            Centimeters,   // 厘米
-            Points         // 磅
-        }
-
-        public string Label
-        {
-            get { return _label; }
-            set
-            {
-                _label = value;
-                if (_unitLabel != null)
-                {
-                    _unitLabel.Text = value;
-                    _unitLabel.Visible = true;
-                    UpdateUnitLabelPosition();
-                }
-            }
-        }
-
-        public UnitType Unit
-        {
-            get { return _currentUnit; }
-            set
-            {
-                _currentUnit = value;
-                UpdateUnitLabel();
-            }
-        }
-
-        public string UnitText
-        {
-            get
-            {
-                switch (_currentUnit)
-                {
-                    case UnitType.Characters: return "字符";
-                    case UnitType.Centimeters: return "厘米";
-                    case UnitType.Points: return "磅";
-                    default: return "厘米";
-                }
-            }
-        }
-
-        // 使用Word API进行单位转换
-        public decimal ValueInCentimeters
-        {
-            get
-            {
-                switch (_currentUnit)
-                {
-                    case UnitType.Characters:
-                        return ConvertCharactersToCentimeters(Value);
-                    case UnitType.Centimeters:
-                        return Value;
-                    case UnitType.Points:
-                        return (decimal)_wordApp.PointsToCentimeters((float)Value);
-                    default:
-                        return Value;
-                }
-            }
-            set
-            {
-                switch (_currentUnit)
-                {
-                    case UnitType.Characters:
-                        Value = ConvertCentimetersToCharacters(value);
-                        break;
-                    case UnitType.Centimeters:
-                        Value = value;
-                        break;
-                    case UnitType.Points:
-                        Value = (decimal)_wordApp.CentimetersToPoints((float)value);
-                        break;
-                    default:
-                        Value = value;
-                        break;
-                }
-            }
-        }
-
-        public void ForceUpdateUnitLabel()
-        {
-            if (_unitLabel != null)
-            {
-                _unitLabel.Visible = true;
-                _unitLabel.BringToFront(); // 强制置顶
-                UpdateUnitLabelPosition();
-            }
-        }
-
-        public NumericUpDownWithUnit(Microsoft.Office.Interop.Word.Application wordApp = null, UnitType unit = UnitType.Centimeters)
-        {
-            _wordApp = wordApp ?? Globals.ThisAddIn.Application;
-            _currentUnit = unit;
-            InitializeComponent();
-        }
-
-        private void InitializeComponent()
-        {
-            this._unitLabel = new Label();
-            this._unitLabel.Text = UnitText;
-            this._unitLabel.AutoSize = true;
-            this._unitLabel.Font = new Font("Microsoft YaHei", 8F);
-            this._unitLabel.ForeColor = Color.FromArgb(64, 64, 64); // 浅黑色
-            this._unitLabel.BackColor = Color.Transparent;
-            this._unitLabel.BorderStyle = BorderStyle.None; // 移除边框
-            this._unitLabel.Visible = true;
-            this._unitLabel.BringToFront(); // 置顶显示
-            this.Controls.Add(_unitLabel);
-            this.TextAlign = HorizontalAlignment.Left;
-            this.Width = 100;
-            this.Height = 25;
-            this.BackColor = Color.FromArgb(250, 250, 250); // 更浅的白灰色
-            this.DecimalPlaces = 2;
-            this.Increment = 0.01m;
-            this.Minimum = 0;
-            this.Maximum = 50;
-            
-            // 延迟设置位置，确保控件完全初始化
-            this.HandleCreated += (s, e) => {
-                this.BeginInvoke(new Action(() => UpdateUnitLabelPosition()));
-            };
-        }
-
-        // 使用Word API进行字符到厘米的转换
-        private decimal ConvertCharactersToCentimeters(decimal characters)
-        {
-            try
-            {
-                if (_wordApp?.Selection?.Range?.Font?.Size != null)
-                {
-                    // 获取当前字体大小
-                    float fontSize = _wordApp.Selection.Range.Font.Size;
-                    
-                    // 使用Word API计算字符宽度
-                    // 创建临时文本来测量字符宽度
-                    var tempRange = _wordApp.Selection.Range;
-                    var originalText = tempRange.Text;
-                    var originalFont = tempRange.Font;
-                    
-                    // 设置测量用的字体
-                    tempRange.Text = "中"; // 使用中文字符测量
-                    tempRange.Font.Size = fontSize;
-                    
-                    // 获取字符宽度（以磅为单位）
-                    float charWidthInPoints = tempRange.Information[WdInformation.wdHorizontalPositionRelativeToPage];
-                    
-                    // 恢复原始文本和字体
-                    tempRange.Text = originalText;
-                    tempRange.Font = originalFont;
-                    
-                    // 使用Word API转换为厘米
-                    return (decimal)_wordApp.PointsToCentimeters(charWidthInPoints * (float)characters);
-                }
-                else
-                {
-                    // 备用方案：使用Word默认字体大小
-                    float defaultFontSize = 12f; // Word默认字体大小
-                    float charWidthInPoints = defaultFontSize * 1.0f; // 中文字符宽度约等于字体大小
-                    return (decimal)_wordApp.PointsToCentimeters(charWidthInPoints * (float)characters);
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"字符转厘米转换失败: {ex.Message}");
-                // 异常时使用默认转换
-                return characters * 0.5m;
-            }
-        }
-
-        // 使用Word API进行厘米到字符的转换
-        private decimal ConvertCentimetersToCharacters(decimal centimeters)
-        {
-            try
-            {
-                if (_wordApp?.Selection?.Range?.Font?.Size != null)
-                {
-                    float fontSize = _wordApp.Selection.Range.Font.Size;
-                    
-                    // 使用Word API计算单个字符宽度
-                    var tempRange = _wordApp.Selection.Range;
-                    var originalText = tempRange.Text;
-                    var originalFont = tempRange.Font;
-                    
-                    tempRange.Text = "中";
-                    tempRange.Font.Size = fontSize;
-                    
-                    float charWidthInPoints = tempRange.Information[WdInformation.wdHorizontalPositionRelativeToPage];
-                    float charWidthInCm = (float)_wordApp.PointsToCentimeters(charWidthInPoints);
-                    
-                    // 恢复原始文本和字体
-                    tempRange.Text = originalText;
-                    tempRange.Font = originalFont;
-                    
-                    return centimeters / (decimal)charWidthInCm;
-                }
-                else
-                {
-                    // 备用方案
-                    float defaultFontSize = 12f;
-                    float charWidthInPoints = defaultFontSize * 1.0f;
-                    float charWidthInCm = (float)_wordApp.PointsToCentimeters(charWidthInPoints);
-                    return centimeters / (decimal)charWidthInCm;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"厘米转字符转换失败: {ex.Message}");
-                return centimeters / 0.5m; // 默认转换
-            }
-        }
-
-        private void UpdateUnitLabel()
-        {
-            _label = UnitText;
-            if (_unitLabel != null)
-            {
-                _unitLabel.Text = _label;
-                UpdateUnitLabelPosition();
-            }
-        }
-
-        private void UpdateUnitLabelPosition()
-        {
-            if (_unitLabel != null && this.Width > 0 && this.Height > 0)
-            {
-                // 计算单位标签的位置，使其显示在输入框右端
-                using (Graphics g = this.CreateGraphics())
-                {
-                    SizeF textSize = g.MeasureString(_unitLabel.Text, _unitLabel.Font);
-                    int labelWidth = (int)textSize.Width;
-                    int labelHeight = (int)textSize.Height;
-                    int rightMargin = 25; // 右边距，为增加减少按钮留出空间
-                    int topMargin = (this.Height - labelHeight) / 2;
-                    _unitLabel.Location = new Point(this.Width - labelWidth - rightMargin, Math.Max(0, topMargin));
-                }
-            }
-        }
-
-        protected override void OnHandleCreated(EventArgs e)
-        {
-            base.OnHandleCreated(e);
-            // 延迟更新单位标签位置，确保控件完全初始化
-            this.BeginInvoke(new Action(() => UpdateUnitLabelPosition()));
-        }
-
-        protected override void OnResize(EventArgs e)
-        {
-            base.OnResize(e);
-            UpdateUnitLabelPosition();
-        }
-
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            base.OnPaint(e);
-            // 确保单位标签在绘制时也正确显示
-            if (_unitLabel != null && _unitLabel.Visible)
-            {
-                _unitLabel.BringToFront(); // 强制置顶
-                UpdateUnitLabelPosition();
-            }
-        }
-    }
-
-    /// <summary>
-    /// 输入框辅助类 - 封装所有输入框相关功能
-    /// </summary>
-    public static class InputHelper
-    {
-        /// <summary>
-        /// 创建带单位的数值输入框
-        /// </summary>
-        public static NumericUpDownWithUnit CreateNumericInput(Microsoft.Office.Interop.Word.Application wordApp, 
-            string name, Point location, Size size, NumericUpDownWithUnit.UnitType unit = NumericUpDownWithUnit.UnitType.Centimeters)
-        {
-            return new NumericUpDownWithUnit(wordApp, unit)
-            {
-                Name = name,
-                Location = location,
-                Size = size
-            };
-        }
-
-        /// <summary>
-        /// 创建编号样式下拉框
-        /// </summary>
-        public static StyledComboBox CreateNumberStyleCombo(string name, Point location, string[] items = null)
-        {
-            var combo = new StyledComboBox
-            {
-                Name = name,
-                Location = location
-            };
-            
-            // 添加项目到下拉框
-            var defaultItems = new string[] { "1,2,3...", "01,02,03...", "A,B,C...", "a,b,c...", "I,II,III...", "i,ii,iii...", "一,二,三...", "壹,贰,叁...", "甲,乙,丙...", "正规编号" };
-            var itemsToAdd = items ?? defaultItems;
-            
-            foreach (string item in itemsToAdd)
-            {
-                combo.Items.Add(item);
-            }
-            
-            combo.SelectedIndex = 0;
-            return combo;
-        }
-
-        /// <summary>
-        /// 创建编号格式文本框
-        /// </summary>
-        public static StyledTextBox CreateNumberFormatTextBox(string name, Point location)
-        {
-            return new StyledTextBox
-            {
-                Name = name,
-                Location = location
-            };
-        }
-
-        /// <summary>
-        /// 创建编号之后下拉框
-        /// </summary>
-        public static StyledComboBox CreateAfterNumberCombo(string name, Point location)
-        {
-            var combo = new StyledComboBox
-            {
-                Name = name,
-                Location = location
-            };
-            
-            // 添加项目到下拉框
-            combo.Items.Add("无");
-            combo.Items.Add("空格");
-            combo.Items.Add("制表位");
-            
-            combo.SelectedIndex = 1; // 默认选择"空格"
-            return combo;
-        }
-
-        /// <summary>
-        /// 创建链接样式下拉框
-        /// </summary>
-        public static StyledComboBox CreateLinkedStyleCombo(string name, Point location)
-        {
-            var combo = new StyledComboBox
-            {
-                Name = name,
-                Location = location
-            };
-            
-            // 添加项目到下拉框
-            combo.Items.Add("无");
-            combo.Items.Add("标题 1");
-            combo.Items.Add("标题 2");
-            combo.Items.Add("标题 3");
-            combo.Items.Add("标题 4");
-            combo.Items.Add("标题 5");
-            combo.Items.Add("标题 6");
-            combo.Items.Add("标题 7");
-            combo.Items.Add("标题 8");
-            combo.Items.Add("标题 9");
-            
-            combo.SelectedIndex = 0; // 默认选择"无"
-            return combo;
-        }
-
-        /// <summary>
-        /// 创建级别标签
-        /// </summary>
-        public static Label CreateLevelLabel(int level, Point location)
-        {
-            return new Label
-            {
-                Text = "第" + level + "级",
-                Location = location,
-                Size = new Size(50, 20),
-                Font = new Font("Microsoft YaHei", 9F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(0, 123, 255)
-            };
-        }
-
-        /// <summary>
-        /// 创建列标题标签
-        /// </summary>
-        public static Label CreateColumnHeader(string text, Point location, Size size)
-        {
-            return new Label
-            {
-                Text = text,
-                Location = location,
-                Size = size,
-                Font = new Font("Microsoft YaHei", 9F, FontStyle.Bold)
-            };
-        }
-
-        /// <summary>
-        /// 批量设置输入框的值（使用Word API转换）
-        /// </summary>
-        public static void SetInputValues(Control container, int level, decimal numberIndent, decimal textIndent, decimal tabPosition)
-        {
-            var nudNumberIndent = container.Controls.Find("TxtBoxNumIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
-            var nudTextIndent = container.Controls.Find("TxtBoxTextIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
-            var nudTabPosition = container.Controls.Find("TxtBoxTabPosition" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
-
-            if (nudNumberIndent != null) nudNumberIndent.ValueInCentimeters = numberIndent;
-            if (nudTextIndent != null) nudTextIndent.ValueInCentimeters = textIndent;
-            if (nudTabPosition != null) nudTabPosition.ValueInCentimeters = tabPosition;
-        }
-
-        /// <summary>
-        /// 输入框值结构体
-        /// </summary>
-        public struct InputValues
-        {
-            public decimal NumberIndent { get; set; }
-            public decimal TextIndent { get; set; }
-            public decimal TabPosition { get; set; }
-        }
-
-        /// <summary>
-        /// 批量获取输入框的值（使用Word API转换）
-        /// </summary>
-        public static InputValues GetInputValues(Control container, int level)
-        {
-            var nudNumberIndent = container.Controls.Find("TxtBoxNumIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
-            var nudTextIndent = container.Controls.Find("TxtBoxTextIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
-            var nudTabPosition = container.Controls.Find("TxtBoxTabPosition" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
-
-            return new InputValues
-            {
-                NumberIndent = nudNumberIndent?.ValueInCentimeters ?? 0,
-                TextIndent = nudTextIndent?.ValueInCentimeters ?? 0,
-                TabPosition = nudTabPosition?.ValueInCentimeters ?? 0
-            };
-        }
-
-        /// <summary>
-        /// 切换所有输入框的单位
-        /// </summary>
-        public static void ChangeAllUnits(Control container, NumericUpDownWithUnit.UnitType newUnit, int levelCount)
-        {
-            for (int level = 1; level <= levelCount; level++)
-            {
-                var nudNumberIndent = container.Controls.Find("TxtBoxNumIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
-                var nudTextIndent = container.Controls.Find("TxtBoxTextIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
-                var nudTabPosition = container.Controls.Find("TxtBoxTabPosition" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
-
-                if (nudNumberIndent != null)
-                {
-                    decimal currentValue = nudNumberIndent.ValueInCentimeters;
-                    nudNumberIndent.Unit = newUnit;
-                    nudNumberIndent.ValueInCentimeters = currentValue;
-                }
-
-                if (nudTextIndent != null)
-                {
-                    decimal currentValue = nudTextIndent.ValueInCentimeters;
-                    nudTextIndent.Unit = newUnit;
-                    nudTextIndent.ValueInCentimeters = currentValue;
-                }
-
-                if (nudTabPosition != null)
-                {
-                    decimal currentValue = nudTabPosition.ValueInCentimeters;
-                    nudTabPosition.Unit = newUnit;
-                    nudTabPosition.ValueInCentimeters = currentValue;
-                }
-            }
-        }
-    }
-
-    public class LevelData
-    {
-        public int Level { get; set; }
-        public string NumberStyle { get; set; }
-        public string NumberFormat { get; set; }
-        public decimal NumberIndent { get; set; }
-        public decimal TextIndent { get; set; }
-        public string AfterNumberType { get; set; } // 编号之后类型：无、空格、制表位
-        public decimal TabPosition { get; set; } // 制表位位置
-        public string LinkedStyle { get; set; }
-    }
-
-    public class LevelDataEventArgs : EventArgs
-    {
-        public LevelData LevelData { get; set; }
-        
-        public LevelDataEventArgs(LevelData levelData)
-        {
-            LevelData = levelData;
-        }
-    }
 
 
     public partial class MultiLevelList : Form
@@ -624,6 +46,7 @@ namespace WordMan_VSTO
             SetupEventHandlers();
             CreateLevelControls();
         }
+
 
         private void InitializeData()
         {
@@ -878,6 +301,8 @@ namespace WordMan_VSTO
             btnLoadCurrentList.Click += BtnLoadCurrentList_Click;
             btnSetMultiLevelList.Click += BtnApply_Click;
             btnClose.Click += btnClose_Click;
+            btnImport.Click += btnImport_Click;
+            btnExport.Click += btnExport_Click;
             btnApplySettings.Click += BtnApplySettings_Click;
 
             // 右侧快捷设置事件
@@ -906,6 +331,40 @@ namespace WordMan_VSTO
         private void btnClose_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void btnImport_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string filePath = ConfigurationManager.ShowImportDialog();
+                if (filePath != null)
+                {
+                    LoadConfigurationFromFile(filePath);
+                    MessageBox.Show("配置导入成功！", "导入成功");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"导入失败：{ex.Message}", "导入错误");
+            }
+        }
+
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string filePath = ConfigurationManager.ShowExportDialog();
+                if (filePath != null)
+                {
+                    SaveConfigurationToFile(filePath);
+                    MessageBox.Show("配置导出成功！", "导出成功");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"导出失败：{ex.Message}", "导出错误");
+            }
         }
 
         private void BtnLoadCurrentList_Click(object sender, EventArgs e)
@@ -1052,17 +511,17 @@ namespace WordMan_VSTO
                     }
                     
                     // 使用InputHelper获取数值（自动使用Word API转换）
-                    try
-                    {
+                        try
+                        {
                         var inputValues = InputHelper.GetInputValues(levelsContainer, i + 1);
                         numberIndents[i] = (float)inputValues.NumberIndent;
                         textIndents[i] = (float)inputValues.TextIndent;
                         tabPositions[i] = (float)inputValues.TabPosition;
-                    }
-                    catch (Exception ex)
-                    {
+                        }
+                        catch (Exception ex)
+                        {
                         MessageBox.Show($"第{i + 1}级数值转换错误：{ex.Message}", "错误");
-                        return;
+                            return;
                     }
                 }
 
@@ -1115,7 +574,6 @@ namespace WordMan_VSTO
                 listLevel.NumberFormat = numberFormats[i - 1];
                 
                 // 设置链接样式 - 直接使用Word样式对象
-                System.Diagnostics.Debug.WriteLine($"级别 {i}: 尝试链接样式 '{linkedStyles[i - 1]}'");
                 if (linkedStyles[i - 1] != "无" && !string.IsNullOrEmpty(linkedStyles[i - 1]))
                 {
                     try
@@ -1145,15 +603,10 @@ namespace WordMan_VSTO
                             if (style != null)
                             {
                                 listLevel.LinkedStyle = style.NameLocal;
-                                System.Diagnostics.Debug.WriteLine($"级别 {i}: 使用内置样式对象 '{style.NameLocal}' (WdBuiltinStyle: {builtInStyleEnum})");
-                                
-                                // 验证样式是否被正确设置
-                                System.Diagnostics.Debug.WriteLine($"级别 {i}: 验证 - listLevel.LinkedStyle = '{listLevel.LinkedStyle}'");
                             }
                             else
                             {
                                 listLevel.LinkedStyle = "";
-                                System.Diagnostics.Debug.WriteLine($"级别 {i}: 无法找到内置样式对象，级别 {level}");
                             }
                         }
                         else
@@ -1161,12 +614,10 @@ namespace WordMan_VSTO
                             // 如果不是标题样式，尝试通过名称查找
                             string styleName = GetWordStyleName(linkedStyles[i - 1]);
                             listLevel.LinkedStyle = styleName;
-                            System.Diagnostics.Debug.WriteLine($"级别 {i}: 通过名称查找样式 '{styleName}'");
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        System.Diagnostics.Debug.WriteLine($"级别 {i}: 设置链接样式时出错: {ex.Message}");
                         listLevel.LinkedStyle = "";
                     }
                 }
@@ -1220,28 +671,6 @@ namespace WordMan_VSTO
             listFormat.ApplyListTemplateWithLevel(listTemplate2, ref Index, ref ApplyTo, ref DefaultListBehavior, ref ApplyLevel2);
         }
 
-        private WdListNumberStyle GetNumberStyleByIndex(int index)
-        {
-            var styles = new[] { 
-                WdListNumberStyle.wdListNumberStyleArabic,
-                WdListNumberStyle.wdListNumberStyleArabic,
-                WdListNumberStyle.wdListNumberStyleUppercaseLetter,
-                WdListNumberStyle.wdListNumberStyleLowercaseLetter,
-                WdListNumberStyle.wdListNumberStyleUppercaseRoman,
-                WdListNumberStyle.wdListNumberStyleLowercaseRoman,
-                WdListNumberStyle.wdListNumberStyleCardinalText,
-                WdListNumberStyle.wdListNumberStyleOrdinalText,
-                WdListNumberStyle.wdListNumberStyleOrdinal,
-                WdListNumberStyle.wdListNumberStyleOrdinal
-            };
-            
-            if (index < 0 || index >= styles.Length)
-            {
-                throw new ArgumentException($"编号样式索引无效: {index}, 有效范围: 0-{styles.Length - 1}");
-            }
-            
-            return styles[index];
-        }
 
         private void BtnApplySettings_Click(object sender, EventArgs e)
         {
@@ -1393,21 +822,6 @@ namespace WordMan_VSTO
             }
         }
 
-        private string GetNumberStyleName(WdListNumberStyle numberStyle)
-        {
-            switch (numberStyle)
-            {
-                case WdListNumberStyle.wdListNumberStyleArabic: return "1,2,3...";
-                case WdListNumberStyle.wdListNumberStyleUppercaseLetter: return "A,B,C...";
-                case WdListNumberStyle.wdListNumberStyleLowercaseLetter: return "a,b,c...";
-                case WdListNumberStyle.wdListNumberStyleUppercaseRoman: return "I,II,III...";
-                case WdListNumberStyle.wdListNumberStyleLowercaseRoman: return "i,ii,iii...";
-                case WdListNumberStyle.wdListNumberStyleCardinalText: return "一,二,三...";
-                case WdListNumberStyle.wdListNumberStyleOrdinalText: return "壹,贰,叁...";
-                case WdListNumberStyle.wdListNumberStyleOrdinal: return "①,②,③...";
-                default: return "1,2,3...";
-            }
-        }
 
         private WdListNumberStyle GetNumberStyle(string styleName)
         {
@@ -1441,7 +855,6 @@ namespace WordMan_VSTO
             int level = 0;
             if (!int.TryParse(displayName.Replace("标题 ", "").Replace("标题", ""), out level) || level < 1 || level > 9)
             {
-                System.Diagnostics.Debug.WriteLine($"无法解析级别数字: '{displayName}'");
                 return "";
             }
 
@@ -1468,13 +881,12 @@ namespace WordMan_VSTO
                 
                 if (builtInStyle != null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"使用内置样式对象: '{builtInStyle.NameLocal}' (WdBuiltinStyle: {builtInStyleEnum})");
                     return builtInStyle.NameLocal;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                System.Diagnostics.Debug.WriteLine($"无法获取内置样式对象: {ex.Message}");
+                // 内置样式不可用，继续尝试其他方法
             }
 
             // 如果内置样式不可用，尝试通过名称查找
@@ -1485,7 +897,6 @@ namespace WordMan_VSTO
                 var style = app.ActiveDocument.Styles[englishName];
                 if (style != null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"找到英文样式: '{style.NameLocal}'");
                     return style.NameLocal;
                 }
             }
@@ -1501,7 +912,6 @@ namespace WordMan_VSTO
                 var style = app.ActiveDocument.Styles[chineseName];
                 if (style != null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"找到中文样式: '{style.NameLocal}'");
                     return style.NameLocal;
                 }
             }
@@ -1511,8 +921,80 @@ namespace WordMan_VSTO
             }
 
             // 如果都找不到，返回空字符串（表示不链接样式）
-            System.Diagnostics.Debug.WriteLine($"未找到样式，返回空字符串: '{displayName}'");
             return "";
+        }
+
+        /// <summary>
+        /// 保存配置到文件
+        /// </summary>
+        private void SaveConfigurationToFile(string filePath)
+        {
+            ConfigurationManager.SaveConfigurationToFile(filePath, levelDataList, currentLevels);
+        }
+
+
+        /// <summary>
+        /// 从文件加载配置
+        /// </summary>
+        private void LoadConfigurationFromFile(string filePath)
+        {
+            ConfigurationManager.LoadConfigurationFromFile(filePath, out levelDataList, out currentLevels);
+            
+            // 更新界面
+            cmbLevelCount.SelectedItem = currentLevels.ToString();
+            CreateLevelControls();
+            RefreshLevelControls();
+            
+            // 强制刷新界面
+            this.Refresh();
+            levelsContainer.Refresh();
+        }
+
+        /// <summary>
+        /// 刷新级别控件显示
+        /// </summary>
+        private void RefreshLevelControls()
+        {
+            for (int level = 1; level <= currentLevels; level++)
+            {
+                var levelData = levelDataList[level - 1];
+                
+                // 更新控件显示
+                var cmbNumberStyle = levelsContainer.Controls.Find("CmbNumStyle" + level, true).FirstOrDefault() as StyledComboBox;
+                var txtNumberFormat = levelsContainer.Controls.Find("TextBoxNumFormat" + level, true).FirstOrDefault() as StyledTextBox;
+                var cmbAfterNumber = levelsContainer.Controls.Find("CmbAfterNumber" + level, true).FirstOrDefault() as StyledComboBox;
+                var cmbLinkedStyle = levelsContainer.Controls.Find("CmbLinkedStyle" + level, true).FirstOrDefault() as StyledComboBox;
+
+                if (cmbNumberStyle != null)
+                {
+                    string[] styleOptions = { "1,2,3...", "01,02,03...", "A,B,C...", "a,b,c...", "I,II,III...", "i,ii,iii...", "一,二,三...", "壹,贰,叁...", "甲,乙,丙...", "正规编号" };
+                    int styleIndex = Array.IndexOf(styleOptions, levelData.NumberStyle);
+                    cmbNumberStyle.SelectedIndex = styleIndex >= 0 ? styleIndex : 0;
+                }
+
+                if (txtNumberFormat != null)
+                    txtNumberFormat.Text = levelData.NumberFormat;
+
+                if (cmbAfterNumber != null)
+                {
+                    string[] afterNumberOptions = { "无", "空格", "制表位" };
+                    int afterNumberIndex = Array.IndexOf(afterNumberOptions, levelData.AfterNumberType);
+                    cmbAfterNumber.SelectedIndex = afterNumberIndex >= 0 ? afterNumberIndex : 1;
+                }
+
+                if (cmbLinkedStyle != null)
+                {
+                    string[] linkedStyleOptions = { "无", "标题 1", "标题 2", "标题 3", "标题 4", "标题 5", "标题 6", "标题 7", "标题 8", "标题 9" };
+                    int linkedStyleIndex = Array.IndexOf(linkedStyleOptions, levelData.LinkedStyle);
+                    cmbLinkedStyle.SelectedIndex = linkedStyleIndex >= 0 ? linkedStyleIndex : 0;
+                }
+
+                // 使用InputHelper设置数值
+                InputHelper.SetInputValues(levelsContainer, level, levelData.NumberIndent, levelData.TextIndent, levelData.TabPosition);
+                
+                // 更新制表位位置的启用状态
+                UpdateTabPositionEnabled(level);
+            }
         }
     }
 }

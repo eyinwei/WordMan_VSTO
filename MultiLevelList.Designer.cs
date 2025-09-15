@@ -62,12 +62,23 @@
             this.lblSection3 = new System.Windows.Forms.Label();
             this.lblNumberIndent = new System.Windows.Forms.Label();
             
-            // 自定义控件
-            this.numericUpDownWithUnit1 = new NumericUpDownWithUnit();
-            this.numericUpDownWithUnit2 = new NumericUpDownWithUnit();
-            this.numericUpDownWithUnit3 = new NumericUpDownWithUnit();
-            this.numericUpDownWithUnit4 = new NumericUpDownWithUnit();
-            this.numericUpDownWithUnit5 = new NumericUpDownWithUnit();
+            // 设计器友好的静态控件初始化
+            this.sampleLevelPanel = new System.Windows.Forms.Panel();
+            this.lblSampleLevel = new System.Windows.Forms.Label();
+            this.cmbSampleNumberStyle = new System.Windows.Forms.ComboBox();
+            this.txtSampleNumberFormat = new System.Windows.Forms.TextBox();
+            this.nudSampleNumberIndent = new System.Windows.Forms.NumericUpDown();
+            this.nudSampleTextIndent = new System.Windows.Forms.NumericUpDown();
+            this.cmbSampleAfterNumber = new System.Windows.Forms.ComboBox();
+            this.nudSampleTabPosition = new System.Windows.Forms.NumericUpDown();
+            this.cmbSampleLinkedStyle = new System.Windows.Forms.ComboBox();
+            
+            // 自定义控件 - 使用Word API进行单位转换
+            this.numericUpDownWithUnit1 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, NumericUpDownWithUnit.UnitType.Centimeters);
+            this.numericUpDownWithUnit2 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, NumericUpDownWithUnit.UnitType.Centimeters);
+            this.numericUpDownWithUnit3 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, NumericUpDownWithUnit.UnitType.Centimeters);
+            this.numericUpDownWithUnit4 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, NumericUpDownWithUnit.UnitType.Centimeters);
+            this.numericUpDownWithUnit5 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, NumericUpDownWithUnit.UnitType.Centimeters);
             this.mainPanel.SuspendLayout();
             this.leftPanel.SuspendLayout();
             this.levelsScrollPanel.SuspendLayout();
@@ -601,7 +612,6 @@
             this.numericUpDownWithUnit1.Size = new System.Drawing.Size(100, 25);
             this.numericUpDownWithUnit1.TabIndex = 6;
             this.numericUpDownWithUnit1.Enabled = false;
-            this.numericUpDownWithUnit1.Label = "厘米";
             // 
             // numericUpDownWithUnit2
             // 
@@ -622,7 +632,6 @@
             this.numericUpDownWithUnit2.Size = new System.Drawing.Size(100, 25);
             this.numericUpDownWithUnit2.TabIndex = 7;
             this.numericUpDownWithUnit2.Enabled = false;
-            this.numericUpDownWithUnit2.Label = "厘米";
             // 
             // numericUpDownWithUnit3
             // 
@@ -643,7 +652,6 @@
             this.numericUpDownWithUnit3.Size = new System.Drawing.Size(100, 25);
             this.numericUpDownWithUnit3.TabIndex = 8;
             this.numericUpDownWithUnit3.Enabled = false;
-            this.numericUpDownWithUnit3.Label = "厘米";
             // 
             // numericUpDownWithUnit4
             // 
@@ -664,7 +672,6 @@
             this.numericUpDownWithUnit4.Size = new System.Drawing.Size(100, 25);
             this.numericUpDownWithUnit4.TabIndex = 9;
             this.numericUpDownWithUnit4.Enabled = false;
-            this.numericUpDownWithUnit4.Label = "厘米";
             // 
             // numericUpDownWithUnit5
             // 
@@ -685,7 +692,6 @@
             this.numericUpDownWithUnit5.Size = new System.Drawing.Size(100, 25);
             this.numericUpDownWithUnit5.TabIndex = 10;
             this.numericUpDownWithUnit5.Enabled = false;
-            this.numericUpDownWithUnit5.Label = "厘米";
             // 
             // MultiLevelList
             // 
@@ -756,6 +762,17 @@
         private System.Windows.Forms.Label lblSection2;
         private System.Windows.Forms.Label lblSection3;
         private System.Windows.Forms.Label lblNumberIndent;
+        
+        // 设计器友好的静态控件 - 用于示例级别
+        private System.Windows.Forms.Panel sampleLevelPanel;
+        private System.Windows.Forms.Label lblSampleLevel;
+        private System.Windows.Forms.ComboBox cmbSampleNumberStyle;
+        private System.Windows.Forms.TextBox txtSampleNumberFormat;
+        private System.Windows.Forms.NumericUpDown nudSampleNumberIndent;
+        private System.Windows.Forms.NumericUpDown nudSampleTextIndent;
+        private System.Windows.Forms.ComboBox cmbSampleAfterNumber;
+        private System.Windows.Forms.NumericUpDown nudSampleTabPosition;
+        private System.Windows.Forms.ComboBox cmbSampleLinkedStyle;
         
         // 自定义控件
         private NumericUpDownWithUnit numericUpDownWithUnit1;

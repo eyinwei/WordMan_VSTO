@@ -98,6 +98,7 @@
             // 
             // 文本处理
             // 
+            this.文本处理.Items.Add(this.TypesettingButton);
             this.文本处理.Items.Add(this.去除断行);
             this.文本处理.Items.Add(this.去除空格);
             this.文本处理.Items.Add(this.去除空行);
@@ -420,7 +421,6 @@
             this.其他.Items.Add(this.取消高亮);
             this.其他.Items.Add(this.版本);
             this.其他.Items.Add(this.一键排版);
-            this.其他.Items.Add(this.TypesettingButton);
             this.其他.Items.Add(this.另存PDF);
             this.其他.Label = "其他";
             this.其他.Name = "其他";

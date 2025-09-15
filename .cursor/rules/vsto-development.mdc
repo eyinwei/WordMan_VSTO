@@ -1,0 +1,108 @@
+---
+globs: *.cs,*.Designer.cs
+description: VSTO开发最佳实践和Word集成指南
+---
+
+# VSTO 开发最佳实践
+
+## 项目结构
+
+- **主入口**: [ThisAddIn.cs](mdc:ThisAddIn.cs) - VSTO插件主入口
+- **Word API工具**: [WordAPIHelper.cs](mdc:WordAPIHelper.cs) - 统一Word API管理
+- **多级列表**: [MultiLevelList.cs](mdc:MultiLevelList.cs) - 示例实现
+- **样式设置**: [StyleSetting/](mdc:StyleSetting/) - 样式相关功能
+
+## VSTO 开发规则
+
+### 1. 必须使用Word API
+```csharp
+// ✅ 正确 - 通过WordAPIHelper获取
+var app = WordAPIHelper.GetWordApplication();
+var doc = WordAPIHelper.GetActiveDocument();
+
+// ❌ 错误 - 直接访问
+var app = Globals.ThisAddIn.Application; // 应该通过WordAPIHelper
+```
+
+### 2. 自定义控件必须集成Word API
+参考 [MultiLevelList.cs](mdc:MultiLevelList.cs) 中的 `NumericUpDownWithUnit`：
+```csharp
+public class NumericUpDownWithUnit : NumericUpDown
+{
+    private Microsoft.Office.Interop.Word.Application _wordApp;
+    
+    public NumericUpDownWithUnit(Microsoft.Office.Interop.Word.Application wordApp = null, UnitType unit = UnitType.Centimeters)
+    {
+        _wordApp = wordApp ?? WordAPIHelper.GetWordApplication();
+        // ...
+    }
+}
+```
+
+### 3. 设计器兼容性
+在 [MultiLevelList.Designer.cs](mdc:MultiLevelList.Designer.cs) 中：
+```csharp
+// ✅ 正确 - 在设计器中直接传递Word API参数
+this.numericUpDownWithUnit1 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, NumericUpDownWithUnit.UnitType.Centimeters);
+```
+
+### 4. 单位转换必须使用Word API
+```csharp
+// ✅ 正确 - 使用Word API转换
+decimal centimeters = (decimal)app.PointsToCentimeters(points);
+float points = app.CentimetersToPoints(centimeters);
+
+// 字符转换必须考虑当前字体
+private decimal ConvertCharactersToCentimeters(decimal characters)
+{
+    if (_wordApp?.Selection?.Range?.Font?.Size != null)
+    {
+        float fontSize = _wordApp.Selection.Range.Font.Size;
+        // 使用Word API计算字符宽度
+    }
+}
+```
+
+### 5. 错误处理模式
+```csharp
+try
+{
+    // Word API 调用
+    var result = WordAPIHelper.SomeMethod();
+}
+catch (Exception ex)
+{
+    throw new Exception($"Word API操作失败：{ex.Message}");
+}
+```
+
+## 文件组织
+
+### 核心文件
+- `ThisAddIn.cs` - VSTO插件入口
+- `WordAPIHelper.cs` - Word API统一管理
+- `MainRibbon.cs` - 功能区界面
+
+### 功能模块
+- `MultiLevelList.cs` - 多级列表功能
+- `StyleSetting/` - 样式设置模块
+- `CommonSymbolForm.cs` - 通用符号
+- `GreekLetterForm.cs` - 希腊字母
+
+### 设计器文件
+- `*.Designer.cs` - 界面设计文件
+- `*.resx` - 资源文件
+
+## 开发流程
+
+1. **设计阶段**: 使用Visual Studio设计器调整布局
+2. **开发阶段**: 在代码中集成Word API
+3. **测试阶段**: 确保Word API调用正常
+4. **优化阶段**: 使用WordAPIHelper统一管理
+
+## 注意事项
+
+- 所有Word相关操作必须通过Word API
+- 自定义控件必须支持Word API集成
+- 设计器文件必须与代码保持同步
+- 单位转换必须使用Word API确保准确性

@@ -217,13 +217,16 @@
     <Compile Include="CommonSymbolForm.Designer.cs">
       <DependentUpon>CommonSymbolForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="StyleSettings.cs">
+    <Compile Include="StyleSetting\StyleSettings.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="StyleSettings.Designer.cs">
+    <Compile Include="StyleSetting\StyleSettings.Designer.cs">
       <DependentUpon>StyleSettings.cs</DependentUpon>
     </Compile>
-    <Compile Include="StyleSettingsUIDesigner.cs" />
+    <Compile Include="StyleSetting\StyleSettingsUIDesigner.cs" />
+    <Compile Include="StyleSetting\StyleSerializationHelper.cs" />
+    <Compile Include="StyleSetting\StyleInfo.cs" />
+    <Compile Include="WordAPIHelper.cs" />
     <Compile Include="MultiLevelList.cs">
       <SubType>Component</SubType>
     </Compile>

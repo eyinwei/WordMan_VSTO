@@ -95,6 +95,15 @@ namespace WordMan_VSTO
     {
         private string _label = "厘米";
         private Label _unitLabel;
+        private Microsoft.Office.Interop.Word.Application _wordApp;
+        private UnitType _currentUnit = UnitType.Centimeters;
+
+        public enum UnitType
+        {
+            Characters,    // 字符
+            Centimeters,   // 厘米
+            Points         // 磅
+        }
 
         public string Label
         {
@@ -111,6 +120,67 @@ namespace WordMan_VSTO
             }
         }
 
+        public UnitType Unit
+        {
+            get { return _currentUnit; }
+            set
+            {
+                _currentUnit = value;
+                UpdateUnitLabel();
+            }
+        }
+
+        public string UnitText
+        {
+            get
+            {
+                switch (_currentUnit)
+                {
+                    case UnitType.Characters: return "字符";
+                    case UnitType.Centimeters: return "厘米";
+                    case UnitType.Points: return "磅";
+                    default: return "厘米";
+                }
+            }
+        }
+
+        // 使用Word API进行单位转换
+        public decimal ValueInCentimeters
+        {
+            get
+            {
+                switch (_currentUnit)
+                {
+                    case UnitType.Characters:
+                        return ConvertCharactersToCentimeters(Value);
+                    case UnitType.Centimeters:
+                        return Value;
+                    case UnitType.Points:
+                        return (decimal)_wordApp.PointsToCentimeters((float)Value);
+                    default:
+                        return Value;
+                }
+            }
+            set
+            {
+                switch (_currentUnit)
+                {
+                    case UnitType.Characters:
+                        Value = ConvertCentimetersToCharacters(value);
+                        break;
+                    case UnitType.Centimeters:
+                        Value = value;
+                        break;
+                    case UnitType.Points:
+                        Value = (decimal)_wordApp.CentimetersToPoints((float)value);
+                        break;
+                    default:
+                        Value = value;
+                        break;
+                }
+            }
+        }
+
         public void ForceUpdateUnitLabel()
         {
             if (_unitLabel != null)
@@ -121,15 +191,17 @@ namespace WordMan_VSTO
             }
         }
 
-        public NumericUpDownWithUnit()
+        public NumericUpDownWithUnit(Microsoft.Office.Interop.Word.Application wordApp = null, UnitType unit = UnitType.Centimeters)
         {
+            _wordApp = wordApp ?? Globals.ThisAddIn.Application;
+            _currentUnit = unit;
             InitializeComponent();
         }
 
         private void InitializeComponent()
         {
             this._unitLabel = new Label();
-            this._unitLabel.Text = _label;
+            this._unitLabel.Text = UnitText;
             this._unitLabel.AutoSize = true;
             this._unitLabel.Font = new Font("Microsoft YaHei", 8F);
             this._unitLabel.ForeColor = Color.FromArgb(64, 64, 64); // 浅黑色
@@ -144,12 +216,111 @@ namespace WordMan_VSTO
             this.BackColor = Color.FromArgb(250, 250, 250); // 更浅的白灰色
             this.DecimalPlaces = 2;
             this.Increment = 0.01m;
-            // 不在这里设置Minimum和Maximum，让调用者设置
+            this.Minimum = 0;
+            this.Maximum = 50;
             
             // 延迟设置位置，确保控件完全初始化
             this.HandleCreated += (s, e) => {
                 this.BeginInvoke(new Action(() => UpdateUnitLabelPosition()));
             };
+        }
+
+        // 使用Word API进行字符到厘米的转换
+        private decimal ConvertCharactersToCentimeters(decimal characters)
+        {
+            try
+            {
+                if (_wordApp?.Selection?.Range?.Font?.Size != null)
+                {
+                    // 获取当前字体大小
+                    float fontSize = _wordApp.Selection.Range.Font.Size;
+                    
+                    // 使用Word API计算字符宽度
+                    // 创建临时文本来测量字符宽度
+                    var tempRange = _wordApp.Selection.Range;
+                    var originalText = tempRange.Text;
+                    var originalFont = tempRange.Font;
+                    
+                    // 设置测量用的字体
+                    tempRange.Text = "中"; // 使用中文字符测量
+                    tempRange.Font.Size = fontSize;
+                    
+                    // 获取字符宽度（以磅为单位）
+                    float charWidthInPoints = tempRange.Information[WdInformation.wdHorizontalPositionRelativeToPage];
+                    
+                    // 恢复原始文本和字体
+                    tempRange.Text = originalText;
+                    tempRange.Font = originalFont;
+                    
+                    // 使用Word API转换为厘米
+                    return (decimal)_wordApp.PointsToCentimeters(charWidthInPoints * (float)characters);
+                }
+                else
+                {
+                    // 备用方案：使用Word默认字体大小
+                    float defaultFontSize = 12f; // Word默认字体大小
+                    float charWidthInPoints = defaultFontSize * 1.0f; // 中文字符宽度约等于字体大小
+                    return (decimal)_wordApp.PointsToCentimeters(charWidthInPoints * (float)characters);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"字符转厘米转换失败: {ex.Message}");
+                // 异常时使用默认转换
+                return characters * 0.5m;
+            }
+        }
+
+        // 使用Word API进行厘米到字符的转换
+        private decimal ConvertCentimetersToCharacters(decimal centimeters)
+        {
+            try
+            {
+                if (_wordApp?.Selection?.Range?.Font?.Size != null)
+                {
+                    float fontSize = _wordApp.Selection.Range.Font.Size;
+                    
+                    // 使用Word API计算单个字符宽度
+                    var tempRange = _wordApp.Selection.Range;
+                    var originalText = tempRange.Text;
+                    var originalFont = tempRange.Font;
+                    
+                    tempRange.Text = "中";
+                    tempRange.Font.Size = fontSize;
+                    
+                    float charWidthInPoints = tempRange.Information[WdInformation.wdHorizontalPositionRelativeToPage];
+                    float charWidthInCm = (float)_wordApp.PointsToCentimeters(charWidthInPoints);
+                    
+                    // 恢复原始文本和字体
+                    tempRange.Text = originalText;
+                    tempRange.Font = originalFont;
+                    
+                    return centimeters / (decimal)charWidthInCm;
+                }
+                else
+                {
+                    // 备用方案
+                    float defaultFontSize = 12f;
+                    float charWidthInPoints = defaultFontSize * 1.0f;
+                    float charWidthInCm = (float)_wordApp.PointsToCentimeters(charWidthInPoints);
+                    return centimeters / (decimal)charWidthInCm;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"厘米转字符转换失败: {ex.Message}");
+                return centimeters / 0.5m; // 默认转换
+            }
+        }
+
+        private void UpdateUnitLabel()
+        {
+            _label = UnitText;
+            if (_unitLabel != null)
+            {
+                _unitLabel.Text = _label;
+                UpdateUnitLabelPosition();
+            }
         }
 
         private void UpdateUnitLabelPosition()
@@ -190,6 +361,213 @@ namespace WordMan_VSTO
             {
                 _unitLabel.BringToFront(); // 强制置顶
                 UpdateUnitLabelPosition();
+            }
+        }
+    }
+
+    /// <summary>
+    /// 输入框辅助类 - 封装所有输入框相关功能
+    /// </summary>
+    public static class InputHelper
+    {
+        /// <summary>
+        /// 创建带单位的数值输入框
+        /// </summary>
+        public static NumericUpDownWithUnit CreateNumericInput(Microsoft.Office.Interop.Word.Application wordApp, 
+            string name, Point location, Size size, NumericUpDownWithUnit.UnitType unit = NumericUpDownWithUnit.UnitType.Centimeters)
+        {
+            return new NumericUpDownWithUnit(wordApp, unit)
+            {
+                Name = name,
+                Location = location,
+                Size = size
+            };
+        }
+
+        /// <summary>
+        /// 创建编号样式下拉框
+        /// </summary>
+        public static StyledComboBox CreateNumberStyleCombo(string name, Point location, string[] items = null)
+        {
+            var combo = new StyledComboBox
+            {
+                Name = name,
+                Location = location
+            };
+            
+            // 添加项目到下拉框
+            var defaultItems = new string[] { "1,2,3...", "01,02,03...", "A,B,C...", "a,b,c...", "I,II,III...", "i,ii,iii...", "一,二,三...", "壹,贰,叁...", "甲,乙,丙...", "正规编号" };
+            var itemsToAdd = items ?? defaultItems;
+            
+            foreach (string item in itemsToAdd)
+            {
+                combo.Items.Add(item);
+            }
+            
+            combo.SelectedIndex = 0;
+            return combo;
+        }
+
+        /// <summary>
+        /// 创建编号格式文本框
+        /// </summary>
+        public static StyledTextBox CreateNumberFormatTextBox(string name, Point location)
+        {
+            return new StyledTextBox
+            {
+                Name = name,
+                Location = location
+            };
+        }
+
+        /// <summary>
+        /// 创建编号之后下拉框
+        /// </summary>
+        public static StyledComboBox CreateAfterNumberCombo(string name, Point location)
+        {
+            var combo = new StyledComboBox
+            {
+                Name = name,
+                Location = location
+            };
+            
+            // 添加项目到下拉框
+            combo.Items.Add("无");
+            combo.Items.Add("空格");
+            combo.Items.Add("制表位");
+            
+            combo.SelectedIndex = 1; // 默认选择"空格"
+            return combo;
+        }
+
+        /// <summary>
+        /// 创建链接样式下拉框
+        /// </summary>
+        public static StyledComboBox CreateLinkedStyleCombo(string name, Point location)
+        {
+            var combo = new StyledComboBox
+            {
+                Name = name,
+                Location = location
+            };
+            
+            // 添加项目到下拉框
+            combo.Items.Add("无");
+            combo.Items.Add("标题 1");
+            combo.Items.Add("标题 2");
+            combo.Items.Add("标题 3");
+            combo.Items.Add("标题 4");
+            combo.Items.Add("标题 5");
+            combo.Items.Add("标题 6");
+            combo.Items.Add("标题 7");
+            combo.Items.Add("标题 8");
+            combo.Items.Add("标题 9");
+            
+            combo.SelectedIndex = 0; // 默认选择"无"
+            return combo;
+        }
+
+        /// <summary>
+        /// 创建级别标签
+        /// </summary>
+        public static Label CreateLevelLabel(int level, Point location)
+        {
+            return new Label
+            {
+                Text = "第" + level + "级",
+                Location = location,
+                Size = new Size(50, 20),
+                Font = new Font("Microsoft YaHei", 9F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(0, 123, 255)
+            };
+        }
+
+        /// <summary>
+        /// 创建列标题标签
+        /// </summary>
+        public static Label CreateColumnHeader(string text, Point location, Size size)
+        {
+            return new Label
+            {
+                Text = text,
+                Location = location,
+                Size = size,
+                Font = new Font("Microsoft YaHei", 9F, FontStyle.Bold)
+            };
+        }
+
+        /// <summary>
+        /// 批量设置输入框的值（使用Word API转换）
+        /// </summary>
+        public static void SetInputValues(Control container, int level, decimal numberIndent, decimal textIndent, decimal tabPosition)
+        {
+            var nudNumberIndent = container.Controls.Find("TxtBoxNumIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
+            var nudTextIndent = container.Controls.Find("TxtBoxTextIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
+            var nudTabPosition = container.Controls.Find("TxtBoxTabPosition" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
+
+            if (nudNumberIndent != null) nudNumberIndent.ValueInCentimeters = numberIndent;
+            if (nudTextIndent != null) nudTextIndent.ValueInCentimeters = textIndent;
+            if (nudTabPosition != null) nudTabPosition.ValueInCentimeters = tabPosition;
+        }
+
+        /// <summary>
+        /// 输入框值结构体
+        /// </summary>
+        public struct InputValues
+        {
+            public decimal NumberIndent { get; set; }
+            public decimal TextIndent { get; set; }
+            public decimal TabPosition { get; set; }
+        }
+
+        /// <summary>
+        /// 批量获取输入框的值（使用Word API转换）
+        /// </summary>
+        public static InputValues GetInputValues(Control container, int level)
+        {
+            var nudNumberIndent = container.Controls.Find("TxtBoxNumIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
+            var nudTextIndent = container.Controls.Find("TxtBoxTextIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
+            var nudTabPosition = container.Controls.Find("TxtBoxTabPosition" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
+
+            return new InputValues
+            {
+                NumberIndent = nudNumberIndent?.ValueInCentimeters ?? 0,
+                TextIndent = nudTextIndent?.ValueInCentimeters ?? 0,
+                TabPosition = nudTabPosition?.ValueInCentimeters ?? 0
+            };
+        }
+
+        /// <summary>
+        /// 切换所有输入框的单位
+        /// </summary>
+        public static void ChangeAllUnits(Control container, NumericUpDownWithUnit.UnitType newUnit, int levelCount)
+        {
+            for (int level = 1; level <= levelCount; level++)
+            {
+                var nudNumberIndent = container.Controls.Find("TxtBoxNumIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
+                var nudTextIndent = container.Controls.Find("TxtBoxTextIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
+                var nudTabPosition = container.Controls.Find("TxtBoxTabPosition" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
+
+                if (nudNumberIndent != null)
+                {
+                    decimal currentValue = nudNumberIndent.ValueInCentimeters;
+                    nudNumberIndent.Unit = newUnit;
+                    nudNumberIndent.ValueInCentimeters = currentValue;
+                }
+
+                if (nudTextIndent != null)
+                {
+                    decimal currentValue = nudTextIndent.ValueInCentimeters;
+                    nudTextIndent.Unit = newUnit;
+                    nudTextIndent.ValueInCentimeters = currentValue;
+                }
+
+                if (nudTabPosition != null)
+                {
+                    decimal currentValue = nudTabPosition.ValueInCentimeters;
+                    nudTabPosition.Unit = newUnit;
+                    nudTabPosition.ValueInCentimeters = currentValue;
+                }
             }
         }
     }
@@ -346,20 +724,20 @@ namespace WordMan_VSTO
                 CreateLevelRow(i);
             }
 
-            // 添加列标题 - 放在最后，这样会显示在最上方
+            // 添加列标题 - 使用InputHelper创建
             var headerPanel = new Panel();
             headerPanel.Height = 30;
             headerPanel.Dock = DockStyle.Top;
             headerPanel.BackColor = Color.Transparent;
             
-            var lblLevel = new Label { Text = "级别", Location = new Point(10, 8), Size = new Size(50, 20), Font = new Font("Microsoft YaHei", 9F, FontStyle.Bold) };
-            var lblNumberStyle = new Label { Text = "编号样式", Location = new Point(70, 8), Size = new Size(100, 20), Font = new Font("Microsoft YaHei", 9F, FontStyle.Bold) };
-            var lblNumberFormat = new Label { Text = "编号格式", Location = new Point(180, 8), Size = new Size(100, 20), Font = new Font("Microsoft YaHei", 9F, FontStyle.Bold) };
-            var lblNumberIndent = new Label { Text = "编号缩进", Location = new Point(290, 8), Size = new Size(100, 20), Font = new Font("Microsoft YaHei", 9F, FontStyle.Bold) };
-            var lblTextIndent = new Label { Text = "文本缩进", Location = new Point(400, 8), Size = new Size(100, 20), Font = new Font("Microsoft YaHei", 9F, FontStyle.Bold) };
-            var lblAfterNumber = new Label { Text = "编号之后", Location = new Point(510, 8), Size = new Size(100, 20), Font = new Font("Microsoft YaHei", 9F, FontStyle.Bold) };
-            var lblTabPosition = new Label { Text = "制表位位置", Location = new Point(620, 8), Size = new Size(100, 20), Font = new Font("Microsoft YaHei", 9F, FontStyle.Bold) };
-            var lblLinkedStyle = new Label { Text = "链接样式", Location = new Point(730, 8), Size = new Size(100, 20), Font = new Font("Microsoft YaHei", 9F, FontStyle.Bold) };
+            var lblLevel = InputHelper.CreateColumnHeader("级别", new Point(10, 8), new Size(50, 20));
+            var lblNumberStyle = InputHelper.CreateColumnHeader("编号样式", new Point(70, 8), new Size(100, 20));
+            var lblNumberFormat = InputHelper.CreateColumnHeader("编号格式", new Point(180, 8), new Size(100, 20));
+            var lblNumberIndent = InputHelper.CreateColumnHeader("编号缩进", new Point(290, 8), new Size(100, 20));
+            var lblTextIndent = InputHelper.CreateColumnHeader("文本缩进", new Point(400, 8), new Size(100, 20));
+            var lblAfterNumber = InputHelper.CreateColumnHeader("编号之后", new Point(510, 8), new Size(100, 20));
+            var lblTabPosition = InputHelper.CreateColumnHeader("制表位位置", new Point(620, 8), new Size(100, 20));
+            var lblLinkedStyle = InputHelper.CreateColumnHeader("链接样式", new Point(730, 8), new Size(100, 20));
             
             headerPanel.Controls.AddRange(new Control[] { lblLevel, lblNumberStyle, lblNumberFormat, lblNumberIndent, lblTextIndent, lblAfterNumber, lblTabPosition, lblLinkedStyle });
             levelsContainer.Controls.Add(headerPanel);
@@ -371,6 +749,7 @@ namespace WordMan_VSTO
             }
         }
 
+
         private void CreateLevelRow(int level)
         {
             var rowPanel = new Panel();
@@ -379,105 +758,41 @@ namespace WordMan_VSTO
             rowPanel.BackColor = Color.Transparent;
             rowPanel.BorderStyle = BorderStyle.None;
 
-            // 级别标签
-            var lblLevel = new Label
-            {
-                Text = "第" + level + "级",
-                Location = new Point(10, 8),
-                Size = new Size(50, 20),
-                Font = new Font("Microsoft YaHei", 9F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(0, 123, 255)
-            };
+            // 使用InputHelper创建控件
+            var lblLevel = InputHelper.CreateLevelLabel(level, new Point(10, 8));
+            var cmbNumberStyle = InputHelper.CreateNumberStyleCombo("CmbNumStyle" + level, new Point(70, 5));
+            var txtNumberFormat = InputHelper.CreateNumberFormatTextBox("TextBoxNumFormat" + level, new Point(180, 5));
+            var nudNumberIndent = InputHelper.CreateNumericInput(app, "TxtBoxNumIndent" + level, new Point(290, 5), new Size(100, 25));
+            var nudTextIndent = InputHelper.CreateNumericInput(app, "TxtBoxTextIndent" + level, new Point(400, 5), new Size(100, 25));
+            var cmbAfterNumber = InputHelper.CreateAfterNumberCombo("CmbAfterNumber" + level, new Point(510, 5));
+            var nudTabPosition = InputHelper.CreateNumericInput(app, "TxtBoxTabPosition" + level, new Point(620, 5), new Size(100, 25));
+            var cmbLinkedStyle = InputHelper.CreateLinkedStyleCombo("CmbLinkedStyle" + level, new Point(730, 5));
 
-            // 编号样式下拉框
-            var cmbNumberStyle = new StyledComboBox
-            {
-                Name = "CmbNumStyle" + level,
-                Location = new Point(70, 5),
-                Items = { "1,2,3...", "01,02,03...", "A,B,C...", "a,b,c...", "I,II,III...", "i,ii,iii...", "一,二,三...", "壹,贰,叁...", "甲,乙,丙...", "正规编号" }
-            };
-            // 从levelDataList中获取编号样式设置
+            // 从levelDataList中获取数据并设置
             var levelData = levelDataList[level - 1];
+            
+            // 设置编号样式
             string[] styleOptions = { "1,2,3...", "01,02,03...", "A,B,C...", "a,b,c...", "I,II,III...", "i,ii,iii...", "一,二,三...", "壹,贰,叁...", "甲,乙,丙...", "正规编号" };
             int styleIndex = Array.IndexOf(styleOptions, levelData.NumberStyle);
             cmbNumberStyle.SelectedIndex = styleIndex >= 0 ? styleIndex : 0;
 
-            // 编号格式文本框
-            var txtNumberFormat = new StyledTextBox
-            {
-                Name = "TextBoxNumFormat" + level,
-                Location = new Point(180, 5)
-            };
-            // 从levelDataList中获取编号格式
+            // 设置编号格式
             txtNumberFormat.Text = levelData.NumberFormat;
 
-            // 编号缩进
-            var nudNumberIndent = new NumericUpDownWithUnit
-            {
-                Name = "TxtBoxNumIndent" + level,
-                Location = new Point(290, 5),
-                Size = new Size(100, 25)
-            };
-            nudNumberIndent.Label = "厘米"; // 单独设置Label属性
-            nudNumberIndent.Minimum = 0;
-            nudNumberIndent.Maximum = 50;
-            // 从levelDataList中获取编号缩进
-            nudNumberIndent.Value = levelData.NumberIndent;
-            // 强制更新单位标签显示
-            nudNumberIndent.ForceUpdateUnitLabel();
+            // 设置数值（使用Word API转换）
+            nudNumberIndent.ValueInCentimeters = levelData.NumberIndent;
+            nudTextIndent.ValueInCentimeters = levelData.TextIndent;
+            nudTabPosition.ValueInCentimeters = levelData.TabPosition;
 
-            // 文本缩进
-            var nudTextIndent = new NumericUpDownWithUnit
-            {
-                Name = "TxtBoxTextIndent" + level,
-                Location = new Point(400, 5),
-                Size = new Size(100, 25)
-            };
-            nudTextIndent.Label = "厘米"; // 单独设置Label属性
-            nudTextIndent.Minimum = 0;
-            nudTextIndent.Maximum = 50;
-            // 从levelDataList中获取文本缩进
-            nudTextIndent.Value = levelData.TextIndent;
-            // 强制更新单位标签显示
-            nudTextIndent.ForceUpdateUnitLabel();
-
-            // 编号之后下拉框
-            var cmbAfterNumber = new StyledComboBox
-            {
-                Name = "CmbAfterNumber" + level,
-                Location = new Point(510, 5),
-                Items = { "无", "空格", "制表位" }
-            };
-            // 从levelDataList中获取编号之后类型
+            // 设置编号之后类型
             string[] afterNumberOptions = { "无", "空格", "制表位" };
             int afterNumberIndex = Array.IndexOf(afterNumberOptions, levelData.AfterNumberType);
             cmbAfterNumber.SelectedIndex = afterNumberIndex >= 0 ? afterNumberIndex : 1;
 
-            // 制表位位置
-            var nudTabPosition = new NumericUpDownWithUnit
-            {
-                Name = "TxtBoxTabPosition" + level,
-                Location = new Point(620, 5),
-                Size = new Size(100, 25)
-            };
-            nudTabPosition.Label = "厘米"; // 单独设置Label属性
-            nudTabPosition.Minimum = 0;
-            nudTabPosition.Maximum = 50;
-            // 从levelDataList中获取制表位位置
-            nudTabPosition.Value = levelData.TabPosition;
-            // 根据编号之后类型设置制表位位置启用状态
+            // 设置制表位位置启用状态
             nudTabPosition.Enabled = (levelData.AfterNumberType == "制表位");
-            // 强制更新单位标签显示
-            nudTabPosition.ForceUpdateUnitLabel();
 
-            // 链接样式下拉框
-            var cmbLinkedStyle = new StyledComboBox
-            {
-                Name = "CmbLinkedStyle" + level,
-                Location = new Point(730, 5),
-                Items = { "无", "标题 1", "标题 2", "标题 3", "标题 4", "标题 5", "标题 6", "标题 7", "标题 8", "标题 9" }
-            };
-            // 从levelDataList中获取链接样式
+            // 设置链接样式
             string[] linkedStyleOptions = { "无", "标题 1", "标题 2", "标题 3", "标题 4", "标题 5", "标题 6", "标题 7", "标题 8", "标题 9" };
             int linkedStyleIndex = Array.IndexOf(linkedStyleOptions, levelData.LinkedStyle);
             cmbLinkedStyle.SelectedIndex = linkedStyleIndex >= 0 ? linkedStyleIndex : 0;
@@ -510,19 +825,24 @@ namespace WordMan_VSTO
             var levelData = levelDataList[level - 1];
             var cmbNumberStyle = levelsContainer.Controls.Find("CmbNumStyle" + level, true).FirstOrDefault() as StyledComboBox;
             var txtNumberFormat = levelsContainer.Controls.Find("TextBoxNumFormat" + level, true).FirstOrDefault() as StyledTextBox;
-            var nudNumberIndent = levelsContainer.Controls.Find("TxtBoxNumIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
-            var nudTextIndent = levelsContainer.Controls.Find("TxtBoxTextIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
             var cmbAfterNumber = levelsContainer.Controls.Find("CmbAfterNumber" + level, true).FirstOrDefault() as StyledComboBox;
-            var nudTabPosition = levelsContainer.Controls.Find("TxtBoxTabPosition" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
             var cmbLinkedStyle = levelsContainer.Controls.Find("CmbLinkedStyle" + level, true).FirstOrDefault() as StyledComboBox;
+
+            // 使用InputHelper获取数值（自动使用Word API转换）
+            var inputValues = InputHelper.GetInputValues(levelsContainer, level);
+            var numberIndent = inputValues.NumberIndent;
+            var textIndent = inputValues.TextIndent;
+            var tabPosition = inputValues.TabPosition;
 
             if (cmbNumberStyle != null) levelData.NumberStyle = cmbNumberStyle.Text;
             if (txtNumberFormat != null) levelData.NumberFormat = txtNumberFormat.Text;
-            if (nudNumberIndent != null) levelData.NumberIndent = nudNumberIndent.Value;
-            if (nudTextIndent != null) levelData.TextIndent = nudTextIndent.Value;
             if (cmbAfterNumber != null) levelData.AfterNumberType = cmbAfterNumber.Text;
-            if (nudTabPosition != null) levelData.TabPosition = nudTabPosition.Value;
             if (cmbLinkedStyle != null) levelData.LinkedStyle = cmbLinkedStyle.Text;
+            
+            // 使用Word API转换的数值
+            levelData.NumberIndent = numberIndent;
+            levelData.TextIndent = textIndent;
+            levelData.TabPosition = tabPosition;
         }
 
         private void UpdateTabPositionEnabled(int level)
@@ -575,6 +895,7 @@ namespace WordMan_VSTO
             CreateLevelControls();
         }
 
+
         private void BtnSetLevelStyle_Click(object sender, EventArgs e)
         {
             // 调用样式设置窗格
@@ -612,16 +933,13 @@ namespace WordMan_VSTO
                 currentLevels = maxLevel;
                 CreateLevelControls();
 
-                // 载入数据到控件
+                // 载入数据到控件 - 使用InputHelper简化
                 for (int i = 1; i <= maxLevel; i++)
                 {
                     ListLevel listLevel = listTemplate.ListLevels[i];
                     
                     var cmbNumberStyle = levelsContainer.Controls.Find("CmbNumStyle" + i, true).FirstOrDefault() as StyledComboBox;
                     var txtNumberFormat = levelsContainer.Controls.Find("TextBoxNumFormat" + i, true).FirstOrDefault() as StyledTextBox;
-                    var nudNumberIndent = levelsContainer.Controls.Find("TxtBoxNumIndent" + i, true).FirstOrDefault() as NumericUpDownWithUnit;
-                    var nudTextIndent = levelsContainer.Controls.Find("TxtBoxTextIndent" + i, true).FirstOrDefault() as NumericUpDownWithUnit;
-                    var nudAfterIndent = levelsContainer.Controls.Find("TxtBoxAfterNumIndent" + i, true).FirstOrDefault() as NumericUpDownWithUnit;
                     var cmbLinkedStyle = levelsContainer.Controls.Find("CmbLinkedStyle" + i, true).FirstOrDefault() as StyledComboBox;
 
                     if (cmbNumberStyle != null)
@@ -633,22 +951,15 @@ namespace WordMan_VSTO
                     if (txtNumberFormat != null)
                         txtNumberFormat.Text = listLevel.NumberFormat.ToString();
                     
-                    if (nudNumberIndent != null)
-                        nudNumberIndent.Value = (decimal)app.PointsToCentimeters(listLevel.NumberPosition);
-                    
-                    if (nudTextIndent != null)
-                        nudTextIndent.Value = (decimal)app.PointsToCentimeters(listLevel.TextPosition);
-                    
-                    if (nudAfterIndent != null)
-                    {
-                        if (listLevel.TabPosition != 9999999f)
-                            nudAfterIndent.Value = (decimal)app.PointsToCentimeters(listLevel.TabPosition);
-                        else
-                            nudAfterIndent.Value = 0;
-                    }
-                    
                     if (cmbLinkedStyle != null)
                         cmbLinkedStyle.Text = string.IsNullOrEmpty(listLevel.LinkedStyle) ? "无" : listLevel.LinkedStyle;
+                    
+                    // 使用InputHelper设置数值（自动使用Word API转换）
+                    decimal numberIndent = (decimal)app.PointsToCentimeters(listLevel.NumberPosition);
+                    decimal textIndent = (decimal)app.PointsToCentimeters(listLevel.TextPosition);
+                    decimal tabPosition = listLevel.TabPosition != 9999999f ? (decimal)app.PointsToCentimeters(listLevel.TabPosition) : 0;
+                    
+                    InputHelper.SetInputValues(levelsContainer, i, numberIndent, textIndent, tabPosition);
                 }
 
                 // 清空快捷设置
@@ -697,15 +1008,12 @@ namespace WordMan_VSTO
                 string[] afterNumberTypes = new string[levelCount];
                 float[] tabPositions = new float[levelCount];
 
-                // 收集数据
+                // 收集数据 - 使用InputHelper简化
                 for (int i = 0; i < levelCount; i++)
                 {
                     var numberStyleCombo = levelsContainer.Controls.Find("CmbNumStyle" + (i + 1), true).FirstOrDefault() as StyledComboBox;
                     var numberFormatText = levelsContainer.Controls.Find("TextBoxNumFormat" + (i + 1), true).FirstOrDefault() as StyledTextBox;
-                    var numberIndentControl = levelsContainer.Controls.Find("TxtBoxNumIndent" + (i + 1), true).FirstOrDefault() as NumericUpDownWithUnit;
-                    var textIndentControl = levelsContainer.Controls.Find("TxtBoxTextIndent" + (i + 1), true).FirstOrDefault() as NumericUpDownWithUnit;
                     var afterNumberCombo = levelsContainer.Controls.Find("CmbAfterNumber" + (i + 1), true).FirstOrDefault() as StyledComboBox;
-                    var tabPositionControl = levelsContainer.Controls.Find("TxtBoxTabPosition" + (i + 1), true).FirstOrDefault() as NumericUpDownWithUnit;
                     var linkedStyleCombo = levelsContainer.Controls.Find("CmbLinkedStyle" + (i + 1), true).FirstOrDefault() as StyledComboBox;
 
                     if (numberStyleCombo != null)
@@ -738,48 +1046,23 @@ namespace WordMan_VSTO
                         }
                     }
                     
-                    if (numberIndentControl != null)
-                    {
-                        try
-                        {
-                            numberIndents[i] = (float)numberIndentControl.Value;
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show($"第{i + 1}级编号缩进值错误：{ex.Message}", "错误");
-                            return;
-                        }
-                    }
-                    
-                    if (textIndentControl != null)
-                    {
-                        try
-                        {
-                            textIndents[i] = (float)textIndentControl.Value;
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show($"第{i + 1}级文本缩进值错误：{ex.Message}", "错误");
-                            return;
-                        }
-                    }
-                    
                     if (afterNumberCombo != null)
                     {
                         afterNumberTypes[i] = afterNumberCombo.Text;
                     }
                     
-                    if (tabPositionControl != null)
+                    // 使用InputHelper获取数值（自动使用Word API转换）
+                    try
                     {
-                        try
-                        {
-                            tabPositions[i] = (float)tabPositionControl.Value;
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show($"第{i + 1}级制表位位置值错误：{ex.Message}", "错误");
-                            return;
-                        }
+                        var inputValues = InputHelper.GetInputValues(levelsContainer, i + 1);
+                        numberIndents[i] = (float)inputValues.NumberIndent;
+                        textIndents[i] = (float)inputValues.TextIndent;
+                        tabPositions[i] = (float)inputValues.TabPosition;
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"第{i + 1}级数值转换错误：{ex.Message}", "错误");
+                        return;
                     }
                 }
 
@@ -975,21 +1258,21 @@ namespace WordMan_VSTO
                 {
                     var numberIndentControl = levelsContainer.Controls.Find("TxtBoxNumIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
                     if (numberIndentControl != null)
-                        numberIndentControl.Value = numericUpDownWithUnit1.Value;
+                        numberIndentControl.ValueInCentimeters = numericUpDownWithUnit1.ValueInCentimeters;
                 }
                 
                 if (chkTextIndent.Checked) // 文本缩进
                 {
                     var textIndentControl = levelsContainer.Controls.Find("TxtBoxTextIndent" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
                     if (textIndentControl != null)
-                        textIndentControl.Value = numericUpDownWithUnit4.Value; // 使用numericUpDownWithUnit4（文本缩进输入框）
+                        textIndentControl.ValueInCentimeters = numericUpDownWithUnit4.ValueInCentimeters; // 使用numericUpDownWithUnit4（文本缩进输入框）
                 }
                 
                 if (chkTabPosition.Checked) // 制表位位置
                 {
                     var tabPositionControl = levelsContainer.Controls.Find("TxtBoxTabPosition" + level, true).FirstOrDefault() as NumericUpDownWithUnit;
                     if (tabPositionControl != null)
-                        tabPositionControl.Value = numericUpDownWithUnit5.Value; // 使用numericUpDownWithUnit5（制表位位置输入框）
+                        tabPositionControl.ValueInCentimeters = numericUpDownWithUnit5.ValueInCentimeters; // 使用numericUpDownWithUnit5（制表位位置输入框）
                 }
 
                 // 2. 递进缩进设置
@@ -1000,11 +1283,14 @@ namespace WordMan_VSTO
                     {
                         if (level == 1)
                         {
-                            numberIndentControl.Value = numericUpDownWithUnit2.Value; // 一级编号缩进
+                            numberIndentControl.ValueInCentimeters = numericUpDownWithUnit2.ValueInCentimeters; // 一级编号缩进
                         }
                         else
                         {
-                            numberIndentControl.Value = numericUpDownWithUnit2.Value + numericUpDownWithUnit3.Value * (level - 1); // 递进计算
+                            // 使用Word API进行递进计算
+                            decimal baseIndent = numericUpDownWithUnit2.ValueInCentimeters;
+                            decimal increment = numericUpDownWithUnit3.ValueInCentimeters;
+                            numberIndentControl.ValueInCentimeters = baseIndent + increment * (level - 1);
                         }
                     }
                 }

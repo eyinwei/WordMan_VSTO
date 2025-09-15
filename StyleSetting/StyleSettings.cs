@@ -43,10 +43,9 @@ namespace WordMan_VSTO
         // 样式列表与预设样式
         private List<string> _styleNames = new List<string>
         {
-            "正文（无缩进）", "正文（缩进）", "一级标题", "二级标题", "三级标题",
-            "四级标题", "五级标题", "六级标题", "表中文本", "题注"
+            "标题 1", "标题 2", "标题 3", "标题 4", "标题 5", "标题 6", "正文", "题注", "表内文字"
         };
-        private string[] _presetStyles = { "公文风格" };
+        private string[] _presetStyles = { "公文风格", "学术风格" };
 
         public StyleSettings()
         {
@@ -102,6 +101,11 @@ namespace WordMan_VSTO
             var delBtn = _uiDesigner.GetControl<Button>("btnDeleteStyle");
             if (delBtn != null)
                 delBtn.Click += DeleteStyle_Click;
+                
+            // 预设样式选择事件
+            var presetCombo = _uiDesigner.GetControl<ComboBox>("cmbPresetStyle");
+            if (presetCombo != null)
+                presetCombo.SelectedIndexChanged += PresetStyle_SelectedIndexChanged;
 
             // 选择内置样式按钮事件
             var selectBuiltInBtn = _uiDesigner.GetControl<Button>("btnSelectBuiltIn");
@@ -139,10 +143,63 @@ namespace WordMan_VSTO
             var cmb = sender as ComboBox;
             if (cmb == null) return;
 
-            // 只支持公文风格
-            if (cmb.SelectedItem.ToString() == "公文风格")
+            switch (cmb.SelectedItem?.ToString())
             {
+                case "公文风格":
                     InitializeOfficialDocumentStyle();
+                    break;
+                case "学术风格":
+                    InitializeAcademicStyle();
+                    break;
+            }
+            
+            // 更新UI显示
+            UpdateUIFromCurrentStyles();
+            // 更新预览
+            _uiDesigner.UpdateStylePreview();
+        }
+
+        /// <summary>
+        /// 根据当前样式设置更新UI显示
+        /// </summary>
+        private void UpdateUIFromCurrentStyles()
+        {
+            // 获取当前选中的样式
+            var styleList = _uiDesigner.GetControl<ListBox>("lstStyleList");
+            if (styleList?.SelectedItem != null)
+            {
+                string selectedStyle = styleList.SelectedItem.ToString();
+                // 重新加载当前选中的样式到UI
+                switch (selectedStyle)
+                {
+                    case "标题 1":
+                        LoadTitleSettings("Title1", Title1Settings);
+                        break;
+                    case "标题 2":
+                        LoadTitleSettings("Title2", Title2Settings);
+                        break;
+                    case "标题 3":
+                        LoadTitleSettings("Title3", Title3Settings);
+                        break;
+                    case "标题 4":
+                        LoadTitleSettings("Title4", Title4Settings);
+                        break;
+                    case "标题 5":
+                        LoadTitleSettings("Title5", Title5Settings);
+                        break;
+                    case "标题 6":
+                        LoadTitleSettings("Title6", Title6Settings);
+                        break;
+                    case "正文":
+                        LoadBodyTextSettings(false);
+                        break;
+                    case "表内文字":
+                        LoadTableTextSettings();
+                        break;
+                    case "题注":
+                        LoadCaptionSettings();
+                        break;
+                }
             }
         }
 
@@ -152,7 +209,7 @@ namespace WordMan_VSTO
             // 正文样式（GB/T 9704-2012：3号仿宋体字）
             BodyTextSettings = new Hashtable
             {
-                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", 16f}, // 三号=16磅
+                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", "16"}, // 三号=16磅
                 {"isBold", false}, {"alignment", WdParagraphAlignment.wdAlignParagraphJustify},
                 {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 28f} // 28磅行距（每页22行）
             };
@@ -166,7 +223,7 @@ namespace WordMan_VSTO
             // 一级标题（GB/T 9704-2012：2号小标宋体字）
             Title1Settings = new Hashtable
             {
-                {"enFont", "小标宋"}, {"cnFont", "小标宋"}, {"fontSize", 22f}, // 二号=22磅
+                {"enFont", "小标宋"}, {"cnFont", "小标宋"}, {"fontSize", "22"}, // 二号=22磅
                 {"isBold", true}, {"alignment", WdParagraphAlignment.wdAlignParagraphCenter},
                 {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 28f}
             };
@@ -174,7 +231,7 @@ namespace WordMan_VSTO
             // 二级标题（GB/T 9704-2012：3号黑体字）
             Title2Settings = new Hashtable
             {
-                {"enFont", "黑体"}, {"cnFont", "黑体"}, {"fontSize", 16f}, // 三号=16磅
+                {"enFont", "黑体"}, {"cnFont", "黑体"}, {"fontSize", "16"}, // 三号=16磅
                 {"isBold", true}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
                 {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 28f}
             };
@@ -182,7 +239,7 @@ namespace WordMan_VSTO
             // 三级标题（GB/T 9704-2012：3号楷体字）
             Title3Settings = new Hashtable
             {
-                {"enFont", "楷体"}, {"cnFont", "楷体"}, {"fontSize", 16f}, // 三号=16磅
+                {"enFont", "楷体"}, {"cnFont", "楷体"}, {"fontSize", "16"}, // 三号=16磅
                 {"isBold", true}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
                 {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 28f}
             };
@@ -190,7 +247,7 @@ namespace WordMan_VSTO
             // 四级标题（GB/T 9704-2012：3号仿宋体字）
             Title4Settings = new Hashtable
             {
-                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", 16f}, // 三号=16磅
+                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", "16"}, // 三号=16磅
                 {"isBold", true}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
                 {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 28f}
             };
@@ -198,7 +255,7 @@ namespace WordMan_VSTO
             // 五级标题（GB/T 9704-2012：3号仿宋体字）
             Title5Settings = new Hashtable
             {
-                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", 16f}, // 三号=16磅
+                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", "16"}, // 三号=16磅
                 {"isBold", true}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
                 {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 28f}
             };
@@ -206,7 +263,7 @@ namespace WordMan_VSTO
             // 六级标题（GB/T 9704-2012：3号仿宋体字）
             Title6Settings = new Hashtable
             {
-                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", 16f}, // 三号=16磅
+                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", "16"}, // 三号=16磅
                 {"isBold", true}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
                 {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 28f}
             };
@@ -214,7 +271,7 @@ namespace WordMan_VSTO
             // 表中文本（GB/T 9704-2012：3号仿宋体字）
             TableTextSettings = new Hashtable
             {
-                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", 16f}, // 三号=16磅
+                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", "16"}, // 三号=16磅
                 {"alignment", WdParagraphAlignment.wdAlignParagraphCenter},
                 {"lineSpacing", 28f}
             };
@@ -222,9 +279,93 @@ namespace WordMan_VSTO
             // 题注（GB/T 9704-2012：3号仿宋体字）
             CaptionSettings = new Hashtable
             {
-                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", 16f}, // 三号=16磅
+                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", "16"}, // 三号=16磅
                 {"alignment", WdParagraphAlignment.wdAlignParagraphCenter},
                 {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 28f}
+            };
+
+            LoadSettings(); // 刷新界面
+        }
+
+        // 学术风格初始化（按照学术论文标准）
+        private void InitializeAcademicStyle()
+        {
+            // 正文样式（学术论文：小四宋体字）
+            BodyTextSettings = new Hashtable
+            {
+                {"enFont", "宋体"}, {"cnFont", "宋体"}, {"fontSize", "14"}, // 小四=14磅
+                {"isBold", false}, {"alignment", WdParagraphAlignment.wdAlignParagraphJustify},
+                {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 20f} // 1.3倍行距
+            };
+
+            // 正文缩进样式
+            BodyTextIndentSettings = new Hashtable
+            {
+                {"leftIndent", 0f}, {"firstLineIndent", 28f} // 首行缩进2个字符
+            };
+
+            // 一级标题（学术论文：四号黑体字）
+            Title1Settings = new Hashtable
+            {
+                {"enFont", "黑体"}, {"cnFont", "黑体"}, {"fontSize", "18"}, // 四号=18磅
+                {"isBold", true}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
+                {"spaceBefore", 12f}, {"spaceAfter", 0f}, {"lineSpacing", 20f}
+            };
+
+            // 二级标题（学术论文：小四黑体字）
+            Title2Settings = new Hashtable
+            {
+                {"enFont", "黑体"}, {"cnFont", "黑体"}, {"fontSize", "14"}, // 小四=14磅
+                {"isBold", true}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
+                {"spaceBefore", 12f}, {"spaceAfter", 0f}, {"lineSpacing", 20f}
+            };
+
+            // 三级标题（学术论文：小四宋体字）
+            Title3Settings = new Hashtable
+            {
+                {"enFont", "宋体"}, {"cnFont", "宋体"}, {"fontSize", "14"}, // 小四=14磅
+                {"isBold", false}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
+                {"spaceBefore", 12f}, {"spaceAfter", 0f}, {"lineSpacing", 20f}
+            };
+
+            // 四级标题（学术论文：小四宋体字）
+            Title4Settings = new Hashtable
+            {
+                {"enFont", "宋体"}, {"cnFont", "宋体"}, {"fontSize", "14"}, // 小四=14磅
+                {"isBold", false}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
+                {"spaceBefore", 12f}, {"spaceAfter", 0f}, {"lineSpacing", 20f}
+            };
+
+            // 五级标题（学术论文：小四宋体字）
+            Title5Settings = new Hashtable
+            {
+                {"enFont", "宋体"}, {"cnFont", "宋体"}, {"fontSize", "14"}, // 小四=14磅
+                {"isBold", false}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
+                {"spaceBefore", 12f}, {"spaceAfter", 0f}, {"lineSpacing", 20f}
+            };
+
+            // 六级标题（学术论文：小四宋体字）
+            Title6Settings = new Hashtable
+            {
+                {"enFont", "宋体"}, {"cnFont", "宋体"}, {"fontSize", "14"}, // 小四=14磅
+                {"isBold", false}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
+                {"spaceBefore", 12f}, {"spaceAfter", 0f}, {"lineSpacing", 20f}
+            };
+
+            // 表中文本（学术论文：五号宋体字）
+            TableTextSettings = new Hashtable
+            {
+                {"enFont", "宋体"}, {"cnFont", "宋体"}, {"fontSize", "12"}, // 五号=12磅
+                {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
+                {"lineSpacing", 16f} // 单倍行距
+            };
+
+            // 题注（学术论文：小四宋体字）
+            CaptionSettings = new Hashtable
+            {
+                {"enFont", "宋体"}, {"cnFont", "宋体"}, {"fontSize", "14"}, // 小四=14磅
+                {"alignment", WdParagraphAlignment.wdAlignParagraphCenter},
+                {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 20f}
             };
 
             LoadSettings(); // 刷新界面
@@ -313,8 +454,8 @@ namespace WordMan_VSTO
             // 添加样式数据
             var styleNames = new List<string>
             {
-                "正文（无缩进）", "正文（缩进）", "一级标题", "二级标题", "三级标题",
-                "四级标题", "五级标题", "六级标题", "表中文本", "题注"
+                "一级标题", "二级标题", "三级标题", "四级标题", "五级标题", "六级标题",
+                "正文（无缩进）", "正文（缩进）", "表中文本", "题注"
             };
 
             foreach (var styleName in styleNames)
@@ -346,50 +487,46 @@ namespace WordMan_VSTO
             if (cmbFontSize != null)
                 cmbFontSize.Text = settings["fontSize"].ToString();
                 
-            var boldBtn = FindControl<Button>("btnBold");
-            if (boldBtn != null)
-                boldBtn.Text = Convert.ToBoolean(settings["isBold"]) ? "是" : "否";
+            var chkBold = FindControl<CheckBox>("chkBold");
+            if (chkBold != null)
+                chkBold.Checked = Convert.ToBoolean(settings["isBold"]);
 
             // 对齐方式
-            var cmbAlign = FindControl<ComboBox>("cmbHAlignment");
+            var cmbAlign = FindControl<ComboBox>("cmbAlignment");
             if (cmbAlign != null)
             {
-            switch ((WdParagraphAlignment)settings["alignment"])
-            {
-                case WdParagraphAlignment.wdAlignParagraphLeft:
+                switch ((WdParagraphAlignment)settings["alignment"])
+                {
+                    case WdParagraphAlignment.wdAlignParagraphLeft:
                         cmbAlign.Text = "左对齐";
-                    break;
-                case WdParagraphAlignment.wdAlignParagraphCenter:
+                        break;
+                    case WdParagraphAlignment.wdAlignParagraphCenter:
                         cmbAlign.Text = "居中";
-                    break;
-                case WdParagraphAlignment.wdAlignParagraphRight:
+                        break;
+                    case WdParagraphAlignment.wdAlignParagraphRight:
                         cmbAlign.Text = "右对齐";
                         break;
                     case WdParagraphAlignment.wdAlignParagraphJustify:
                         cmbAlign.Text = "两端对齐";
-                    break;
+                        break;
                 }
             }
 
-            var cmbSpaceBefore = FindControl<ComboBox>("cmbSpaceBefore");
-            if (cmbSpaceBefore != null)
-                cmbSpaceBefore.Text = settings["spaceBefore"].ToString() + "磅";
+            var txtSpaceBefore = FindControl<TextBox>("txtSpaceBefore");
+            if (txtSpaceBefore != null)
+                txtSpaceBefore.Text = settings["spaceBefore"].ToString() + "行";
                 
-            var cmbSpaceAfter = FindControl<ComboBox>("cmbSpaceAfter");
-            if (cmbSpaceAfter != null)
-                cmbSpaceAfter.Text = settings["spaceAfter"].ToString() + "磅";
+            var txtSpaceAfter = FindControl<TextBox>("txtSpaceAfter");
+            if (txtSpaceAfter != null)
+                txtSpaceAfter.Text = settings["spaceAfter"].ToString() + "行";
                 
             var cmbLineSpace = FindControl<ComboBox>("cmbLineSpace");
             if (cmbLineSpace != null)
                 cmbLineSpace.Text = settings["lineSpacing"].ToString() + "磅";
                 
-            var txtLeftIndent = FindControl<TextBox>("txtLeftIndent");
-            if (txtLeftIndent != null)
-                txtLeftIndent.Text = "0";
-                
-            var txtRightIndent = FindControl<TextBox>("txtRightIndent");
-            if (txtRightIndent != null)
-                txtRightIndent.Text = "0";
+            var txtFirstIndent = FindControl<TextBox>("txtFirstIndent");
+            if (txtFirstIndent != null)
+                txtFirstIndent.Text = "0字符";
         }
 
         // 加载正文样式（区分缩进/无缩进）
@@ -409,60 +546,55 @@ namespace WordMan_VSTO
             if (cmbFontSize != null)
                 cmbFontSize.Text = BodyTextSettings["fontSize"].ToString();
                 
-            var boldBtn = FindControl<Button>("btnBold");
-            if (boldBtn != null)
-                boldBtn.Text = Convert.ToBoolean(BodyTextSettings["isBold"]) ? "是" : "否";
+            var chkBold = FindControl<CheckBox>("chkBold");
+            if (chkBold != null)
+                chkBold.Checked = Convert.ToBoolean(BodyTextSettings["isBold"]);
 
             // 对齐方式
-            var cmbAlign = FindControl<ComboBox>("cmbHAlignment");
+            var cmbAlign = FindControl<ComboBox>("cmbAlignment");
             if (cmbAlign != null)
             {
-            switch ((WdParagraphAlignment)BodyTextSettings["alignment"])
-            {
-                case WdParagraphAlignment.wdAlignParagraphLeft:
+                switch ((WdParagraphAlignment)BodyTextSettings["alignment"])
+                {
+                    case WdParagraphAlignment.wdAlignParagraphLeft:
                         cmbAlign.Text = "左对齐";
-                    break;
-                case WdParagraphAlignment.wdAlignParagraphCenter:
+                        break;
+                    case WdParagraphAlignment.wdAlignParagraphCenter:
                         cmbAlign.Text = "居中";
-                    break;
-                case WdParagraphAlignment.wdAlignParagraphRight:
+                        break;
+                    case WdParagraphAlignment.wdAlignParagraphRight:
                         cmbAlign.Text = "右对齐";
                         break;
                     case WdParagraphAlignment.wdAlignParagraphJustify:
                         cmbAlign.Text = "两端对齐";
-                    break;
+                        break;
                 }
             }
 
-            var cmbSpaceBefore = FindControl<ComboBox>("cmbSpaceBefore");
-            if (cmbSpaceBefore != null)
-                cmbSpaceBefore.Text = BodyTextSettings["spaceBefore"].ToString() + "磅";
+            var txtSpaceBefore = FindControl<TextBox>("txtSpaceBefore");
+            if (txtSpaceBefore != null)
+                txtSpaceBefore.Text = BodyTextSettings["spaceBefore"].ToString() + "行";
                 
-            var cmbSpaceAfter = FindControl<ComboBox>("cmbSpaceAfter");
-            if (cmbSpaceAfter != null)
-                cmbSpaceAfter.Text = BodyTextSettings["spaceAfter"].ToString() + "磅";
+            var txtSpaceAfter = FindControl<TextBox>("txtSpaceAfter");
+            if (txtSpaceAfter != null)
+                txtSpaceAfter.Text = BodyTextSettings["spaceAfter"].ToString() + "行";
                 
             var cmbLineSpace = FindControl<ComboBox>("cmbLineSpace");
             if (cmbLineSpace != null)
                 cmbLineSpace.Text = BodyTextSettings["lineSpacing"].ToString() + "磅";
 
             // 缩进设置
-            var txtLeftIndent = FindControl<TextBox>("txtLeftIndent");
-            var txtRightIndent = FindControl<TextBox>("txtRightIndent");
+            var txtFirstIndent = FindControl<TextBox>("txtFirstIndent");
             
             if (useIndent && BodyTextIndentSettings != null)
             {
-                if (txtLeftIndent != null)
-                    txtLeftIndent.Text = BodyTextIndentSettings["leftIndent"].ToString();
-                if (txtRightIndent != null)
-                    txtRightIndent.Text = BodyTextIndentSettings["firstLineIndent"].ToString();
+                if (txtFirstIndent != null)
+                    txtFirstIndent.Text = BodyTextIndentSettings["firstLineIndent"].ToString() + "字符";
             }
             else
             {
-                if (txtLeftIndent != null)
-                    txtLeftIndent.Text = "0";
-                if (txtRightIndent != null)
-                    txtRightIndent.Text = "0";
+                if (txtFirstIndent != null)
+                    txtFirstIndent.Text = "0字符";
             }
         }
 
@@ -483,49 +615,45 @@ namespace WordMan_VSTO
             if (cmbFontSize != null)
                 cmbFontSize.Text = TableTextSettings["fontSize"].ToString();
                 
-            var boldBtn = FindControl<Button>("btnBold");
-            if (boldBtn != null)
-                boldBtn.Text = "否";
+            var chkBold = FindControl<CheckBox>("chkBold");
+            if (chkBold != null)
+                chkBold.Checked = false;
 
-            var cmbAlign = FindControl<ComboBox>("cmbHAlignment");
+            var cmbAlign = FindControl<ComboBox>("cmbAlignment");
             if (cmbAlign != null)
             {
-            switch ((WdParagraphAlignment)TableTextSettings["alignment"])
-            {
-                case WdParagraphAlignment.wdAlignParagraphLeft:
+                switch ((WdParagraphAlignment)TableTextSettings["alignment"])
+                {
+                    case WdParagraphAlignment.wdAlignParagraphLeft:
                         cmbAlign.Text = "左对齐";
-                    break;
-                case WdParagraphAlignment.wdAlignParagraphCenter:
+                        break;
+                    case WdParagraphAlignment.wdAlignParagraphCenter:
                         cmbAlign.Text = "居中";
-                    break;
-                case WdParagraphAlignment.wdAlignParagraphRight:
+                        break;
+                    case WdParagraphAlignment.wdAlignParagraphRight:
                         cmbAlign.Text = "右对齐";
                         break;
                     case WdParagraphAlignment.wdAlignParagraphJustify:
                         cmbAlign.Text = "两端对齐";
-                    break;
+                        break;
                 }
             }
 
-            var cmbSpaceBefore = FindControl<ComboBox>("cmbSpaceBefore");
-            if (cmbSpaceBefore != null)
-                cmbSpaceBefore.Text = "0磅";
+            var txtSpaceBefore = FindControl<TextBox>("txtSpaceBefore");
+            if (txtSpaceBefore != null)
+                txtSpaceBefore.Text = "0.00行";
                 
-            var cmbSpaceAfter = FindControl<ComboBox>("cmbSpaceAfter");
-            if (cmbSpaceAfter != null)
-                cmbSpaceAfter.Text = "0磅";
+            var txtSpaceAfter = FindControl<TextBox>("txtSpaceAfter");
+            if (txtSpaceAfter != null)
+                txtSpaceAfter.Text = "0.00行";
                 
             var cmbLineSpace = FindControl<ComboBox>("cmbLineSpace");
             if (cmbLineSpace != null)
                 cmbLineSpace.Text = TableTextSettings["lineSpacing"].ToString() + "磅";
                 
-            var txtLeftIndent = FindControl<TextBox>("txtLeftIndent");
-            if (txtLeftIndent != null)
-                txtLeftIndent.Text = "0";
-                
-            var txtRightIndent = FindControl<TextBox>("txtRightIndent");
-            if (txtRightIndent != null)
-                txtRightIndent.Text = "0";
+            var txtFirstIndent = FindControl<TextBox>("txtFirstIndent");
+            if (txtFirstIndent != null)
+                txtFirstIndent.Text = "0字符";
         }
 
         // 题注加载逻辑
@@ -545,49 +673,45 @@ namespace WordMan_VSTO
             if (cmbFontSize != null)
                 cmbFontSize.Text = CaptionSettings["fontSize"].ToString();
                 
-            var boldBtn = FindControl<Button>("btnBold");
-            if (boldBtn != null)
-                boldBtn.Text = "否";
+            var chkBold = FindControl<CheckBox>("chkBold");
+            if (chkBold != null)
+                chkBold.Checked = false;
 
-            var cmbAlign = FindControl<ComboBox>("cmbHAlignment");
+            var cmbAlign = FindControl<ComboBox>("cmbAlignment");
             if (cmbAlign != null)
             {
-            switch ((WdParagraphAlignment)CaptionSettings["alignment"])
-            {
-                case WdParagraphAlignment.wdAlignParagraphLeft:
+                switch ((WdParagraphAlignment)CaptionSettings["alignment"])
+                {
+                    case WdParagraphAlignment.wdAlignParagraphLeft:
                         cmbAlign.Text = "左对齐";
-                    break;
-                case WdParagraphAlignment.wdAlignParagraphCenter:
+                        break;
+                    case WdParagraphAlignment.wdAlignParagraphCenter:
                         cmbAlign.Text = "居中";
-                    break;
-                case WdParagraphAlignment.wdAlignParagraphRight:
+                        break;
+                    case WdParagraphAlignment.wdAlignParagraphRight:
                         cmbAlign.Text = "右对齐";
                         break;
                     case WdParagraphAlignment.wdAlignParagraphJustify:
                         cmbAlign.Text = "两端对齐";
-                    break;
+                        break;
                 }
             }
 
-            var cmbSpaceBefore = FindControl<ComboBox>("cmbSpaceBefore");
-            if (cmbSpaceBefore != null)
-                cmbSpaceBefore.Text = CaptionSettings["spaceBefore"].ToString() + "磅";
+            var txtSpaceBefore = FindControl<TextBox>("txtSpaceBefore");
+            if (txtSpaceBefore != null)
+                txtSpaceBefore.Text = CaptionSettings["spaceBefore"].ToString() + "行";
                 
-            var cmbSpaceAfter = FindControl<ComboBox>("cmbSpaceAfter");
-            if (cmbSpaceAfter != null)
-                cmbSpaceAfter.Text = CaptionSettings["spaceAfter"].ToString() + "磅";
+            var txtSpaceAfter = FindControl<TextBox>("txtSpaceAfter");
+            if (txtSpaceAfter != null)
+                txtSpaceAfter.Text = CaptionSettings["spaceAfter"].ToString() + "行";
                 
             var cmbLineSpace = FindControl<ComboBox>("cmbLineSpace");
             if (cmbLineSpace != null)
                 cmbLineSpace.Text = CaptionSettings["lineSpacing"].ToString() + "磅";
                 
-            var txtLeftIndent = FindControl<TextBox>("txtLeftIndent");
-            if (txtLeftIndent != null)
-                txtLeftIndent.Text = "0";
-                
-            var txtRightIndent = FindControl<TextBox>("txtRightIndent");
-            if (txtRightIndent != null)
-                txtRightIndent.Text = "0";
+            var txtFirstIndent = FindControl<TextBox>("txtFirstIndent");
+            if (txtFirstIndent != null)
+                txtFirstIndent.Text = "0字符";
         }
 
         // 查找控件
@@ -609,10 +733,7 @@ namespace WordMan_VSTO
 
             // 保存正文样式
             BodyTextSettings = GetBodyTextSettings();
-            if (FindControl<ListBox>("lstStyles").SelectedItem.ToString() == "正文（缩进）")
-            {
-                BodyTextIndentSettings = GetBodyTextIndentSettings();
-            }
+            // 正文样式统一处理，不再区分缩进/无缩进
 
             // 保存表中文本和题注样式
             TableTextSettings = GetTableTextSettings();
@@ -630,9 +751,9 @@ namespace WordMan_VSTO
             var cmbEngFont = FindControl<ComboBox>("cmbEngFontName");
             var cmbChnFont = FindControl<ComboBox>("cmbChnFontName");
             var cmbFontSize = FindControl<ComboBox>("cmbFontSize");
-            var boldBtn = FindControl<Button>("btnBold");
-            var cmbSpaceBefore = FindControl<ComboBox>("cmbSpaceBefore");
-            var cmbSpaceAfter = FindControl<ComboBox>("cmbSpaceAfter");
+            var chkBold = FindControl<CheckBox>("chkBold");
+            var txtSpaceBefore = FindControl<TextBox>("txtSpaceBefore");
+            var txtSpaceAfter = FindControl<TextBox>("txtSpaceAfter");
             var cmbLineSpace = FindControl<ComboBox>("cmbLineSpace");
 
             return new Hashtable
@@ -640,10 +761,10 @@ namespace WordMan_VSTO
                 {"enFont", cmbEngFont?.Text ?? "仿宋"},
                 {"cnFont", cmbChnFont?.Text ?? "仿宋"},
                 {"fontSize", float.TryParse(cmbFontSize?.Text, out float fontSize) ? fontSize : 16f},
-                {"isBold", boldBtn?.Text == "是"},
+                {"isBold", chkBold?.Checked ?? false},
                 {"alignment", GetAlignmentValue()},
-                {"spaceBefore", GetSpaceValue(cmbSpaceBefore?.Text)},
-                {"spaceAfter", GetSpaceValue(cmbSpaceAfter?.Text)},
+                {"spaceBefore", GetSpaceValue(txtSpaceBefore?.Text)},
+                {"spaceAfter", GetSpaceValue(txtSpaceAfter?.Text)},
                 {"lineSpacing", GetSpaceValue(cmbLineSpace?.Text)}
             };
         }
@@ -654,9 +775,9 @@ namespace WordMan_VSTO
             var cmbEngFont = FindControl<ComboBox>("cmbEngFontName");
             var cmbChnFont = FindControl<ComboBox>("cmbChnFontName");
             var cmbFontSize = FindControl<ComboBox>("cmbFontSize");
-            var boldBtn = FindControl<Button>("btnBold");
-            var cmbSpaceBefore = FindControl<ComboBox>("cmbSpaceBefore");
-            var cmbSpaceAfter = FindControl<ComboBox>("cmbSpaceAfter");
+            var chkBold = FindControl<CheckBox>("chkBold");
+            var txtSpaceBefore = FindControl<TextBox>("txtSpaceBefore");
+            var txtSpaceAfter = FindControl<TextBox>("txtSpaceAfter");
             var cmbLineSpace = FindControl<ComboBox>("cmbLineSpace");
 
             return new Hashtable
@@ -664,10 +785,10 @@ namespace WordMan_VSTO
                 {"enFont", cmbEngFont?.Text ?? "仿宋"},
                 {"cnFont", cmbChnFont?.Text ?? "仿宋"},
                 {"fontSize", float.TryParse(cmbFontSize?.Text, out float fontSize) ? fontSize : 16f},
-                {"isBold", boldBtn?.Text == "是"},
+                {"isBold", chkBold?.Checked ?? false},
                 {"alignment", GetAlignmentValue()},
-                {"spaceBefore", GetSpaceValue(cmbSpaceBefore?.Text)},
-                {"spaceAfter", GetSpaceValue(cmbSpaceAfter?.Text)},
+                {"spaceBefore", GetSpaceValue(txtSpaceBefore?.Text)},
+                {"spaceAfter", GetSpaceValue(txtSpaceAfter?.Text)},
                 {"lineSpacing", GetSpaceValue(cmbLineSpace?.Text)}
             };
         }
@@ -675,13 +796,12 @@ namespace WordMan_VSTO
         // 获取正文缩进设置
         private Hashtable GetBodyTextIndentSettings()
         {
-            var txtLeftIndent = FindControl<TextBox>("txtLeftIndent");
-            var txtRightIndent = FindControl<TextBox>("txtRightIndent");
+            var txtFirstIndent = FindControl<TextBox>("txtFirstIndent");
 
             return new Hashtable
             {
-                {"leftIndent", float.TryParse(txtLeftIndent?.Text, out float leftIndent) ? leftIndent : 0f},
-                {"firstLineIndent", float.TryParse(txtRightIndent?.Text, out float rightIndent) ? rightIndent : 0f}
+                {"leftIndent", 0f},
+                {"firstLineIndent", GetFirstLineIndentValue(txtFirstIndent?.Text)}
             };
         }
 
@@ -709,8 +829,8 @@ namespace WordMan_VSTO
             var cmbEngFont = FindControl<ComboBox>("cmbEngFontName");
             var cmbChnFont = FindControl<ComboBox>("cmbChnFontName");
             var cmbFontSize = FindControl<ComboBox>("cmbFontSize");
-            var cmbSpaceBefore = FindControl<ComboBox>("cmbSpaceBefore");
-            var cmbSpaceAfter = FindControl<ComboBox>("cmbSpaceAfter");
+            var txtSpaceBefore = FindControl<TextBox>("txtSpaceBefore");
+            var txtSpaceAfter = FindControl<TextBox>("txtSpaceAfter");
             var cmbLineSpace = FindControl<ComboBox>("cmbLineSpace");
 
             return new Hashtable
@@ -719,24 +839,50 @@ namespace WordMan_VSTO
                 {"cnFont", cmbChnFont?.Text ?? "仿宋"},
                 {"fontSize", float.TryParse(cmbFontSize?.Text, out float fontSize) ? fontSize : 16f},
                 {"alignment", GetAlignmentValue()},
-                {"spaceBefore", GetSpaceValue(cmbSpaceBefore?.Text)},
-                {"spaceAfter", GetSpaceValue(cmbSpaceAfter?.Text)},
+                {"spaceBefore", GetSpaceValue(txtSpaceBefore?.Text)},
+                {"spaceAfter", GetSpaceValue(txtSpaceAfter?.Text)},
                 {"lineSpacing", GetSpaceValue(cmbLineSpace?.Text)}
             };
         }
 
-        // 获取间距值（去除"磅"单位）
+        // 获取间距值（去除"磅"和"行"单位）
         private float GetSpaceValue(string spaceText)
         {
             if (string.IsNullOrEmpty(spaceText)) return 0f;
-            var cleanText = spaceText.Replace("磅", "").Trim();
+            var cleanText = spaceText.Replace("磅", "").Replace("行", "").Trim();
             return float.TryParse(cleanText, out float value) ? value : 0f;
+        }
+
+        // 获取首行缩进值（字符转换为磅）
+        private float GetFirstLineIndentValue(string indentText)
+        {
+            if (string.IsNullOrEmpty(indentText)) return 0f;
+            
+            if (indentText.Contains("字符"))
+            {
+                var cleanText = indentText.Replace("字符", "").Trim();
+                if (float.TryParse(cleanText, out float charValue))
+                {
+                    // 1字符约等于16磅（仿宋三号字）
+                    return charValue * 16f;
+                }
+            }
+            else if (indentText.Contains("磅"))
+            {
+                var cleanText = indentText.Replace("磅", "").Trim();
+                if (float.TryParse(cleanText, out float pointValue))
+                {
+                    return pointValue;
+                }
+            }
+            
+            return 0f;
         }
 
         // 获取对齐方式对应的枚举值
         private WdParagraphAlignment GetAlignmentValue()
         {
-            var cmbAlign = FindControl<ComboBox>("cmbHAlignment");
+            var cmbAlign = FindControl<ComboBox>("cmbAlignment");
             if (cmbAlign == null) return WdParagraphAlignment.wdAlignParagraphLeft;
             
             switch (cmbAlign.Text)
@@ -758,56 +904,121 @@ namespace WordMan_VSTO
         // 将设置应用到文档
         private void ApplySettingsToDocument()
         {
-            // 获取当前Word应用程序和文档
-            var app = Globals.ThisAddIn.Application;
-            var doc = app.ActiveDocument;
-            if (doc == null) return;
+            try
+            {
+                // 获取当前Word应用程序和文档
+                var app = Globals.ThisAddIn.Application;
+                var doc = app.ActiveDocument;
+                if (doc == null)
+                {
+                    MessageBox.Show("请先打开一个Word文档！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
 
-            // 应用页面设置（固定为GB/T 9704-2012标准）
-            doc.PageSetup.PaperSize = WdPaperSize.wdPaperA4; // A4纸张
-            doc.PageSetup.Orientation = WdOrientation.wdOrientPortrait; // 竖向
-            doc.PageSetup.TopMargin = app.InchesToPoints(3.7f / 2.54f); // 上边距37mm
-            doc.PageSetup.BottomMargin = app.InchesToPoints(3.5f / 2.54f); // 下边距35mm
-            doc.PageSetup.LeftMargin = app.InchesToPoints(2.8f / 2.54f); // 左边距28mm
-            doc.PageSetup.RightMargin = app.InchesToPoints(2.6f / 2.54f); // 右边距26mm
-            doc.PageSetup.Gutter = 0; // 无装订线
+                // 应用页面设置（固定为GB/T 9704-2012标准）
+                ApplyPageSettings(doc, app);
 
-            // 应用样式设置
-            ApplyStyleToDocument("标题 1", Title1Settings, app);
-            ApplyStyleToDocument("标题 2", Title2Settings, app);
-            ApplyStyleToDocument("标题 3", Title3Settings, app);
-            ApplyStyleToDocument("标题 4", Title4Settings, app);
-            ApplyStyleToDocument("标题 5", Title5Settings, app);
-            ApplyStyleToDocument("标题 6", Title6Settings, app);
-            ApplyStyleToDocument("正文", BodyTextSettings, app);
-            ApplyStyleToDocument("表中文本", TableTextSettings, app);
-            ApplyStyleToDocument("题注", CaptionSettings, app);
+                // 应用样式设置
+                ApplyStyleToDocument("标题 1", Title1Settings, doc);
+                ApplyStyleToDocument("标题 2", Title2Settings, doc);
+                ApplyStyleToDocument("标题 3", Title3Settings, doc);
+                ApplyStyleToDocument("标题 4", Title4Settings, doc);
+                ApplyStyleToDocument("标题 5", Title5Settings, doc);
+                ApplyStyleToDocument("标题 6", Title6Settings, doc);
+                ApplyStyleToDocument("正文", BodyTextSettings, doc);
+                
+                // 应用自定义样式
+                ApplyCustomStyleToDocument("表中文本", TableTextSettings, doc);
+                ApplyCustomStyleToDocument("题注", CaptionSettings, doc);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"应用样式设置时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // 应用页面设置
+        private void ApplyPageSettings(Document doc, Microsoft.Office.Interop.Word.Application app)
+        {
+            try
+            {
+                // 应用GB/T 9704-2012标准页面设置
+                doc.PageSetup.PaperSize = WdPaperSize.wdPaperA4; // A4纸张
+                doc.PageSetup.Orientation = WdOrientation.wdOrientPortrait; // 竖向
+                doc.PageSetup.TopMargin = app.InchesToPoints(3.7f / 2.54f); // 上边距37mm
+                doc.PageSetup.BottomMargin = app.InchesToPoints(3.5f / 2.54f); // 下边距35mm
+                doc.PageSetup.LeftMargin = app.InchesToPoints(2.8f / 2.54f); // 左边距28mm
+                doc.PageSetup.RightMargin = app.InchesToPoints(2.6f / 2.54f); // 右边距26mm
+                doc.PageSetup.Gutter = 0; // 无装订线
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"应用页面设置时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         // 应用单个样式到文档
-        private void ApplyStyleToDocument(string styleName, Hashtable settings, Microsoft.Office.Interop.Word.Application app)
+        private void ApplyStyleToDocument(string styleName, Hashtable settings, Document doc)
         {
             if (settings == null) return;
 
             try
             {
-                var style = app.ActiveDocument.Styles[styleName];
+                var style = doc.Styles[styleName];
 
                 // 设置字体
-                style.Font.Name = settings["cnFont"].ToString();
-                style.Font.NameAscii = settings["enFont"].ToString();
-                style.Font.Size = float.Parse(settings["fontSize"].ToString());
+                style.Font.Name = settings["cnFont"]?.ToString() ?? "仿宋";
+                style.Font.NameAscii = settings["enFont"]?.ToString() ?? "仿宋";
+                style.Font.Size = float.TryParse(settings["fontSize"]?.ToString(), out float fontSize) ? fontSize : 16f;
                 style.Font.Bold = Convert.ToBoolean(settings["isBold"]) ? 1 : 0;
 
                 // 设置段落格式
-                style.ParagraphFormat.Alignment = (WdParagraphAlignment)settings["alignment"];
-                style.ParagraphFormat.SpaceBefore = float.Parse(settings["spaceBefore"].ToString());
-                style.ParagraphFormat.SpaceAfter = float.Parse(settings["spaceAfter"].ToString());
-                style.ParagraphFormat.LineSpacing = float.Parse(settings["lineSpacing"].ToString());
+                style.ParagraphFormat.Alignment = (WdParagraphAlignment)(settings["alignment"] ?? WdParagraphAlignment.wdAlignParagraphLeft);
+                style.ParagraphFormat.SpaceBefore = float.TryParse(settings["spaceBefore"]?.ToString(), out float spaceBefore) ? spaceBefore : 0f;
+                style.ParagraphFormat.SpaceAfter = float.TryParse(settings["spaceAfter"]?.ToString(), out float spaceAfter) ? spaceAfter : 0f;
+                style.ParagraphFormat.LineSpacing = float.TryParse(settings["lineSpacing"]?.ToString(), out float lineSpacing) ? lineSpacing : 28f;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"应用样式「{styleName}」时出错：{ex.Message}", "错误",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // 应用自定义样式到文档
+        private void ApplyCustomStyleToDocument(string styleName, Hashtable settings, Document doc)
+        {
+            if (settings == null) return;
+
+            try
+            {
+                // 检查样式是否存在，如果不存在则创建
+                Style style;
+                try
+                {
+                    style = doc.Styles[styleName];
+                }
+                catch
+                {
+                    // 样式不存在，创建新样式
+                    style = doc.Styles.Add(styleName, WdStyleType.wdStyleTypeParagraph);
+                }
+
+                // 设置字体
+                style.Font.Name = settings["cnFont"]?.ToString() ?? "仿宋";
+                style.Font.NameAscii = settings["enFont"]?.ToString() ?? "仿宋";
+                style.Font.Size = float.TryParse(settings["fontSize"]?.ToString(), out float fontSize) ? fontSize : 16f;
+                style.Font.Bold = Convert.ToBoolean(settings["isBold"]) ? 1 : 0;
+
+                // 设置段落格式
+                style.ParagraphFormat.Alignment = (WdParagraphAlignment)(settings["alignment"] ?? WdParagraphAlignment.wdAlignParagraphLeft);
+                style.ParagraphFormat.SpaceBefore = float.TryParse(settings["spaceBefore"]?.ToString(), out float spaceBefore) ? spaceBefore : 0f;
+                style.ParagraphFormat.SpaceAfter = float.TryParse(settings["spaceAfter"]?.ToString(), out float spaceAfter) ? spaceAfter : 0f;
+                style.ParagraphFormat.LineSpacing = float.TryParse(settings["lineSpacing"]?.ToString(), out float lineSpacing) ? lineSpacing : 28f;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"应用自定义样式「{styleName}」时出错：{ex.Message}", "错误",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -952,37 +1163,37 @@ namespace WordMan_VSTO
             // 根据选择的样式加载对应设置
             switch (selectedStyle)
             {
-                case "正文（无缩进）":
-                    LoadBodyTextSettings(false);
-                    break;
-                case "正文（缩进）":
-                    LoadBodyTextSettings(true);
-                    break;
-                case "一级标题":
+                case "标题 1":
                     LoadTitleSettings("Title1", Title1Settings);
                     break;
-                case "二级标题":
+                case "标题 2":
                     LoadTitleSettings("Title2", Title2Settings);
                     break;
-                case "三级标题":
+                case "标题 3":
                     LoadTitleSettings("Title3", Title3Settings);
                     break;
-                case "四级标题":
+                case "标题 4":
                     LoadTitleSettings("Title4", Title4Settings);
                     break;
-                case "五级标题":
+                case "标题 5":
                     LoadTitleSettings("Title5", Title5Settings);
                     break;
-                case "六级标题":
+                case "标题 6":
                     LoadTitleSettings("Title6", Title6Settings);
                     break;
-                case "表中文本":
+                case "正文":
+                    LoadBodyTextSettings(false);
+                    break;
+                case "表内文字":
                     LoadTableTextSettings();
                     break;
                 case "题注":
                     LoadCaptionSettings();
                     break;
             }
+            
+            // 更新预览
+            _uiDesigner.UpdateStylePreview();
         }
 
         /// <summary>
@@ -992,28 +1203,62 @@ namespace WordMan_VSTO
         {
             try
             {
-                var app = Globals.ThisAddIn.Application;
-                var doc = app.ActiveDocument;
-                if (doc == null)
+                // 显示打开文件对话框
+                using (var openDialog = new OpenFileDialog())
                 {
-                    MessageBox.Show("请先打开一个Word文档！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
+                    openDialog.Filter = "样式文件|*.xml|所有文件|*.*";
+                    openDialog.Title = "加载样式设置";
+                    openDialog.DefaultExt = "xml";
+                    openDialog.CheckFileExists = true;
+                    openDialog.Multiselect = false;
+
+                    if (openDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        // 从XML文件加载样式
+                        var styleInfos = StyleSerializationHelper.DeserializeListFromXml<StyleInfo>(openDialog.FileName);
+                        
+                        // 应用加载的样式设置
+                        foreach (var styleInfo in styleInfos)
+                        {
+                            var settings = styleInfo.ToHashtable();
+                            
+                            switch (styleInfo.StyleName)
+                            {
+                                case "正文":
+                                    BodyTextSettings = settings;
+                                    break;
+                                case "标题 1":
+                                    Title1Settings = settings;
+                                    break;
+                                case "标题 2":
+                                    Title2Settings = settings;
+                                    break;
+                                case "标题 3":
+                                    Title3Settings = settings;
+                                    break;
+                                case "标题 4":
+                                    Title4Settings = settings;
+                                    break;
+                                case "标题 5":
+                                    Title5Settings = settings;
+                                    break;
+                                case "标题 6":
+                                    Title6Settings = settings;
+                                    break;
+                                case "表中文本":
+                                    TableTextSettings = settings;
+                                    break;
+                                case "题注":
+                                    CaptionSettings = settings;
+                                    break;
+                            }
+                        }
+
+                        // 刷新界面
+                        LoadSettings();
+                        MessageBox.Show($"已从文件加载样式设置：{openDialog.FileName}", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
                 }
-
-                // 从当前文档加载样式
-                Title1Settings = GetStyleFromDocument(doc.Styles["标题 1"]);
-                Title2Settings = GetStyleFromDocument(doc.Styles["标题 2"]);
-                Title3Settings = GetStyleFromDocument(doc.Styles["标题 3"]);
-                Title4Settings = GetStyleFromDocument(doc.Styles["标题 4"]);
-                Title5Settings = GetStyleFromDocument(doc.Styles["标题 5"]);
-                Title6Settings = GetStyleFromDocument(doc.Styles["标题 6"]);
-                BodyTextSettings = GetStyleFromDocument(doc.Styles["正文"]);
-
-                // 加载页面设置
-                LoadPageSettingsFromDocument(doc);
-
-                LoadSettings();
-                MessageBox.Show("已加载当前文档样式！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
@@ -1047,8 +1292,35 @@ namespace WordMan_VSTO
                 TableTextSettings = GetTableTextSettings();
                 CaptionSettings = GetCaptionSettings();
 
-                // 这里可以添加保存到文件的逻辑
-                MessageBox.Show($"样式「{currentStyle}」已保存！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // 创建样式信息列表
+                var styleInfos = new List<StyleInfo>
+                {
+                    StyleInfo.FromHashtable("正文", BodyTextSettings),
+                    StyleInfo.FromHashtable("标题 1", Title1Settings),
+                    StyleInfo.FromHashtable("标题 2", Title2Settings),
+                    StyleInfo.FromHashtable("标题 3", Title3Settings),
+                    StyleInfo.FromHashtable("标题 4", Title4Settings),
+                    StyleInfo.FromHashtable("标题 5", Title5Settings),
+                    StyleInfo.FromHashtable("标题 6", Title6Settings),
+                    StyleInfo.FromHashtable("表中文本", TableTextSettings),
+                    StyleInfo.FromHashtable("题注", CaptionSettings)
+                };
+
+                // 显示保存文件对话框
+                using (var saveDialog = new SaveFileDialog())
+                {
+                    saveDialog.Filter = "样式文件|*.xml";
+                    saveDialog.Title = "保存样式设置";
+                    saveDialog.DefaultExt = "xml";
+                    saveDialog.AddExtension = true;
+                    saveDialog.FileName = $"样式设置_{DateTime.Now:yyyyMMdd_HHmmss}.xml";
+
+                    if (saveDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        StyleSerializationHelper.SerializeListToXml(styleInfos, saveDialog.FileName);
+                        MessageBox.Show($"样式设置已保存到：{saveDialog.FileName}", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -1064,11 +1336,17 @@ namespace WordMan_VSTO
             try
             {
                 // 获取新样式名称
-                string newStyleName = Microsoft.VisualBasic.Interaction.InputBox(
-                    "请输入新样式名称：", "添加样式", "新样式", -1, -1);
-
-                if (string.IsNullOrEmpty(newStyleName))
+                var txtNewStyleName = _uiDesigner.GetControl<TextBox>("txtNewStyleName");
+                if (txtNewStyleName == null) return;
+                
+                string newStyleName = txtNewStyleName.Text.Trim();
+                
+                // 检查是否为提示文本
+                if (newStyleName == "输入添加样式的名称" || string.IsNullOrEmpty(newStyleName))
+                {
+                    MessageBox.Show("请输入样式名称！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
+                }
 
                 // 检查样式名称是否已存在
                 if (_styleNames.Contains(newStyleName))
@@ -1087,7 +1365,11 @@ namespace WordMan_VSTO
                     styleList.Items.Add(newStyleName);
                 }
 
-                MessageBox.Show($"样式「{newStyleName}」已添加！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // 清空输入框并恢复提示文本
+                txtNewStyleName.Text = "输入添加样式的名称";
+                txtNewStyleName.ForeColor = Color.Gray;
+
+                MessageBox.Show($"样式「{newStyleName}」已添加到列表！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
@@ -1114,7 +1396,7 @@ namespace WordMan_VSTO
                     return;
 
                 // 确认删除
-                var result = MessageBox.Show($"确定要删除样式「{selectedStyle}」吗？", "确认删除", 
+                var result = MessageBox.Show($"确定要从列表中删除样式「{selectedStyle}」吗？", "确认删除", 
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 
                 if (result == DialogResult.Yes)
@@ -1123,7 +1405,7 @@ namespace WordMan_VSTO
                     _styleNames.Remove(selectedStyle);
                     styleList.Items.Remove(selectedStyle);
                     
-                    MessageBox.Show($"样式「{selectedStyle}」已删除！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show($"样式「{selectedStyle}」已从列表中删除！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
@@ -1147,28 +1429,272 @@ namespace WordMan_VSTO
                     return;
                 }
 
-                // 显示内置样式选择对话框
-                var styleNames = new List<string>();
+                // 获取所有内置样式
+                var allBuiltInStyles = new List<string>();
+                var currentStyles = new List<string>();
+                
                 foreach (Style style in doc.Styles)
                 {
                     if (style.BuiltIn)
                     {
-                        styleNames.Add(style.NameLocal);
+                        allBuiltInStyles.Add(style.NameLocal);
+                        // 检查是否已经在当前样式列表中
+                        if (_styleNames.Contains(style.NameLocal))
+                        {
+                            currentStyles.Add(style.NameLocal);
+                        }
                     }
                 }
 
-                if (styleNames.Count == 0)
+                if (allBuiltInStyles.Count == 0)
                 {
                     MessageBox.Show("未找到内置样式！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
-                // 这里可以添加样式选择对话框的逻辑
-                MessageBox.Show($"找到 {styleNames.Count} 个内置样式", "信息", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // 显示内置样式选择对话框
+                var selectedStyles = ShowBuiltInStyleSelector(allBuiltInStyles, currentStyles);
+                if (selectedStyles != null && selectedStyles.Count > 0)
+                {
+                    // 更新样式列表
+                    UpdateStyleListFromBuiltIn(selectedStyles);
+                    MessageBox.Show($"已添加 {selectedStyles.Count} 个内置样式到列表！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"选择内置样式时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 显示内置样式选择对话框
+        /// </summary>
+        private List<string> ShowBuiltInStyleSelector(List<string> allStyles, List<string> currentStyles)
+        {
+            var form = new Form
+            {
+                Text = "选择内置样式",
+                Size = new Size(400, 500),
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                MaximizeBox = false,
+                MinimizeBox = false
+            };
+
+            var checkedListBox = new CheckedListBox
+            {
+                Location = new System.Drawing.Point(10, 10),
+                Size = new Size(360, 400),
+                CheckOnClick = true
+            };
+
+            // 添加所有样式到列表
+            foreach (var style in allStyles)
+            {
+                checkedListBox.Items.Add(style, currentStyles.Contains(style));
+            }
+
+            var btnOK = new Button
+            {
+                Text = "确定",
+                Location = new System.Drawing.Point(200, 420),
+                Size = new Size(80, 30),
+                DialogResult = DialogResult.OK
+            };
+
+            var btnCancel = new Button
+            {
+                Text = "取消",
+                Location = new System.Drawing.Point(290, 420),
+                Size = new Size(80, 30),
+                DialogResult = DialogResult.Cancel
+            };
+
+            form.Controls.Add(checkedListBox);
+            form.Controls.Add(btnOK);
+            form.Controls.Add(btnCancel);
+
+            if (form.ShowDialog() == DialogResult.OK)
+            {
+                var selectedStyles = new List<string>();
+                foreach (string item in checkedListBox.CheckedItems)
+                {
+                    selectedStyles.Add(item);
+                }
+                return selectedStyles;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 从内置样式更新样式列表
+        /// </summary>
+        private void UpdateStyleListFromBuiltIn(List<string> selectedStyles)
+        {
+            var styleList = _uiDesigner.GetControl<ListBox>("lstStyleList");
+            if (styleList == null) return;
+
+            // 清空当前列表
+            styleList.Items.Clear();
+            _styleNames.Clear();
+
+            // 添加选中的样式
+            foreach (var style in selectedStyles)
+            {
+                _styleNames.Add(style);
+                styleList.Items.Add(style);
+            }
+        }
+
+        /// <summary>
+        /// 行距选择变化事件
+        /// </summary>
+        private void LineSpace_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var cmbLineSpace = sender as ComboBox;
+            if (cmbLineSpace == null) return;
+
+            var txtLineSpaceValue = _uiDesigner.GetControl<TextBox>("txtLineSpaceValue");
+            if (txtLineSpaceValue == null) return;
+
+            // 根据选择显示或隐藏输入框
+            string selectedText = cmbLineSpace.SelectedItem?.ToString();
+            if (selectedText == "固定值" || selectedText == "最小值")
+            {
+                txtLineSpaceValue.Visible = true;
+                if (selectedText == "固定值")
+                    txtLineSpaceValue.Text = "12磅";
+                else
+                    txtLineSpaceValue.Text = "12磅";
+            }
+            else
+            {
+                txtLineSpaceValue.Visible = false;
+            }
+
+            // 触发值变化事件
+            ControlValueChanged(sender, e);
+        }
+
+        /// <summary>
+        /// 行距值验证事件
+        /// </summary>
+        private void LineSpaceValue_Validated(object sender, EventArgs e)
+        {
+            var textBox = sender as TextBox;
+            if (textBox == null) return;
+
+            string text = textBox.Text.TrimEnd(' ', '磅', '行');
+            try
+            {
+                float value = float.Parse(text);
+                if (textBox.Text.EndsWith("行"))
+                {
+                    textBox.Text = value.ToString("0.00 行");
+                }
+                else
+                {
+                    textBox.Text = value.ToString("0.00 磅");
+                }
+            }
+            catch
+            {
+                textBox.Text = "12.00 磅";
+            }
+        }
+
+        /// <summary>
+        /// 段落间距验证事件
+        /// </summary>
+        private void ParagraphSpace_Validated(object sender, EventArgs e)
+        {
+            var textBox = sender as TextBox;
+            if (textBox == null) return;
+
+            string text = textBox.Text.TrimEnd(' ', '行', '磅');
+            try
+            {
+                float value = float.Parse(text);
+                string unit = "行";
+                if (textBox.Text.EndsWith("磅"))
+                {
+                    unit = "磅";
+                }
+                textBox.Text = value.ToString("0.00");
+                
+                // 更新单位标签
+                UpdateUnitLabel(textBox, unit);
+            }
+            catch
+            {
+                textBox.Text = "0.00";
+                UpdateUnitLabel(textBox, "行");
+            }
+        }
+
+        /// <summary>
+        /// 缩进距离验证事件
+        /// </summary>
+        private void IndentDistance_Validated(object sender, EventArgs e)
+        {
+            var textBox = sender as TextBox;
+            if (textBox == null) return;
+
+            string text = textBox.Text.TrimEnd(' ', '磅', '字', '符', '厘', '米');
+            try
+            {
+                float value = float.Parse(text);
+                string unit = "字符";
+                if (textBox.Text.EndsWith("厘米"))
+                {
+                    unit = "厘米";
+                }
+                else if (textBox.Text.EndsWith("磅"))
+                {
+                    unit = "磅";
+                }
+                textBox.Text = value.ToString("0.00");
+                
+                // 更新单位标签
+                UpdateUnitLabel(textBox, unit);
+            }
+            catch
+            {
+                textBox.Text = "2.00";
+                UpdateUnitLabel(textBox, "字符");
+            }
+        }
+
+        /// <summary>
+        /// 更新单位标签
+        /// </summary>
+        private void UpdateUnitLabel(TextBox textBox, string unit)
+        {
+            string textBoxName = textBox.Name;
+            string unitLabelName = "";
+            
+            switch (textBoxName)
+            {
+                case "txtSpaceBefore":
+                    unitLabelName = "lblSpaceBeforeUnit";
+                    break;
+                case "txtSpaceAfter":
+                    unitLabelName = "lblSpaceAfterUnit";
+                    break;
+                case "txtIndentDistance":
+                    unitLabelName = "lblIndentUnit";
+                    break;
+            }
+            
+            if (!string.IsNullOrEmpty(unitLabelName))
+            {
+                var unitLabel = _uiDesigner.GetControl<Label>(unitLabelName);
+                if (unitLabel != null)
+                {
+                    unitLabel.Text = unit;
+                }
             }
         }
 
@@ -1224,32 +1750,75 @@ namespace WordMan_VSTO
                 if (cmbFontSize != null)
                     cmbFontSize.SelectedIndexChanged += ControlValueChanged;
 
+                // 绑定格式复选框
+                var chkBold = _uiDesigner.GetControl<CheckBox>("chkBold");
+                if (chkBold != null)
+                    chkBold.CheckedChanged += ControlValueChanged;
+
+                var chkItalic = _uiDesigner.GetControl<CheckBox>("chkItalic");
+                if (chkItalic != null)
+                    chkItalic.CheckedChanged += ControlValueChanged;
+
+                var chkUnderline = _uiDesigner.GetControl<CheckBox>("chkUnderline");
+                if (chkUnderline != null)
+                    chkUnderline.CheckedChanged += ControlValueChanged;
+
                 // 绑定对齐方式控件
-                var cmbAlign = _uiDesigner.GetControl<ComboBox>("cmbHAlignment");
+                var cmbAlign = _uiDesigner.GetControl<ComboBox>("cmbAlignment");
                 if (cmbAlign != null)
                     cmbAlign.SelectedIndexChanged += ControlValueChanged;
 
                 // 绑定间距控件
-                var cmbSpaceBefore = _uiDesigner.GetControl<ComboBox>("cmbSpaceBefore");
-                if (cmbSpaceBefore != null)
-                    cmbSpaceBefore.SelectedIndexChanged += ControlValueChanged;
+                var txtSpaceBefore = _uiDesigner.GetControl<TextBox>("txtSpaceBefore");
+                if (txtSpaceBefore != null)
+                {
+                    txtSpaceBefore.TextChanged += ControlValueChanged;
+                    txtSpaceBefore.Validated += ParagraphSpace_Validated;
+                }
 
-                var cmbSpaceAfter = _uiDesigner.GetControl<ComboBox>("cmbSpaceAfter");
-                if (cmbSpaceAfter != null)
-                    cmbSpaceAfter.SelectedIndexChanged += ControlValueChanged;
+                var txtSpaceAfter = _uiDesigner.GetControl<TextBox>("txtSpaceAfter");
+                if (txtSpaceAfter != null)
+                {
+                    txtSpaceAfter.TextChanged += ControlValueChanged;
+                    txtSpaceAfter.Validated += ParagraphSpace_Validated;
+                }
 
                 var cmbLineSpace = _uiDesigner.GetControl<ComboBox>("cmbLineSpace");
                 if (cmbLineSpace != null)
-                    cmbLineSpace.SelectedIndexChanged += ControlValueChanged;
+                    cmbLineSpace.SelectedIndexChanged += LineSpace_SelectedIndexChanged;
+
+                var txtLineSpaceValue = _uiDesigner.GetControl<TextBox>("txtLineSpaceValue");
+                if (txtLineSpaceValue != null)
+                {
+                    txtLineSpaceValue.TextChanged += ControlValueChanged;
+                    txtLineSpaceValue.Validated += LineSpaceValue_Validated;
+                }
 
                 // 绑定缩进控件
-                var txtLeftIndent = _uiDesigner.GetControl<TextBox>("txtLeftIndent");
-                if (txtLeftIndent != null)
-                    txtLeftIndent.TextChanged += ControlValueChanged;
+                var txtFirstIndent = _uiDesigner.GetControl<TextBox>("txtFirstIndent");
+                if (txtFirstIndent != null)
+                    txtFirstIndent.TextChanged += ControlValueChanged;
 
-                var txtRightIndent = _uiDesigner.GetControl<TextBox>("txtRightIndent");
-                if (txtRightIndent != null)
-                    txtRightIndent.TextChanged += ControlValueChanged;
+                var txtIndentDistance = _uiDesigner.GetControl<TextBox>("txtIndentDistance");
+                if (txtIndentDistance != null)
+                {
+                    txtIndentDistance.TextChanged += ControlValueChanged;
+                    txtIndentDistance.Validated += IndentDistance_Validated;
+                }
+                    
+                // 绑定段前分页复选框
+                var chkPageBreakBefore = _uiDesigner.GetControl<CheckBox>("chkPageBreakBefore");
+                if (chkPageBreakBefore != null)
+                    chkPageBreakBefore.CheckedChanged += ControlValueChanged;
+
+                // 绑定大纲级别和缩进方式
+                var cmbOutlineLevel = _uiDesigner.GetControl<ComboBox>("cmbOutlineLevel");
+                if (cmbOutlineLevel != null)
+                    cmbOutlineLevel.SelectedIndexChanged += ControlValueChanged;
+
+                var cmbIndentType = _uiDesigner.GetControl<ComboBox>("cmbIndentType");
+                if (cmbIndentType != null)
+                    cmbIndentType.SelectedIndexChanged += ControlValueChanged;
             }
             catch (Exception ex)
             {
@@ -1282,8 +1851,8 @@ namespace WordMan_VSTO
         {
             try
             {
-                // 这里可以添加样式预览逻辑
-                // 例如：更新预览区域的显示
+                // 调用UI设计器的预览更新方法
+                _uiDesigner?.UpdateStylePreview();
             }
             catch (Exception ex)
             {

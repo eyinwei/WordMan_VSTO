@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using Microsoft.Office.Interop.Word;
 using Point = System.Drawing.Point;
@@ -66,7 +67,7 @@ namespace WordMan_VSTO
     {
         private Label _unitLabel;
         private string _currentUnit = "厘米";
-        private readonly string[] _availableUnits = { "厘米", "磅", "字符" };
+        private readonly string[] _availableUnits = { "厘米", "磅", "字符", "行" };
 
         public string Unit
         {
@@ -237,6 +238,9 @@ namespace WordMan_VSTO
                 case "字符":
                     // 字符转换：1字符 ≈ 0.5厘米，1厘米 ≈ 28.35磅
                     return wordApp.CentimetersToPoints((float)(value * 0.5));
+                case "行":
+                    // 行转换：1行 ≈ 12磅（标准行距）
+                    return value * 12;
                 default:
                     return value; // 默认返回原值
             }
@@ -254,6 +258,9 @@ namespace WordMan_VSTO
                 case "字符":
                     // 字符转换：1磅 ≈ 0.035厘米，1厘米 ≈ 2字符
                     return wordApp.PointsToCentimeters((float)valueInPoints) * 2;
+                case "行":
+                    // 行转换：1磅 ≈ 1/12行
+                    return valueInPoints / 12;
                 default:
                     return valueInPoints; // 默认返回原值
             }

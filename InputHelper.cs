@@ -2,6 +2,9 @@ using System;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using Microsoft.Office.Interop.Word;
+using Point = System.Drawing.Point;
+using Font = System.Drawing.Font;
 
 namespace WordMan_VSTO
 {

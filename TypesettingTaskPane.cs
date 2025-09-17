@@ -484,7 +484,7 @@ namespace WordMan_VSTO
             try
             {
                 // 使用反射来创建窗体，避免编译时依赖问题
-                var multiLevelListType = Type.GetType("WordMan_VSTO.MultiLevelList");
+                var multiLevelListType = Type.GetType("WordMan_VSTO.MultiLevelListForm");
                 if (multiLevelListType != null)
                 {
                     using (var multiLevelForm = (Form)Activator.CreateInstance(multiLevelListType))

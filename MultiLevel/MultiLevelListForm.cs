@@ -9,6 +9,7 @@ using Microsoft.Office.Interop.Word;
 using Font = System.Drawing.Font;
 using Point = System.Drawing.Point;
 using Color = System.Drawing.Color;
+using WordMan_VSTO.MultiLevel;
 
 namespace WordMan_VSTO
 {
@@ -17,7 +18,7 @@ namespace WordMan_VSTO
 
 
 
-    public partial class MultiLevelList : Form
+    public partial class MultiLevelListForm : Form
     {
         private int currentLevels = 5;
         private List<LevelData> levelDataList = new List<LevelData>();
@@ -38,10 +39,10 @@ namespace WordMan_VSTO
             WdListNumberStyle.wdListNumberStyleArabic            // 9: 正规编号
         };
 
-        public MultiLevelList()
+        public MultiLevelListForm()
         {
             InitializeComponent();
-            app = Globals.ThisAddIn.Application;
+            app = WordAPIHelper.GetWordApplication();
             InitializeData();
             SetupEventHandlers();
             CreateLevelControls();
@@ -994,6 +995,25 @@ namespace WordMan_VSTO
                 
                 // 更新制表位位置的启用状态
                 UpdateTabPositionEnabled(level);
+            }
+        }
+
+        /// <summary>
+        /// 设置每级样式按钮点击事件
+        /// </summary>
+        private void btnSetLevelStyle_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // 创建多级段落设置窗体
+                WordMan_VSTO.MultiLevel.LevelStyleSettingsForm levelStyleSettingsForm = new WordMan_VSTO.MultiLevel.LevelStyleSettingsForm(currentLevels);
+                
+                // 显示窗体
+                levelStyleSettingsForm.ShowDialog(this);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"打开多级段落设置失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

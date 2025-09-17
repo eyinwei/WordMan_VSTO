@@ -211,10 +211,8 @@
     can be found.
   -->
   <ItemGroup>
-    <Compile Include="MultiLevel\DataModels.cs" />
-    <Compile Include="MultiLevel\InputHelper.cs" />
-    <Compile Include="MultiLevel\ValidationConstants.cs" />
-    <Compile Include="MultiLevel\ValidationHelper.cs" />
+    <Compile Include="MultiLevel\MultiLevelDataManager.cs" />
+    <Compile Include="InputHelper.cs" />
     <Compile Include="Syboms\CommonSymbolForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -230,16 +228,36 @@
     <Compile Include="StyleSetting\StyleSettingsUIDesigner.cs" />
     <Compile Include="StyleSetting\StyleSerializationHelper.cs" />
     <Compile Include="StyleSetting\StyleInfo.cs" />
+    <Compile Include="StylePane\WordStyleInfo.cs" />
+    <Compile Include="StylePane\StyleSerializationHelper.cs" />
+    <Compile Include="StylePane\NumericUpDownWithUnit.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="StylePane\ToggleButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="StylePane\DocumentStyleSettings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="StylePane\DocumentStyleSettings.Designer.cs">
+      <DependentUpon>DocumentStyleSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MultiLevel\WordStyleInfo.cs" />
     <Compile Include="WordAPIHelper.cs" />
-    <Compile Include="MultiLevel\ConfigurationManager.cs" />
     <Compile Include="CustomControls.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="MultiLevel\MultiLevelList.cs">
+    <Compile Include="MultiLevel\MultiLevelListForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MultiLevel\MultiLevelList.Designer.cs">
-      <DependentUpon>MultiLevelList.cs</DependentUpon>
+    <Compile Include="MultiLevel\MultiLevelListForm.Designer.cs">
+      <DependentUpon>MultiLevelListForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MultiLevel\LevelStyleSettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MultiLevel\LevelStyleSettingsForm.Designer.cs">
+      <DependentUpon>LevelStyleSettingsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

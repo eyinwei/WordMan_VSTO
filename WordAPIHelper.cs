@@ -170,6 +170,46 @@ namespace WordMan_VSTO
         }
 
         /// <summary>
+        /// 将磅值转换为中文字体大小
+        /// </summary>
+        public static string ConvertFontSizeToString(float sizeInPoints)
+        {
+            try
+            {
+                // 磅值到中文大小的映射（Word标准）
+                var pointToChineseMap = new Dictionary<float, string>
+                {
+                    { 42f, "初号" }, { 36f, "小初" }, { 26f, "一号" }, { 24f, "小一" },
+                    { 22f, "二号" }, { 18f, "小二" }, { 16f, "三号" }, { 15f, "小三" },
+                    { 14f, "四号" }, { 12f, "小四" }, { 10.5f, "五号" }, { 9f, "小五" },
+                    { 7.5f, "六号" }, { 6.5f, "小六" }, { 5.5f, "七号" }, { 5f, "八号" }
+                };
+
+                // 精确匹配
+                if (pointToChineseMap.ContainsKey(sizeInPoints))
+                {
+                    return pointToChineseMap[sizeInPoints];
+                }
+
+                // 近似匹配（允许0.1的误差）
+                foreach (var kvp in pointToChineseMap)
+                {
+                    if (Math.Abs(kvp.Key - sizeInPoints) <= 0.1f)
+                    {
+                        return kvp.Value;
+                    }
+                }
+
+                // 如果没有匹配的中文大小，返回数字
+                return sizeInPoints.ToString("0.0");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"转换字体大小失败：{ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// 通过Word API转换单位
         /// </summary>
         public static float ConvertUnits(string value, string fromUnit, string toUnit)
@@ -201,6 +241,9 @@ namespace WordMan_VSTO
                         points = numericValue;
                         break;
                 }
+
+                // 限制磅值在Word允许的范围内（0.7磅到1584磅）
+                points = Math.Max(0.7f, Math.Min(1584f, points));
 
                 // 从磅值转换为目标单位
                 switch (toUnit)
@@ -238,7 +281,7 @@ namespace WordMan_VSTO
                 
                 // 创建临时范围用于预览
                 var range = doc.Range();
-                range.Text = "这是样式预览文本，将显示当前设置的字体、段落等效果。\r\n示例文字 示例文字 示例文字 示例文字 示例文字\r\n示例文字 示例文字 示例文字 示例文字 示例文字";
+                range.Text = "示例文字 示例文字 示例文字 示例文字 示例文字\r\n示例文字 示例文字 示例文字 示例文字 示例文字";
                 
                 // 应用字体设置
                 range.Font.Name = chnFont;
@@ -471,14 +514,49 @@ namespace WordMan_VSTO
             try
             {
                 var app = GetWordApplication();
+                var doc = GetActiveDocument();
+                
+                // 创建临时选择范围
+                var range = doc.Range();
+                range.Text = "颜色预览";
+                
+                // 设置当前颜色
+                range.Font.Color = WdColor.wdColorAutomatic;
+                if (currentColor != Color.Black)
+                {
+                    range.Font.Color = (WdColor)ColorTranslator.ToOle(currentColor);
+                }
+                
+                // 调用Word颜色对话框
                 var colorDialog = app.Dialogs[WdWordDialog.wdDialogFormatFont];
+                // 设置对话框只显示颜色选项卡
                 colorDialog.Show();
-                // 这里需要根据实际Word API来获取选择的颜色
-                return currentColor;
+                
+                // 获取选择的颜色
+                var selectedColor = range.Font.Color;
+                if (selectedColor == WdColor.wdColorAutomatic)
+                {
+                    return Color.Black;
+                }
+                else
+                {
+                    return ColorTranslator.FromOle((int)selectedColor);
+                }
             }
             catch (Exception ex)
             {
-                throw new Exception($"调用Word颜色对话框失败：{ex.Message}");
+                // 如果Word颜色对话框失败，使用系统颜色对话框作为备用
+                using (var colorDialog = new ColorDialog())
+                {
+                    colorDialog.Color = currentColor;
+                    colorDialog.FullOpen = true;
+                    
+                    if (colorDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        return colorDialog.Color;
+                    }
+                }
+                return currentColor;
             }
         }
 

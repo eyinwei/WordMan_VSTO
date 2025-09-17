@@ -2,12 +2,14 @@
 using Microsoft.Office.Tools.Ribbon;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using Microsoft.VisualBasic;    
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Word = Microsoft.Office.Interop.Word;
+using WordMan_VSTO.StylePane;
 
 namespace WordMan_VSTO
 {
@@ -1463,6 +1465,36 @@ namespace WordMan_VSTO
         {
             // 仅一行：调用任务窗格的静态方法，剩下的全由任务窗格自己处理
             TypesettingTaskPane.TriggerShowOrHide();
+        }
+
+        // 文档样式设置按钮点击事件
+        private void button1_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                // 创建文档样式设置窗口
+                DocumentStyleSettings documentStyleSettings = new DocumentStyleSettings();
+                
+                // 创建窗体来包含UserControl
+                Form styleForm = new Form();
+                styleForm.Text = "文档样式设置";
+                styleForm.Size = new Size(600, 650);
+                styleForm.StartPosition = FormStartPosition.CenterParent;
+                styleForm.FormBorderStyle = FormBorderStyle.FixedDialog;
+                styleForm.MaximizeBox = false;
+                styleForm.MinimizeBox = false;
+                
+                // 将UserControl添加到窗体
+                documentStyleSettings.Dock = DockStyle.Fill;
+                styleForm.Controls.Add(documentStyleSettings);
+                
+                // 显示窗体
+                styleForm.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"打开文档样式设置失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
 

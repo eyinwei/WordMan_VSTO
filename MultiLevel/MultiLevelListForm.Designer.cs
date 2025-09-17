@@ -1,8 +1,11 @@
-﻿using System.Drawing;
+﻿using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace WordMan_VSTO
 {
-    partial class MultiLevelList
+    partial class MultiLevelListForm
     {
         /// <summary>
         /// Required designer variable.
@@ -79,11 +82,11 @@ namespace WordMan_VSTO
             this.cmbSampleLinkedStyle = new System.Windows.Forms.ComboBox();
             
             // 自定义控件 - 使用Word API进行单位转换
-            this.numericUpDownWithUnit1 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, "厘米");
-            this.numericUpDownWithUnit2 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, "厘米");
-            this.numericUpDownWithUnit3 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, "厘米");
-            this.numericUpDownWithUnit4 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, "厘米");
-            this.numericUpDownWithUnit5 = new NumericUpDownWithUnit(Globals.ThisAddIn.Application, "厘米");
+            this.numericUpDownWithUnit1 = new NumericUpDownWithUnit(WordAPIHelper.GetWordApplication(), "厘米");
+            this.numericUpDownWithUnit2 = new NumericUpDownWithUnit(WordAPIHelper.GetWordApplication(), "厘米");
+            this.numericUpDownWithUnit3 = new NumericUpDownWithUnit(WordAPIHelper.GetWordApplication(), "厘米");
+            this.numericUpDownWithUnit4 = new NumericUpDownWithUnit(WordAPIHelper.GetWordApplication(), "厘米");
+            this.numericUpDownWithUnit5 = new NumericUpDownWithUnit(WordAPIHelper.GetWordApplication(), "厘米");
             this.mainPanel.SuspendLayout();
             this.leftPanel.SuspendLayout();
             this.levelsScrollPanel.SuspendLayout();
@@ -165,6 +168,7 @@ namespace WordMan_VSTO
             this.btnSetLevelStyle.Name = "btnSetLevelStyle";
             this.btnSetLevelStyle.TabIndex = 2;
             this.btnSetLevelStyle.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnSetLevelStyle.Click += new System.EventHandler(this.btnSetLevelStyle_Click);
             // 
             // cmbLevelCount
             // 
@@ -666,7 +670,7 @@ namespace WordMan_VSTO
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(248)))), ((int)(((byte)(255)))));
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(233)))), ((int)(((byte)(247)))));
             this.ClientSize = new System.Drawing.Size(1200, 480);
             this.Controls.Add(this.mainPanel);
             this.Font = new System.Drawing.Font("Microsoft YaHei", 9F, System.Drawing.FontStyle.Regular);

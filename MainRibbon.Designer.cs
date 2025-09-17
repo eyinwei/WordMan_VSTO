@@ -77,6 +77,7 @@
             this.版本 = this.Factory.CreateRibbonButton();
             this.一键排版 = this.Factory.CreateRibbonButton();
             this.TypesettingButton = this.Factory.CreateRibbonButton();
+            this.button1 = this.Factory.CreateRibbonButton();
             this.另存PDF = this.Factory.CreateRibbonButton();
             this.WordMan.SuspendLayout();
             this.文本处理.SuspendLayout();
@@ -421,6 +422,7 @@
             this.其他.Items.Add(this.取消高亮);
             this.其他.Items.Add(this.版本);
             this.其他.Items.Add(this.一键排版);
+            this.其他.Items.Add(this.button1);
             this.其他.Items.Add(this.另存PDF);
             this.其他.Label = "其他";
             this.其他.Name = "其他";
@@ -462,6 +464,15 @@
             this.TypesettingButton.OfficeImageId = "AboveText";
             this.TypesettingButton.ShowImage = true;
             this.TypesettingButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.TypesettingButton_Click);
+            // 
+            // button1
+            // 
+            this.button1.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.button1.Label = "样式设置";
+            this.button1.Name = "button1";
+            this.button1.OfficeImageId = "StyleGallery";
+            this.button1.ShowImage = true;
+            this.button1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button1_Click);
             // 
             // 另存PDF
             // 
@@ -540,6 +551,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 高度刷;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 创建三线表;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton TypesettingButton;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton button1;
     }
 
     partial class ThisRibbonCollection

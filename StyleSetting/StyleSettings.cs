@@ -50,21 +50,35 @@ namespace WordMan_VSTO
         public StyleSettings()
         {
             InitializeComponent();
+            
+            // 启用双缓冲，减少闪烁
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint | 
+                         ControlStyles.UserPaint | 
+                         ControlStyles.DoubleBuffer | 
+                         ControlStyles.ResizeRedraw, true);
+            
+            // 暂停布局更新
+            this.SuspendLayout();
+            
             this.Text = "样式设置";
-            this.Size = new Size(1000, 700);
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.BackColor = Color.FromArgb(248, 249, 250);
             this.Font = new Font("微软雅黑", 9F);
             
-            // 初始化UI设计器
+            // 初始化UI设计器（不在这里设置Size和BackColor，避免冲突）
             _uiDesigner = new StyleSettingsUIDesigner(this);
             _uiDesigner.InitializeAllControls();
             
             // 绑定事件
             BindEvents();
-
-            // 初始化默认样式
-            InitializeDefaultStyles();
+            
+            // 恢复布局更新
+            this.ResumeLayout(true);
+            
+            // 延迟初始化默认样式，避免在窗体显示前更新UI
+            this.Load += (s, e) => InitializeDefaultStyles();
+            
+            // 窗体显示时也尝试读取当前文档样式
+            this.Shown += (s, e) => LoadCurrentDocumentStyles();
         }
 
         /// <summary>
@@ -129,8 +143,152 @@ namespace WordMan_VSTO
         // 初始化默认样式（按照GB/T 9704-2012标准）
         private void InitializeDefaultStyles()
         {
-            // 初始化公文风格样式
-            InitializeOfficialDocumentStyle();
+            try
+            {
+                // 尝试读取当前文档的样式设置
+                LoadCurrentDocumentStyles();
+            }
+            catch (Exception ex)
+            {
+                // 如果读取失败，使用默认的公文风格样式
+                System.Diagnostics.Debug.WriteLine($"读取当前文档样式失败：{ex.Message}");
+                InitializeOfficialDocumentStyle();
+            }
+        }
+
+        /// <summary>
+        /// 读取当前文档的样式设置
+        /// </summary>
+        private void LoadCurrentDocumentStyles()
+        {
+            try
+            {
+                var app = WordAPIHelper.GetWordApplication();
+                var doc = WordAPIHelper.GetActiveDocument();
+                
+                if (doc == null)
+                {
+                    // 如果没有活动文档，使用默认样式
+                    InitializeOfficialDocumentStyle();
+                    return;
+                }
+
+                // 读取当前文档的样式设置到UI
+                LoadDocumentStylesToUI(doc);
+                
+                // 更新预览
+                _uiDesigner?.UpdateStylePreview();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"读取文档样式失败：{ex.Message}");
+                InitializeOfficialDocumentStyle();
+            }
+        }
+
+        /// <summary>
+        /// 将文档样式加载到UI
+        /// </summary>
+        private void LoadDocumentStylesToUI(Microsoft.Office.Interop.Word.Document doc)
+        {
+            try
+            {
+                var app = doc.Application;
+                
+                // 获取当前选择或文档的样式
+                var selection = app.Selection;
+                if (selection != null && selection.Range != null)
+                {
+                    var range = selection.Range;
+                    
+                    // 读取字体设置
+                    var chnFont = _uiDesigner.GetControl<ComboBox>("cmbChnFontName");
+                    if (chnFont != null)
+                        chnFont.Text = range.Font.Name;
+                    
+                    var engFont = _uiDesigner.GetControl<ComboBox>("cmbEngFontName");
+                    if (engFont != null)
+                        engFont.Text = range.Font.NameAscii;
+                    
+                    var fontSize = _uiDesigner.GetControl<ComboBox>("cmbFontSize");
+                    if (fontSize != null)
+                        fontSize.Text = range.Font.Size.ToString();
+                    
+                    var chkBold = _uiDesigner.GetControl<CheckBox>("chkBold");
+                    if (chkBold != null)
+                        chkBold.Checked = range.Font.Bold == 1;
+                    
+                    var chkItalic = _uiDesigner.GetControl<CheckBox>("chkItalic");
+                    if (chkItalic != null)
+                        chkItalic.Checked = range.Font.Italic == 1;
+                    
+                    var chkUnderline = _uiDesigner.GetControl<CheckBox>("chkUnderline");
+                    if (chkUnderline != null)
+                        chkUnderline.Checked = range.Font.Underline != Microsoft.Office.Interop.Word.WdUnderline.wdUnderlineNone;
+                    
+                    // 读取段落设置
+                    var alignment = _uiDesigner.GetControl<ComboBox>("cmbAlignment");
+                    if (alignment != null)
+                    {
+                        switch (range.ParagraphFormat.Alignment)
+                        {
+                            case Microsoft.Office.Interop.Word.WdParagraphAlignment.wdAlignParagraphLeft:
+                                alignment.Text = "左对齐";
+                                break;
+                            case Microsoft.Office.Interop.Word.WdParagraphAlignment.wdAlignParagraphCenter:
+                                alignment.Text = "居中";
+                                break;
+                            case Microsoft.Office.Interop.Word.WdParagraphAlignment.wdAlignParagraphRight:
+                                alignment.Text = "右对齐";
+                                break;
+                            case Microsoft.Office.Interop.Word.WdParagraphAlignment.wdAlignParagraphJustify:
+                                alignment.Text = "两端对齐";
+                                break;
+                        }
+                    }
+                    
+                    // 读取行距设置
+                    var lineSpace = _uiDesigner.GetControl<ComboBox>("cmbLineSpace");
+                    if (lineSpace != null)
+                    {
+                        switch (range.ParagraphFormat.LineSpacingRule)
+                        {
+                            case Microsoft.Office.Interop.Word.WdLineSpacing.wdLineSpaceSingle:
+                                lineSpace.Text = "单倍行距";
+                                break;
+                            case Microsoft.Office.Interop.Word.WdLineSpacing.wdLineSpace1pt5:
+                                lineSpace.Text = "1.5倍行距";
+                                break;
+                            case Microsoft.Office.Interop.Word.WdLineSpacing.wdLineSpaceDouble:
+                                lineSpace.Text = "2倍行距";
+                                break;
+                            case Microsoft.Office.Interop.Word.WdLineSpacing.wdLineSpaceExactly:
+                                lineSpace.Text = "固定值";
+                                break;
+                            case Microsoft.Office.Interop.Word.WdLineSpacing.wdLineSpaceAtLeast:
+                                lineSpace.Text = "最小值";
+                                break;
+                        }
+                    }
+                    
+                    // 读取间距设置
+                    var nudSpaceBefore = _uiDesigner.GetControl<NumericUpDownWithUnit>("nudSpaceBefore");
+                    if (nudSpaceBefore != null)
+                    {
+                        nudSpaceBefore.Value = (decimal)app.PointsToCentimeters(range.ParagraphFormat.SpaceBefore);
+                    }
+                    
+                    var nudSpaceAfter = _uiDesigner.GetControl<NumericUpDownWithUnit>("nudSpaceAfter");
+                    if (nudSpaceAfter != null)
+                    {
+                        nudSpaceAfter.Value = (decimal)app.PointsToCentimeters(range.ParagraphFormat.SpaceAfter);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"加载文档样式到UI失败：{ex.Message}");
+            }
         }
 
 
@@ -1635,36 +1793,11 @@ namespace WordMan_VSTO
         }
 
         /// <summary>
-        /// 缩进距离验证事件
+        /// 缩进距离验证事件（现在使用NumericUpDownWithUnit，不需要此方法）
         /// </summary>
         private void IndentDistance_Validated(object sender, EventArgs e)
         {
-            var textBox = sender as TextBox;
-            if (textBox == null) return;
-
-            string text = textBox.Text.TrimEnd(' ', '磅', '字', '符', '厘', '米');
-            try
-            {
-                float value = float.Parse(text);
-                string unit = "字符";
-                if (textBox.Text.EndsWith("厘米"))
-                {
-                    unit = "厘米";
-                }
-                else if (textBox.Text.EndsWith("磅"))
-                {
-                    unit = "磅";
-                }
-                textBox.Text = value.ToString("0.00");
-                
-                // 更新单位标签
-                UpdateUnitLabel(textBox, unit);
-            }
-            catch
-            {
-                textBox.Text = "2.00";
-                UpdateUnitLabel(textBox, "字符");
-            }
+            // NumericUpDownWithUnit控件自动处理单位转换，不需要手动验证
         }
 
         /// <summary>
@@ -1705,24 +1838,18 @@ namespace WordMan_VSTO
         {
             try
             {
-                using (var colorDialog = new ColorDialog())
-                {
-                    colorDialog.Color = Color.Black; // 默认颜色
-                    colorDialog.FullOpen = true;
-                    
-                    if (colorDialog.ShowDialog() == DialogResult.OK)
-                    {
-                        // 更新字体颜色显示
-                        var fontColorBtn = sender as Button;
-                        if (fontColorBtn != null)
-                        {
-                            fontColorBtn.BackColor = colorDialog.Color;
-                            fontColorBtn.Text = $"颜色: {colorDialog.Color.Name}";
-                        }
-                        
-                        MessageBox.Show($"已选择颜色：{colorDialog.Color.Name}", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                }
+                var fontColorBtn = sender as Button;
+                if (fontColorBtn == null) return;
+                
+                // 使用Word API的颜色选择器
+                var selectedColor = _uiDesigner.ShowWordColorDialog(fontColorBtn.BackColor);
+                
+                // 更新字体颜色显示
+                fontColorBtn.BackColor = selectedColor;
+                fontColorBtn.Text = $"颜色: {selectedColor.Name}";
+                
+                // 更新预览
+                UpdateStylePreview();
             }
             catch (Exception ex)
             {
@@ -1769,18 +1896,16 @@ namespace WordMan_VSTO
                     cmbAlign.SelectedIndexChanged += ControlValueChanged;
 
                 // 绑定间距控件
-                var txtSpaceBefore = _uiDesigner.GetControl<TextBox>("txtSpaceBefore");
-                if (txtSpaceBefore != null)
+                var nudSpaceBefore = _uiDesigner.GetControl<NumericUpDownWithUnit>("nudSpaceBefore");
+                if (nudSpaceBefore != null)
                 {
-                    txtSpaceBefore.TextChanged += ControlValueChanged;
-                    txtSpaceBefore.Validated += ParagraphSpace_Validated;
+                    nudSpaceBefore.ValueChanged += ControlValueChanged;
                 }
 
-                var txtSpaceAfter = _uiDesigner.GetControl<TextBox>("txtSpaceAfter");
-                if (txtSpaceAfter != null)
+                var nudSpaceAfter = _uiDesigner.GetControl<NumericUpDownWithUnit>("nudSpaceAfter");
+                if (nudSpaceAfter != null)
                 {
-                    txtSpaceAfter.TextChanged += ControlValueChanged;
-                    txtSpaceAfter.Validated += ParagraphSpace_Validated;
+                    nudSpaceAfter.ValueChanged += ControlValueChanged;
                 }
 
                 var cmbLineSpace = _uiDesigner.GetControl<ComboBox>("cmbLineSpace");
@@ -1799,11 +1924,10 @@ namespace WordMan_VSTO
                 if (txtFirstIndent != null)
                     txtFirstIndent.TextChanged += ControlValueChanged;
 
-                var txtIndentDistance = _uiDesigner.GetControl<TextBox>("txtIndentDistance");
-                if (txtIndentDistance != null)
+                var nudIndentDistance = _uiDesigner.GetControl<NumericUpDownWithUnit>("nudIndentDistance");
+                if (nudIndentDistance != null)
                 {
-                    txtIndentDistance.TextChanged += ControlValueChanged;
-                    txtIndentDistance.Validated += IndentDistance_Validated;
+                    nudIndentDistance.ValueChanged += ControlValueChanged;
                 }
                     
                 // 绑定段前分页复选框

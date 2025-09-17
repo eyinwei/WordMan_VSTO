@@ -7,6 +7,179 @@ using System.Windows.Forms;
 
 namespace WordMan_VSTO
 {
+    #region 数据结构定义
+
+    /// <summary>
+    /// 级别数据结构
+    /// </summary>
+    public class LevelData
+    {
+        public int Level { get; set; }
+        public string NumberStyle { get; set; }
+        public string NumberFormat { get; set; }
+        public decimal NumberIndent { get; set; }
+        public decimal TextIndent { get; set; }
+        public string AfterNumberType { get; set; } // 编号之后类型：无、空格、制表位
+        public decimal TabPosition { get; set; } // 制表位位置
+        public string LinkedStyle { get; set; }
+    }
+
+    /// <summary>
+    /// 级别数据事件参数
+    /// </summary>
+    public class LevelDataEventArgs : EventArgs
+    {
+        public LevelData LevelData { get; set; }
+        
+        public LevelDataEventArgs(LevelData levelData)
+        {
+            LevelData = levelData;
+        }
+    }
+
+    /// <summary>
+    /// 输入框值结构体
+    /// </summary>
+    public struct InputValues
+    {
+        public decimal NumberIndent { get; set; }
+        public decimal TextIndent { get; set; }
+        public decimal TabPosition { get; set; }
+    }
+
+    #endregion
+
+    #region 验证常量和逻辑
+
+    /// <summary>
+    /// 验证常量和辅助类 - 统一管理所有验证相关的常量和逻辑
+    /// </summary>
+    public static class ValidationConstants
+    {
+        /// <summary>
+        /// 有效的编号样式列表
+        /// </summary>
+        public static readonly string[] ValidNumberStyles = 
+        {
+            "1,2,3...", "01,02,03...", "A,B,C...", "a,b,c...", 
+            "I,II,III...", "i,ii,iii...", "一,二,三...", "壹,贰,叁...", 
+            "甲,乙,丙...", "正规编号"
+        };
+
+        /// <summary>
+        /// 有效的编号之后类型列表
+        /// </summary>
+        public static readonly string[] ValidAfterNumberTypes = 
+        {
+            "无", "空格", "制表位"
+        };
+
+        /// <summary>
+        /// 有效的链接样式列表
+        /// </summary>
+        public static readonly string[] ValidLinkedStyles = 
+        {
+            "无", "标题 1", "标题 2", "标题 3", "标题 4", 
+            "标题 5", "标题 6", "标题 7", "标题 8", "标题 9"
+        };
+
+        /// <summary>
+        /// 默认编号样式
+        /// </summary>
+        public const string DefaultNumberStyle = "1,2,3...";
+
+        /// <summary>
+        /// 默认编号之后类型
+        /// </summary>
+        public const string DefaultAfterNumberType = "空格";
+
+        /// <summary>
+        /// 默认链接样式
+        /// </summary>
+        public const string DefaultLinkedStyle = "无";
+
+        /// <summary>
+        /// 最小级别数
+        /// </summary>
+        public const int MinLevelCount = 1;
+
+        /// <summary>
+        /// 最大级别数
+        /// </summary>
+        public const int MaxLevelCount = 9;
+    }
+
+    /// <summary>
+    /// 验证辅助类 - 统一管理所有验证逻辑
+    /// </summary>
+    public static class ValidationHelper
+    {
+        /// <summary>
+        /// 验证编号样式
+        /// </summary>
+        /// <param name="style">要验证的样式</param>
+        /// <returns>有效的样式，如果无效则返回默认值</returns>
+        public static string ValidateNumberStyle(string style)
+        {
+            if (string.IsNullOrEmpty(style))
+                return ValidationConstants.DefaultNumberStyle;
+                
+            if (ValidationConstants.ValidNumberStyles.Contains(style))
+                return style;
+                
+            return ValidationConstants.DefaultNumberStyle;
+        }
+
+        /// <summary>
+        /// 验证编号之后类型
+        /// </summary>
+        /// <param name="type">要验证的类型</param>
+        /// <returns>有效的类型，如果无效则返回默认值</returns>
+        public static string ValidateAfterNumberType(string type)
+        {
+            if (string.IsNullOrEmpty(type))
+                return ValidationConstants.DefaultAfterNumberType;
+                
+            if (ValidationConstants.ValidAfterNumberTypes.Contains(type))
+                return type;
+                
+            return ValidationConstants.DefaultAfterNumberType;
+        }
+
+        /// <summary>
+        /// 验证链接样式
+        /// </summary>
+        /// <param name="style">要验证的样式</param>
+        /// <returns>有效的样式，如果无效则返回默认值</returns>
+        public static string ValidateLinkedStyle(string style)
+        {
+            if (string.IsNullOrEmpty(style))
+                return ValidationConstants.DefaultLinkedStyle;
+                
+            if (ValidationConstants.ValidLinkedStyles.Contains(style))
+                return style;
+                
+            return ValidationConstants.DefaultLinkedStyle;
+        }
+
+        /// <summary>
+        /// 验证级别数
+        /// </summary>
+        /// <param name="levelCount">要验证的级别数</param>
+        /// <returns>有效的级别数，如果无效则返回默认值</returns>
+        public static int ValidateLevelCount(int levelCount)
+        {
+            if (levelCount >= ValidationConstants.MinLevelCount && levelCount <= ValidationConstants.MaxLevelCount)
+                return levelCount;
+                
+            return ValidationConstants.MinLevelCount;
+        }
+    }
+
+    #endregion
+
+    #region 配置管理
+
     /// <summary>
     /// 配置管理器 - 处理多级列表配置的导入导出
     /// </summary>
@@ -266,6 +439,7 @@ namespace WordMan_VSTO
             
             return fields.ToArray();
         }
-
     }
+
+    #endregion
 }

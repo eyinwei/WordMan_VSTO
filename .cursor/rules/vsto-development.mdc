@@ -118,8 +118,6 @@ Microsoft.Office.Interop.Word.Point wordPoint = new Microsoft.Office.Interop.Wor
 
 ## 注意事项
 
-- 所有Word相关操作必须通过Word API
-- 自定义控件必须支持Word API集成
-- 设计器文件必须与代码保持同步
-- 单位转换必须使用Word API确保准确性
+- 所有Word相关操作尽量通过Word API
+- 自定义控件尽量支持Word API集成
 - **必须避免类型歧义引用，明确指定命名空间**

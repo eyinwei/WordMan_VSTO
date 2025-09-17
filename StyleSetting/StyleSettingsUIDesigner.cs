@@ -28,6 +28,9 @@ namespace WordMan_VSTO
         /// </summary>
         public void InitializeAllControls()
         {
+            // 暂停窗体布局更新，避免闪烁
+            _form.SuspendLayout();
+            
             // 设置窗体基本属性
             _form.Size = new Size(920, 630); 
             _form.Text = "样式设置";
@@ -49,6 +52,9 @@ namespace WordMan_VSTO
             // 3. 第三块：下方按钮区域
             var bottomPanel = CreateBottomButtonPanel();
             _form.Controls.Add(bottomPanel);
+            
+            // 恢复窗体布局更新
+            _form.ResumeLayout(true);
         }
 
         /// <summary>
@@ -64,6 +70,9 @@ namespace WordMan_VSTO
                 BackColor = Color.FromArgb(248, 250, 252), // 浅灰蓝色
                 BorderStyle = BorderStyle.FixedSingle
             };
+            
+            // 暂停面板布局更新
+            panel.SuspendLayout();
 
             // 样式列表
             var styleList = CreateStyleList();
@@ -150,6 +159,9 @@ namespace WordMan_VSTO
             panel.Controls.Add(btnAddStyle);
             panel.Controls.Add(btnDeleteStyle);
 
+            // 恢复面板布局更新
+            panel.ResumeLayout(true);
+            
             return panel;
         }
 
@@ -231,14 +243,29 @@ namespace WordMan_VSTO
                 BackColor = Color.FromArgb(252, 254, 255), // 更浅的蓝色
                 BorderStyle = BorderStyle.FixedSingle
             };
+            
+            // 暂停面板布局更新
+            panel.SuspendLayout();
 
-            // 样式设置组
-            var styleSetupGroup = CreateStyleSetupGroup();
-            styleSetupGroup.Location = new Point(10, 10);
-            styleSetupGroup.Size = new Size(650, 480);
+            // 样式设置标题
+            var lblStyleSetup = new Label
+            {
+                Text = "样式设置",
+                Location = new Point(10, 10),
+                Size = new Size(100, 20),
+                Font = new Font("微软雅黑", 9F, FontStyle.Bold),
+                ForeColor = Color.FromArgb(64, 64, 64)
+            };
+            panel.Controls.Add(lblStyleSetup);
 
-            panel.Controls.Add(styleSetupGroup);
+            // 直接创建控件，不使用GroupBox
+            CreateFontControls(panel);
+            CreateParagraphControls(panel);
+            CreateStylePreview(panel);
 
+            // 恢复面板布局更新
+            panel.ResumeLayout(true);
+            
             return panel;
         }
 
@@ -272,22 +299,22 @@ namespace WordMan_VSTO
         /// </summary>
         private void CreateFontControls(Control parentPanel)
         {
-            // 第一行：中文字体和西文字体
-            var lblChnFont = CreateLabel("中文字体", 20, 20);
-            var cmbChnFont = CreateFontComboBox("cmbChnFontName", 100, 17);
+            // 第一行：中文字体和西文字体（向下平移50）
+            var lblChnFont = CreateLabel("中文字体", 20, 70);
+            var cmbChnFont = CreateFontComboBox("cmbChnFontName", 100, 67);
 
-            var lblEngFont = CreateLabel("西文字体", 350, 20);
-            var cmbEngFont = CreateFontComboBox("cmbEngFontName", 430, 17);
+            var lblEngFont = CreateLabel("西文字体", 350, 70);
+            var cmbEngFont = CreateFontComboBox("cmbEngFontName", 430, 67);
 
             // 第二行：字体大小、颜色选择器和格式复选框
-            var lblFontSize = CreateLabel("字体大小", 20, 55);
-            var cmbFontSize = CreateSizeComboBox("cmbFontSize", 100, 52);
+            var lblFontSize = CreateLabel("字体大小", 20, 105);
+            var cmbFontSize = CreateSizeComboBox("cmbFontSize", 100, 102);
 
             // 字体颜色按钮（小方块，无标签）
             var btnFontColor = new Button
             {
                 Name = "btnFontColor",
-                Location = new Point(200, 52),
+                Location = new Point(200, 102),
                 Size = new Size(25, 25),
                 BackColor = Color.Black,
                 ForeColor = Color.White,
@@ -302,7 +329,7 @@ namespace WordMan_VSTO
             {
                 Name = "chkBold",
                 Text = "粗体",
-                Location = new Point(350, 55),
+                Location = new Point(350, 105),
                 Size = new Size(60, 20),
                 Font = new Font("微软雅黑", 9.5F) // 字体稍微增大
             };
@@ -312,7 +339,7 @@ namespace WordMan_VSTO
             {
                 Name = "chkItalic",
                 Text = "斜体",
-                Location = new Point(420, 55),
+                Location = new Point(420, 105),
                 Size = new Size(60, 20),
                 Font = new Font("微软雅黑", 9.5F) // 字体稍微增大
             };
@@ -322,7 +349,7 @@ namespace WordMan_VSTO
             {
                 Name = "chkUnderline",
                 Text = "下划线",
-                Location = new Point(490, 55),
+                Location = new Point(490, 105),
                 Size = new Size(70, 20),
                 Font = new Font("微软雅黑", 9.5F) // 字体稍微增大
             };
@@ -340,32 +367,32 @@ namespace WordMan_VSTO
         /// </summary>
         private void CreateParagraphControls(Control parentPanel)
         {
-            // 第一行：段落对齐和段前分页
-            var lblAlignment = CreateLabel("段落对齐", 20, 100);
-            var cmbAlignment = CreateAlignmentComboBox("cmbAlignment", 100, 97);
+            // 第一行：段落对齐和段前分页（向下平移50）
+            var lblAlignment = CreateLabel("段落对齐", 20, 150);
+            var cmbAlignment = CreateAlignmentComboBox("cmbAlignment", 100, 147);
 
             var chkPageBreakBefore = new CheckBox
             {
                 Name = "chkPageBreakBefore",
                 Text = "段前分页",
-                Location = new Point(350, 100),
+                Location = new Point(350, 150),
                 Size = new Size(80, 20),
                 Font = new Font("微软雅黑", 9.5F) // 字体稍微增大
             };
             _controls["chkPageBreakBefore"] = chkPageBreakBefore;
 
             // 第二行：大纲级别和段落行距
-            var lblOutlineLevel = CreateLabel("大纲级别", 20, 135);
-            var cmbOutlineLevel = CreateOutlineLevelComboBox("cmbOutlineLevel", 100, 132);
+            var lblOutlineLevel = CreateLabel("大纲级别", 20, 185);
+            var cmbOutlineLevel = CreateOutlineLevelComboBox("cmbOutlineLevel", 100, 182);
 
-            var lblLineSpace = CreateLabel("段落行距", 350, 135);
-            var cmbLineSpace = CreateLineSpaceComboBox("cmbLineSpace", 430, 132);
+            var lblLineSpace = CreateLabel("段落行距", 350, 185);
+            var cmbLineSpace = CreateLineSpaceComboBox("cmbLineSpace", 430, 182);
             
             // 行距输入框（当选择固定值或最小值时显示）
             var txtLineSpaceValue = new TextBox
             {
                 Name = "txtLineSpaceValue",
-                Location = new Point(560, 132),
+                Location = new Point(560, 182),
                 Size = new Size(80, 25),
                 Font = new Font("微软雅黑", 9.5F),
                 Text = "12磅",
@@ -374,69 +401,59 @@ namespace WordMan_VSTO
             _controls["txtLineSpaceValue"] = txtLineSpaceValue;
 
             // 第三行：缩进方式和缩进距离
-            var lblIndentType = CreateLabel("缩进方式", 20, 170);
-            var cmbIndentType = CreateIndentTypeComboBox("cmbIndentType", 100, 167);
+            var lblIndentType = CreateLabel("缩进方式", 20, 220);
+            var cmbIndentType = CreateIndentTypeComboBox("cmbIndentType", 100, 217);
 
-            var lblIndentDistance = CreateLabel("缩进距离", 350, 170);
-            var txtIndentDistance = new TextBox
+            var lblIndentDistance = CreateLabel("缩进距离", 350, 220);
+            
+            // 使用NumericUpDownWithUnit控件替代TextBox
+            var nudIndentDistance = new NumericUpDownWithUnit(WordAPIHelper.GetWordApplication(), "字符")
             {
-                Name = "txtIndentDistance",
-                Location = new Point(430, 167),
-                Size = new Size(100, 25),
-                Font = new Font("微软雅黑", 9.5F), // 字体稍微增大
-                Text = "2字符"
+                Name = "nudIndentDistance",
+                Location = new Point(430, 217),
+                Size = new Size(120, 25), // 增加宽度以容纳单位标签
+                Value = 2,
+                Minimum = 0,
+                Maximum = 100,
+                DecimalPlaces = 1,
+                Increment = 0.5m // 设置合适的增量
             };
-            _controls["txtIndentDistance"] = txtIndentDistance;
-
-            // 为缩进距离输入框添加单位自动识别功能（不显示标签）
-            txtIndentDistance.TextChanged += (sender, e) =>
-            {
-                // 单位自动识别和补充，但不显示标签
-                AutoCompleteUnit(txtIndentDistance, new string[] { "字符", "厘米", "磅" });
-            };
+            _controls["nudIndentDistance"] = nudIndentDistance;
 
             // 第四行：段前间距和段后间距
-            var lblSpaceBefore = CreateLabel("段前间距", 20, 205);
-            var txtSpaceBefore = new TextBox
+            var lblSpaceBefore = CreateLabel("段前间距", 20, 255);
+            var nudSpaceBefore = new NumericUpDownWithUnit(WordAPIHelper.GetWordApplication(), "行")
             {
-                Name = "txtSpaceBefore",
-                Location = new Point(100, 202),
-                Size = new Size(100, 25),
-                Font = new Font("微软雅黑", 9.5F), // 字体稍微增大
-                Text = "0.00行"
+                Name = "nudSpaceBefore",
+                Location = new Point(100, 252),
+                Size = new Size(120, 25),
+                Value = 0,
+                Minimum = 0,
+                Maximum = 100,
+                DecimalPlaces = 2,
+                Increment = 0.1m
             };
-            _controls["txtSpaceBefore"] = txtSpaceBefore;
+            _controls["nudSpaceBefore"] = nudSpaceBefore;
 
-            // 为段前间距输入框添加单位自动识别功能（不显示标签）
-            txtSpaceBefore.TextChanged += (sender, e) =>
+            var lblSpaceAfter = CreateLabel("段后间距", 350, 255);
+            var nudSpaceAfter = new NumericUpDownWithUnit(WordAPIHelper.GetWordApplication(), "行")
             {
-                // 单位自动识别和补充，但不显示标签
-                AutoCompleteUnit(txtSpaceBefore, new string[] { "行", "磅" });
+                Name = "nudSpaceAfter",
+                Location = new Point(430, 252),
+                Size = new Size(120, 25),
+                Value = 0,
+                Minimum = 0,
+                Maximum = 100,
+                DecimalPlaces = 2,
+                Increment = 0.1m
             };
-
-            var lblSpaceAfter = CreateLabel("段后间距", 350, 205);
-            var txtSpaceAfter = new TextBox
-            {
-                Name = "txtSpaceAfter",
-                Location = new Point(430, 202),
-                Size = new Size(100, 25),
-                Font = new Font("微软雅黑", 9.5F), // 字体稍微增大
-                Text = "0.00行"
-            };
-            _controls["txtSpaceAfter"] = txtSpaceAfter;
-
-            // 为段后间距输入框添加单位自动识别功能（不显示标签）
-            txtSpaceAfter.TextChanged += (sender, e) =>
-            {
-                // 单位自动识别和补充，但不显示标签
-                AutoCompleteUnit(txtSpaceAfter, new string[] { "行", "磅" });
-            };
+            _controls["nudSpaceAfter"] = nudSpaceAfter;
 
             parentPanel.Controls.AddRange(new Control[] {
                 lblAlignment, cmbAlignment, chkPageBreakBefore,
                 lblOutlineLevel, cmbOutlineLevel, lblLineSpace, cmbLineSpace, txtLineSpaceValue,
-                lblIndentType, cmbIndentType, lblIndentDistance, txtIndentDistance,
-                lblSpaceBefore, txtSpaceBefore, lblSpaceAfter, txtSpaceAfter
+                lblIndentType, cmbIndentType, lblIndentDistance, nudIndentDistance,
+                lblSpaceBefore, nudSpaceBefore, lblSpaceAfter, nudSpaceAfter
             });
         }
 
@@ -445,16 +462,16 @@ namespace WordMan_VSTO
         /// </summary>
         private void CreateStylePreview(Control parentPanel)
         {
-            // 样式预览标签
-            var lblPreview = CreateLabel("样式预览", 20, 250);
+            // 样式预览标签（向下平移50）
+            var lblPreview = CreateLabel("样式预览", 20, 300);
             lblPreview.Font = new Font("微软雅黑", 9.5F, FontStyle.Bold); // 字体稍微增大
 
             // 样式预览文本框
             var txtPreview = new TextBox
             {
                 Name = "txtStylePreview",
-                Location = new Point(20, 275),
-                Size = new Size(610, 140),
+                Location = new Point(20, 325),
+                Size = new Size(610, 190), // 高度从140增加到190
                 Multiline = true,
                 ReadOnly = true,
                 Font = new Font("微软雅黑", 12.5F), // 字体稍微增大
@@ -857,6 +874,9 @@ namespace WordMan_VSTO
                 BackColor = Color.FromArgb(248, 249, 250),
                 BorderStyle = BorderStyle.FixedSingle
             };
+            
+            // 暂停面板布局更新
+            panel.SuspendLayout();
 
             // 预设样式标签
             var lblPreset = new Label
@@ -880,7 +900,7 @@ namespace WordMan_VSTO
                 AutoCompleteSource = AutoCompleteSource.ListItems // 使用列表项作为自动完成源
             };
             cmbPresetStyle.Items.AddRange(new string[] { "公文风格", "学术风格" });
-            cmbPresetStyle.SelectedIndex = 0;
+            // 默认不选择任何预设样式
             _controls["cmbPresetStyle"] = cmbPresetStyle;
 
             // 读取样式按钮
@@ -934,6 +954,9 @@ namespace WordMan_VSTO
             panel.Controls.Add(btnSaveStyle);
             panel.Controls.Add(btnApplyStyle);
 
+            // 恢复面板布局更新
+            panel.ResumeLayout(true);
+            
             return panel;
         }
 
@@ -1030,48 +1053,48 @@ namespace WordMan_VSTO
                         break;
                 }
 
-                // 设置行距（通过调整字体大小来模拟）
+                // 设置行距（通过调整TextBox的Height来模拟，而不是改变字体大小）
+                var baseHeight = 140; // 基础高度
+                
                 if (lineSpace == "单倍行距")
                 {
-                    // 保持当前字体大小
+                    // 保持基础高度
+                    previewTextBox.Height = baseHeight;
                 }
                 else if (lineSpace == "1.5倍行距")
                 {
-                    // 稍微增加字体大小来模拟1.5倍行距
-                    var currentFont = previewTextBox.Font;
-                    previewTextBox.Font = new Font(currentFont.FontFamily, currentFont.Size * 1.1f, currentFont.Style);
+                    // 增加高度来模拟1.5倍行距
+                    previewTextBox.Height = (int)(baseHeight * 1.2);
                 }
                 else if (lineSpace == "2倍行距")
                 {
-                    // 增加字体大小来模拟2倍行距
-                    var currentFont = previewTextBox.Font;
-                    previewTextBox.Font = new Font(currentFont.FontFamily, currentFont.Size * 1.2f, currentFont.Style);
+                    // 增加高度来模拟2倍行距
+                    previewTextBox.Height = (int)(baseHeight * 1.4);
                 }
                 else if (lineSpace == "固定值" || lineSpace == "最小值")
                 {
-                    // 根据固定值调整
+                    // 根据固定值调整高度
                     if (!string.IsNullOrEmpty(lineSpaceValue))
                     {
                         try
                         {
                             var value = float.Parse(lineSpaceValue.Replace("磅", "").Replace("行", "").Trim());
-                            var currentFont = previewTextBox.Font;
                             if (lineSpaceValue.Contains("磅"))
                             {
-                                // 根据磅值调整字体大小
-                                var newSize = Math.Max(8, Math.Min(24, value / 2)); // 简单的转换
-                                previewTextBox.Font = new Font(currentFont.FontFamily, newSize, currentFont.Style);
+                                // 根据磅值调整高度
+                                var multiplier = Math.Max(0.8, Math.Min(2.0, value / 12)); // 基于12磅的倍数
+                                previewTextBox.Height = (int)(baseHeight * multiplier);
                             }
                             else
                             {
-                                // 根据行值调整
-                                var newSize = currentFont.Size * value;
-                                previewTextBox.Font = new Font(currentFont.FontFamily, Math.Max(8, Math.Min(24, newSize)), currentFont.Style);
+                                // 根据行值调整高度
+                                previewTextBox.Height = (int)(baseHeight * value);
                             }
                         }
                         catch
                         {
-                            // 解析失败时保持当前字体
+                            // 解析失败时保持基础高度
+                            previewTextBox.Height = baseHeight;
                         }
                     }
                 }
@@ -1178,9 +1201,14 @@ namespace WordMan_VSTO
                 var lineSpaceValue = GetControl<TextBox>("txtLineSpaceValue")?.Text ?? "";
                 var outlineLevel = GetControl<ComboBox>("cmbOutlineLevel")?.Text ?? "正文文本";
                 var indentType = GetControl<ComboBox>("cmbIndentType")?.Text ?? "首行缩进";
-                var indentDistance = GetControl<TextBox>("txtIndentDistance")?.Text ?? "2字符";
-                var spaceBefore = GetControl<TextBox>("txtSpaceBefore")?.Text ?? "0.00行";
-                var spaceAfter = GetControl<TextBox>("txtSpaceAfter")?.Text ?? "0.00行";
+                var nudIndentDistance = GetControl<NumericUpDownWithUnit>("nudIndentDistance");
+                var indentDistance = nudIndentDistance != null ? nudIndentDistance.ValueInCentimeters.ToString("F1") + "厘米" : "2字符";
+                
+                var nudSpaceBefore = GetControl<NumericUpDownWithUnit>("nudSpaceBefore");
+                var spaceBefore = nudSpaceBefore != null ? nudSpaceBefore.Value.ToString("F2") + "行" : "0.00行";
+                
+                var nudSpaceAfter = GetControl<NumericUpDownWithUnit>("nudSpaceAfter");
+                var spaceAfter = nudSpaceAfter != null ? nudSpaceAfter.Value.ToString("F2") + "行" : "0.00行";
                 var pageBreakBefore = GetControl<CheckBox>("chkPageBreakBefore")?.Checked ?? false;
 
                 // 使用Word API创建样式预览
@@ -1254,7 +1282,7 @@ namespace WordMan_VSTO
                     indentType, indentDistance, spaceBefore, spaceAfter, pageBreakBefore);
 
                 // 设置预览文本
-                previewTextBox.Text = "这是样式预览文本，将显示当前设置的字体、段落等效果。\r\n示例文字 示例文字 示例文字 示例文字 示例文字\r\n示例文字 示例文字 示例文字 示例文字 示例文字";
+                previewTextBox.Text = "示例文字 示例文字 示例文字 示例文字 示例文字\r\n示例文字 示例文字 示例文字 示例文字 示例文字";
             }
             catch (Exception ex)
             {

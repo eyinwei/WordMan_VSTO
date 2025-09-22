@@ -628,11 +628,6 @@ namespace WordMan_VSTO.MultiLevel
             ValidateAndFormatText(Cmb_FontSize, "磅");
         }
 
-        private void Txt_Indent_ValueChanged(object sender, EventArgs e)
-        {
-            // StandardNumericUpDown的ValueChanged事件由OnControlValueChanged处理
-            // 这里保留方法以保持设计器兼容性
-        }
 
         private void Cmb_LineSpace_Validated(object sender, EventArgs e)
         {
@@ -663,30 +658,6 @@ namespace WordMan_VSTO.MultiLevel
         #region 设计器事件处理方法（保持兼容性）
 
 
-        private void Cmb_SpaceValue_TextChanged(object sender, EventArgs e)
-        {
-            // 这个方法现在由OnControlValueChanged处理，但保留以保持设计器兼容性
-        }
-
-        private void Btn_FontColor_BackColorChanged(object sender, EventArgs e)
-        {
-            // 这个方法现在由OnControlValueChanged处理，但保留以保持设计器兼容性
-        }
-
-        private void Cmb_FontNameAndHV_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            // 这个方法现在由OnControlValueChanged处理，但保留以保持设计器兼容性
-        }
-
-        private void Cmb_FontSize_TextChanged(object sender, EventArgs e)
-        {
-            // 这个方法现在由OnControlValueChanged处理，但保留以保持设计器兼容性
-        }
-
-        private void Cmb_LineSpace_TextChanged(object sender, EventArgs e)
-        {
-            // 这个方法现在由OnControlValueChanged处理，但保留以保持设计器兼容性
-        }
 
         #endregion
 

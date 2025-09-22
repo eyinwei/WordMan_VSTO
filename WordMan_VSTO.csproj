@@ -228,9 +228,6 @@
     <Compile Include="StyleSetting\StyleSettingsUIDesigner.cs" />
     <Compile Include="StyleSetting\StyleFileManager.cs" />
     <Compile Include="MultiLevel\WordStyleInfo.cs" />
-    <Compile Include="MultiLevel\ToggleButton.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="ControlsManager.cs" />
     <Compile Include="MultiLevel\MultiLevelListForm.cs">
       <SubType>Form</SubType>

@@ -80,8 +80,13 @@ namespace WordMan_VSTO
         private void InitializeComponent()
         {
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.关闭 = new WordMan_VSTO.StandardButton();
             this.Txt_AddStyleName = new WordMan_VSTO.StandardTextBox();
+            this.Btn_ApplySet = new WordMan_VSTO.StandardButton();
             this.Btn_DelStyle = new WordMan_VSTO.StandardButton();
+            this.Cmb_SetLevel = new WordMan_VSTO.StandardComboBox();
+            this.Cmb_PreSettings = new WordMan_VSTO.StandardComboBox();
+            this.label12 = new System.Windows.Forms.Label();
             this.Pal_Font = new System.Windows.Forms.GroupBox();
             this.label3 = new System.Windows.Forms.Label();
             this.Cmb_ChnFontName = new WordMan_VSTO.StandardComboBox();
@@ -93,8 +98,10 @@ namespace WordMan_VSTO
             this.Btn_Bold = new WordMan_VSTO.ToggleButton();
             this.Btn_Italic = new WordMan_VSTO.ToggleButton();
             this.Btn_UnderLine = new WordMan_VSTO.ToggleButton();
+            this.label16 = new System.Windows.Forms.Label();
             this.Pal_ParaIndent = new System.Windows.Forms.GroupBox();
             this.label9 = new System.Windows.Forms.Label();
+            this.Cmb_LineSpacing = new WordMan_VSTO.StandardComboBox();
             this.Nud_LineSpacing = new WordMan_VSTO.StandardNumericUpDown();
             this.label10 = new System.Windows.Forms.Label();
             this.Nud_BefreSpacing = new WordMan_VSTO.StandardNumericUpDown();
@@ -114,12 +121,6 @@ namespace WordMan_VSTO
             this.Btn_ReadDocumentStyle = new WordMan_VSTO.StandardButton();
             this.Btn_AddStyle = new WordMan_VSTO.StandardButton();
             this.Lst_Styles = new System.Windows.Forms.ListBox();
-            this.Cmb_SetLevel = new WordMan_VSTO.StandardComboBox();
-            this.label12 = new System.Windows.Forms.Label();
-            this.Btn_ApplySet = new WordMan_VSTO.StandardButton();
-            this.Cmb_PreSettings = new WordMan_VSTO.StandardComboBox();
-            this.label16 = new System.Windows.Forms.Label();
-            this.Cmb_LineSpacing = new WordMan_VSTO.StandardComboBox();
             this.groupBox3.SuspendLayout();
             this.Pal_Font.SuspendLayout();
             this.Pal_ParaIndent.SuspendLayout();
@@ -134,6 +135,7 @@ namespace WordMan_VSTO
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.关闭);
             this.groupBox3.Controls.Add(this.Txt_AddStyleName);
             this.groupBox3.Controls.Add(this.Btn_ApplySet);
             this.groupBox3.Controls.Add(this.Btn_DelStyle);
@@ -153,6 +155,19 @@ namespace WordMan_VSTO
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "样式设置";
             // 
+            // 关闭
+            // 
+            this.关闭.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.关闭.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.关闭.Font = new System.Drawing.Font("微软雅黑", 10F, System.Drawing.FontStyle.Bold);
+            this.关闭.ForeColor = System.Drawing.Color.Black;
+            this.关闭.Location = new System.Drawing.Point(536, 334);
+            this.关闭.Name = "关闭";
+            this.关闭.Size = new System.Drawing.Size(120, 31);
+            this.关闭.TabIndex = 34;
+            this.关闭.Text = "关闭";
+            this.关闭.UseVisualStyleBackColor = false;
+            // 
             // Txt_AddStyleName
             // 
             this.Txt_AddStyleName.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
@@ -163,6 +178,19 @@ namespace WordMan_VSTO
             this.Txt_AddStyleName.Name = "Txt_AddStyleName";
             this.Txt_AddStyleName.Size = new System.Drawing.Size(158, 23);
             this.Txt_AddStyleName.TabIndex = 33;
+            // 
+            // Btn_ApplySet
+            // 
+            this.Btn_ApplySet.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.Btn_ApplySet.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.Btn_ApplySet.Font = new System.Drawing.Font("微软雅黑", 10F, System.Drawing.FontStyle.Bold);
+            this.Btn_ApplySet.ForeColor = System.Drawing.Color.Black;
+            this.Btn_ApplySet.Location = new System.Drawing.Point(407, 334);
+            this.Btn_ApplySet.Name = "Btn_ApplySet";
+            this.Btn_ApplySet.Size = new System.Drawing.Size(120, 31);
+            this.Btn_ApplySet.TabIndex = 7;
+            this.Btn_ApplySet.Text = "应用设置";
+            this.Btn_ApplySet.UseVisualStyleBackColor = false;
             // 
             // Btn_DelStyle
             // 
@@ -177,6 +205,55 @@ namespace WordMan_VSTO
             this.Btn_DelStyle.TabIndex = 29;
             this.Btn_DelStyle.Text = "删除样式";
             this.Btn_DelStyle.UseVisualStyleBackColor = false;
+            // 
+            // Cmb_SetLevel
+            // 
+            this.Cmb_SetLevel.AllowInput = false;
+            this.Cmb_SetLevel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.Cmb_SetLevel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Cmb_SetLevel.Font = new System.Drawing.Font("微软雅黑", 9F);
+            this.Cmb_SetLevel.FormattingEnabled = true;
+            this.Cmb_SetLevel.Items.AddRange(new object[] {
+            "无",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9"});
+            this.Cmb_SetLevel.Location = new System.Drawing.Point(535, 274);
+            this.Cmb_SetLevel.Name = "Cmb_SetLevel";
+            this.Cmb_SetLevel.Size = new System.Drawing.Size(120, 25);
+            this.Cmb_SetLevel.TabIndex = 21;
+            // 
+            // Cmb_PreSettings
+            // 
+            this.Cmb_PreSettings.AllowInput = false;
+            this.Cmb_PreSettings.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.Cmb_PreSettings.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Cmb_PreSettings.Font = new System.Drawing.Font("微软雅黑", 9F);
+            this.Cmb_PreSettings.FormattingEnabled = true;
+            this.Cmb_PreSettings.Items.AddRange(new object[] {
+            "公文风格",
+            "论文风格",
+            "报告风格",
+            "条文风格"});
+            this.Cmb_PreSettings.Location = new System.Drawing.Point(278, 274);
+            this.Cmb_PreSettings.Name = "Cmb_PreSettings";
+            this.Cmb_PreSettings.Size = new System.Drawing.Size(120, 25);
+            this.Cmb_PreSettings.TabIndex = 8;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(470, 278);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(68, 17);
+            this.label12.TabIndex = 20;
+            this.label12.Text = "显示标题数";
             // 
             // Pal_Font
             // 
@@ -265,6 +342,8 @@ namespace WordMan_VSTO
             // 
             this.Btn_FontColor.BackColor = System.Drawing.Color.Black;
             this.Btn_FontColor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.Btn_FontColor.Font = new System.Drawing.Font("微软雅黑", 10F, System.Drawing.FontStyle.Bold);
+            this.Btn_FontColor.ForeColor = System.Drawing.Color.Black;
             this.Btn_FontColor.Location = new System.Drawing.Point(191, 57);
             this.Btn_FontColor.Name = "Btn_FontColor";
             this.Btn_FontColor.Size = new System.Drawing.Size(25, 25);
@@ -285,7 +364,7 @@ namespace WordMan_VSTO
             // Btn_Italic
             // 
             this.Btn_Italic.BackColor = System.Drawing.Color.AliceBlue;
-            this.Btn_Italic.Location = new System.Drawing.Point(353, 54);
+            this.Btn_Italic.Location = new System.Drawing.Point(353, 53);
             this.Btn_Italic.Name = "Btn_Italic";
             this.Btn_Italic.Pressed = false;
             this.Btn_Italic.Size = new System.Drawing.Size(55, 30);
@@ -296,13 +375,23 @@ namespace WordMan_VSTO
             // Btn_UnderLine
             // 
             this.Btn_UnderLine.BackColor = System.Drawing.Color.AliceBlue;
-            this.Btn_UnderLine.Location = new System.Drawing.Point(418, 54);
+            this.Btn_UnderLine.Location = new System.Drawing.Point(418, 53);
             this.Btn_UnderLine.Name = "Btn_UnderLine";
             this.Btn_UnderLine.Pressed = false;
             this.Btn_UnderLine.Size = new System.Drawing.Size(55, 30);
             this.Btn_UnderLine.TabIndex = 9;
             this.Btn_UnderLine.Text = "下划线";
             this.Btn_UnderLine.UseVisualStyleBackColor = false;
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(192, 278);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(56, 17);
+            this.label16.TabIndex = 9;
+            this.label16.Text = "预设风格";
+            this.label16.Click += new System.EventHandler(this.label16_Click);
             // 
             // Pal_ParaIndent
             // 
@@ -340,6 +429,25 @@ namespace WordMan_VSTO
             this.label9.TabIndex = 15;
             this.label9.Text = "段落行距";
             this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // Cmb_LineSpacing
+            // 
+            this.Cmb_LineSpacing.AllowInput = false;
+            this.Cmb_LineSpacing.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.Cmb_LineSpacing.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Cmb_LineSpacing.Font = new System.Drawing.Font("微软雅黑", 9F);
+            this.Cmb_LineSpacing.FormattingEnabled = true;
+            this.Cmb_LineSpacing.Items.AddRange(new object[] {
+            "单倍行距",
+            "1.5倍行距",
+            "2倍行距",
+            "最小值",
+            "固定值",
+            "多倍行距"});
+            this.Cmb_LineSpacing.Location = new System.Drawing.Point(354, 24);
+            this.Cmb_LineSpacing.Name = "Cmb_LineSpacing";
+            this.Cmb_LineSpacing.Size = new System.Drawing.Size(120, 25);
+            this.Cmb_LineSpacing.TabIndex = 16;
             // 
             // Nud_LineSpacing
             // 
@@ -657,97 +765,6 @@ namespace WordMan_VSTO
             this.Lst_Styles.Size = new System.Drawing.Size(158, 276);
             this.Lst_Styles.TabIndex = 0;
             // 
-            // Cmb_SetLevel
-            // 
-            this.Cmb_SetLevel.AllowInput = false;
-            this.Cmb_SetLevel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
-            this.Cmb_SetLevel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.Cmb_SetLevel.Font = new System.Drawing.Font("微软雅黑", 9F);
-            this.Cmb_SetLevel.FormattingEnabled = true;
-            this.Cmb_SetLevel.Items.AddRange(new object[] {
-            "无",
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9"});
-            this.Cmb_SetLevel.Location = new System.Drawing.Point(535, 274);
-            this.Cmb_SetLevel.Name = "Cmb_SetLevel";
-            this.Cmb_SetLevel.Size = new System.Drawing.Size(120, 25);
-            this.Cmb_SetLevel.TabIndex = 21;
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(470, 278);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(68, 17);
-            this.label12.TabIndex = 20;
-            this.label12.Text = "显示标题数";
-            // 
-            // Btn_ApplySet
-            // 
-            this.Btn_ApplySet.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
-            this.Btn_ApplySet.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Btn_ApplySet.Font = new System.Drawing.Font("微软雅黑", 10F, System.Drawing.FontStyle.Bold);
-            this.Btn_ApplySet.ForeColor = System.Drawing.Color.Black;
-            this.Btn_ApplySet.Location = new System.Drawing.Point(535, 334);
-            this.Btn_ApplySet.Name = "Btn_ApplySet";
-            this.Btn_ApplySet.Size = new System.Drawing.Size(120, 31);
-            this.Btn_ApplySet.TabIndex = 7;
-            this.Btn_ApplySet.Text = "应用设置";
-            this.Btn_ApplySet.UseVisualStyleBackColor = false;
-            // 
-            // Cmb_PreSettings
-            // 
-            this.Cmb_PreSettings.AllowInput = false;
-            this.Cmb_PreSettings.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
-            this.Cmb_PreSettings.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.Cmb_PreSettings.Font = new System.Drawing.Font("微软雅黑", 9F);
-            this.Cmb_PreSettings.FormattingEnabled = true;
-            this.Cmb_PreSettings.Items.AddRange(new object[] {
-            "公文风格",
-            "论文风格",
-            "报告风格",
-            "条文风格"});
-            this.Cmb_PreSettings.Location = new System.Drawing.Point(278, 274);
-            this.Cmb_PreSettings.Name = "Cmb_PreSettings";
-            this.Cmb_PreSettings.Size = new System.Drawing.Size(120, 25);
-            this.Cmb_PreSettings.TabIndex = 8;
-            // 
-            // Cmb_LineSpacing
-            // 
-            this.Cmb_LineSpacing.AllowInput = false;
-            this.Cmb_LineSpacing.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
-            this.Cmb_LineSpacing.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.Cmb_LineSpacing.Font = new System.Drawing.Font("微软雅黑", 9F);
-            this.Cmb_LineSpacing.FormattingEnabled = true;
-            this.Cmb_LineSpacing.Items.AddRange(new object[] {
-            "单倍行距",
-            "1.5倍行距",
-            "2倍行距",
-            "最小值",
-            "固定值",
-            "多倍行距"});
-            this.Cmb_LineSpacing.Location = new System.Drawing.Point(354, 24);
-            this.Cmb_LineSpacing.Name = "Cmb_LineSpacing";
-            this.Cmb_LineSpacing.Size = new System.Drawing.Size(120, 25);
-            this.Cmb_LineSpacing.TabIndex = 16;
-            // 
-            // label16
-            // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(192, 278);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(56, 17);
-            this.label16.TabIndex = 9;
-            this.label16.Text = "预设风格";
-            this.label16.Click += new System.EventHandler(this.label16_Click);
-            // 
             // StyleSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
@@ -779,5 +796,6 @@ namespace WordMan_VSTO
         #endregion
 
         private StandardButton Btn_ReadDocumentStyle;
+        private StandardButton 关闭;
     }
 }

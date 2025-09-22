@@ -856,6 +856,29 @@ namespace WordMan_VSTO
         }
 
         /// <summary>
+        /// 创建切换按钮
+        /// </summary>
+        public static ToggleButton CreateToggleButton(string name, Point location, Size size, string text = "", bool pressed = false)
+        {
+            return new ToggleButton
+            {
+                Name = name,
+                Location = location,
+                Size = size,
+                Text = text,
+                Pressed = pressed
+            };
+        }
+
+        /// <summary>
+        /// 创建字体样式切换按钮（粗体、斜体、下划线）
+        /// </summary>
+        public static ToggleButton CreateFontStyleToggleButton(string name, Point location, string text, bool pressed = false)
+        {
+            return CreateToggleButton(name, location, new Size(55, 30), text, pressed);
+        }
+
+        /// <summary>
         /// 批量设置输入框的值（使用Word API转换）
         /// </summary>
         public static void SetInputValues(Control container, int level, decimal numberIndent, decimal textIndent, decimal tabPosition)

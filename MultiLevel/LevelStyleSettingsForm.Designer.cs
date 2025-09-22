@@ -119,7 +119,6 @@ namespace WordMan_VSTO.MultiLevel
             this.Txt_RightIndent.Name = "Txt_RightIndent";
             this.Txt_RightIndent.Size = new System.Drawing.Size(150, 23);
             this.Txt_RightIndent.TabIndex = 39;
-            this.Txt_RightIndent.ValueChanged += new System.EventHandler(this.Txt_Indent_ValueChanged);
             // 
             // Cmb_SpaceAfter
             // 
@@ -128,7 +127,6 @@ namespace WordMan_VSTO.MultiLevel
             this.Cmb_SpaceAfter.Name = "Cmb_SpaceAfter";
             this.Cmb_SpaceAfter.Size = new System.Drawing.Size(150, 25);
             this.Cmb_SpaceAfter.TabIndex = 27;
-            this.Cmb_SpaceAfter.TextChanged += new System.EventHandler(this.Cmb_SpaceValue_TextChanged);
             this.Cmb_SpaceAfter.Validated += new System.EventHandler(this.Cmb_SpaceValue_Validated);
             // 
             // label14
@@ -267,7 +265,6 @@ namespace WordMan_VSTO.MultiLevel
             this.Btn_FontColor.Size = new System.Drawing.Size(151, 27);
             this.Btn_FontColor.TabIndex = 41;
             this.Btn_FontColor.UseVisualStyleBackColor = false;
-            this.Btn_FontColor.BackColorChanged += new System.EventHandler(this.Btn_FontColor_BackColorChanged);
             this.Btn_FontColor.Click += new System.EventHandler(this.Btn_FontColor_Click);
             // 
             // Txt_LeftIndent
@@ -276,7 +273,6 @@ namespace WordMan_VSTO.MultiLevel
             this.Txt_LeftIndent.Name = "Txt_LeftIndent";
             this.Txt_LeftIndent.Size = new System.Drawing.Size(150, 23);
             this.Txt_LeftIndent.TabIndex = 38;
-            this.Txt_LeftIndent.ValueChanged += new System.EventHandler(this.Txt_Indent_ValueChanged);
             // 
             // Btn_BreakBefore
             // 
@@ -298,7 +294,6 @@ namespace WordMan_VSTO.MultiLevel
             this.Cmb_Alignment.Name = "Cmb_Alignment";
             this.Cmb_Alignment.Size = new System.Drawing.Size(150, 25);
             this.Cmb_Alignment.TabIndex = 30;
-            this.Cmb_Alignment.SelectedIndexChanged += new System.EventHandler(this.Cmb_FontNameAndHV_SelectedIndexChanged);
             // 
             // Cmb_SpaceBefore
             // 
@@ -307,7 +302,6 @@ namespace WordMan_VSTO.MultiLevel
             this.Cmb_SpaceBefore.Name = "Cmb_SpaceBefore";
             this.Cmb_SpaceBefore.Size = new System.Drawing.Size(150, 25);
             this.Cmb_SpaceBefore.TabIndex = 26;
-            this.Cmb_SpaceBefore.TextChanged += new System.EventHandler(this.Cmb_SpaceValue_TextChanged);
             this.Cmb_SpaceBefore.Validated += new System.EventHandler(this.Cmb_SpaceValue_Validated);
             // 
             // Cmb_FontSize
@@ -317,7 +311,6 @@ namespace WordMan_VSTO.MultiLevel
             this.Cmb_FontSize.Name = "Cmb_FontSize";
             this.Cmb_FontSize.Size = new System.Drawing.Size(150, 25);
             this.Cmb_FontSize.TabIndex = 24;
-            this.Cmb_FontSize.TextChanged += new System.EventHandler(this.Cmb_FontSize_TextChanged);
             this.Cmb_FontSize.Validated += new System.EventHandler(this.Cmb_FontSize_Validated);
             // 
             // Cmb_LineSpacing
@@ -327,7 +320,6 @@ namespace WordMan_VSTO.MultiLevel
             this.Cmb_LineSpacing.Name = "Cmb_LineSpacing";
             this.Cmb_LineSpacing.Size = new System.Drawing.Size(150, 25);
             this.Cmb_LineSpacing.TabIndex = 23;
-            this.Cmb_LineSpacing.TextChanged += new System.EventHandler(this.Cmb_LineSpace_TextChanged);
             this.Cmb_LineSpacing.Validated += new System.EventHandler(this.Cmb_LineSpace_Validated);
             // 
             // Cmb_EngFontName
@@ -338,7 +330,6 @@ namespace WordMan_VSTO.MultiLevel
             this.Cmb_EngFontName.Name = "Cmb_EngFontName";
             this.Cmb_EngFontName.Size = new System.Drawing.Size(150, 25);
             this.Cmb_EngFontName.TabIndex = 15;
-            this.Cmb_EngFontName.SelectedIndexChanged += new System.EventHandler(this.Cmb_FontNameAndHV_SelectedIndexChanged);
             // 
             // Cmb_ChnFontName
             // 
@@ -348,7 +339,6 @@ namespace WordMan_VSTO.MultiLevel
             this.Cmb_ChnFontName.Name = "Cmb_ChnFontName";
             this.Cmb_ChnFontName.Size = new System.Drawing.Size(150, 25);
             this.Cmb_ChnFontName.TabIndex = 14;
-            this.Cmb_ChnFontName.SelectedIndexChanged += new System.EventHandler(this.Cmb_FontNameAndHV_SelectedIndexChanged);
             // 
             // Btn_Underline
             // 

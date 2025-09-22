@@ -71,20 +71,28 @@
             this.separator4 = this.Factory.CreateRibbonSeparator();
             this.宽度刷 = this.Factory.CreateRibbonToggleButton();
             this.高度刷 = this.Factory.CreateRibbonToggleButton();
-            this.其他 = this.Factory.CreateRibbonGroup();
+            this.位图化 = this.Factory.CreateRibbonButton();
+            this.全文处理 = this.Factory.CreateRibbonGroup();
+            this.TypesettingButton = this.Factory.CreateRibbonButton();
+            this.separator5 = this.Factory.CreateRibbonSeparator();
             this.域名高亮 = this.Factory.CreateRibbonButton();
             this.取消高亮 = this.Factory.CreateRibbonButton();
             this.版本 = this.Factory.CreateRibbonButton();
             this.一键排版 = this.Factory.CreateRibbonButton();
-            this.TypesettingButton = this.Factory.CreateRibbonButton();
-            this.button1 = this.Factory.CreateRibbonButton();
+            this.separator6 = this.Factory.CreateRibbonSeparator();
             this.另存PDF = this.Factory.CreateRibbonButton();
+            this.文档拆分 = this.Factory.CreateRibbonButton();
+            this.文档合并 = this.Factory.CreateRibbonButton();
+            this.快速密级 = this.Factory.CreateRibbonMenu();
+            this.公开 = this.Factory.CreateRibbonButton();
+            this.内部 = this.Factory.CreateRibbonButton();
+            this.移除密级 = this.Factory.CreateRibbonButton();
             this.WordMan.SuspendLayout();
             this.文本处理.SuspendLayout();
             this.表格处理.SuspendLayout();
             this.公式处理.SuspendLayout();
             this.图片处理.SuspendLayout();
-            this.其他.SuspendLayout();
+            this.全文处理.SuspendLayout();
             this.SuspendLayout();
             // 
             // WordMan
@@ -93,13 +101,12 @@
             this.WordMan.Groups.Add(this.表格处理);
             this.WordMan.Groups.Add(this.公式处理);
             this.WordMan.Groups.Add(this.图片处理);
-            this.WordMan.Groups.Add(this.其他);
+            this.WordMan.Groups.Add(this.全文处理);
             this.WordMan.Label = "WordMan";
             this.WordMan.Name = "WordMan";
             // 
             // 文本处理
             // 
-            this.文本处理.Items.Add(this.TypesettingButton);
             this.文本处理.Items.Add(this.去除断行);
             this.文本处理.Items.Add(this.去除空格);
             this.文本处理.Items.Add(this.去除空行);
@@ -355,6 +362,7 @@
             this.图片处理.Items.Add(this.separator4);
             this.图片处理.Items.Add(this.宽度刷);
             this.图片处理.Items.Add(this.高度刷);
+            this.图片处理.Items.Add(this.位图化);
             this.图片处理.Label = "图片处理";
             this.图片处理.Name = "图片处理";
             // 
@@ -416,16 +424,42 @@
             this.高度刷.ShowImage = true;
             this.高度刷.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.高度刷_Click);
             // 
-            // 其他
+            // 位图化
             // 
-            this.其他.Items.Add(this.域名高亮);
-            this.其他.Items.Add(this.取消高亮);
-            this.其他.Items.Add(this.版本);
-            this.其他.Items.Add(this.一键排版);
-            this.其他.Items.Add(this.button1);
-            this.其他.Items.Add(this.另存PDF);
-            this.其他.Label = "其他";
-            this.其他.Name = "其他";
+            this.位图化.Label = "位图化";
+            this.位图化.Name = "位图化";
+            this.位图化.OfficeImageId = "PasteAsPictureMenu";
+            this.位图化.ShowImage = true;
+            this.位图化.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.位图化_Click);
+            // 
+            // 全文处理
+            // 
+            this.全文处理.Items.Add(this.TypesettingButton);
+            this.全文处理.Items.Add(this.separator5);
+            this.全文处理.Items.Add(this.域名高亮);
+            this.全文处理.Items.Add(this.取消高亮);
+            this.全文处理.Items.Add(this.版本);
+            this.全文处理.Items.Add(this.一键排版);
+            this.全文处理.Items.Add(this.separator6);
+            this.全文处理.Items.Add(this.另存PDF);
+            this.全文处理.Items.Add(this.文档拆分);
+            this.全文处理.Items.Add(this.文档合并);
+            this.全文处理.Items.Add(this.快速密级);
+            this.全文处理.Label = "全文处理";
+            this.全文处理.Name = "全文处理";
+            // 
+            // TypesettingButton
+            // 
+            this.TypesettingButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.TypesettingButton.Label = "排版工具";
+            this.TypesettingButton.Name = "TypesettingButton";
+            this.TypesettingButton.OfficeImageId = "HappyFace";
+            this.TypesettingButton.ShowImage = true;
+            this.TypesettingButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.TypesettingButton_Click);
+            // 
+            // separator5
+            // 
+            this.separator5.Name = "separator5";
             // 
             // 域名高亮
             // 
@@ -456,23 +490,9 @@
             this.一键排版.Label = "";
             this.一键排版.Name = "一键排版";
             // 
-            // TypesettingButton
+            // separator6
             // 
-            this.TypesettingButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.TypesettingButton.Label = "排版工具";
-            this.TypesettingButton.Name = "TypesettingButton";
-            this.TypesettingButton.OfficeImageId = "AboveText";
-            this.TypesettingButton.ShowImage = true;
-            this.TypesettingButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.TypesettingButton_Click);
-            // 
-            // button1
-            // 
-            this.button1.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.button1.Label = "样式设置";
-            this.button1.Name = "button1";
-            this.button1.OfficeImageId = "StyleGallery";
-            this.button1.ShowImage = true;
-            this.button1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.button1_Click);
+            this.separator6.Name = "separator6";
             // 
             // 另存PDF
             // 
@@ -482,6 +502,47 @@
             this.另存PDF.OfficeImageId = "MsnLogo";
             this.另存PDF.ShowImage = true;
             this.另存PDF.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.另存PDF_Click);
+            // 
+            // 文档拆分
+            // 
+            this.文档拆分.Label = "文档拆分";
+            this.文档拆分.Name = "文档拆分";
+            this.文档拆分.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.文档拆分_Click);
+            // 
+            // 文档合并
+            // 
+            this.文档合并.Label = "文档合并";
+            this.文档合并.Name = "文档合并";
+            this.文档合并.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.文档合并_Click);
+            // 
+            // 快速密级
+            // 
+            this.快速密级.Items.Add(this.公开);
+            this.快速密级.Items.Add(this.内部);
+            this.快速密级.Items.Add(this.移除密级);
+            this.快速密级.Label = "快速密级";
+            this.快速密级.Name = "快速密级";
+            // 
+            // 公开
+            // 
+            this.公开.Label = "公开";
+            this.公开.Name = "公开";
+            this.公开.ShowImage = true;
+            this.公开.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.公开_Click);
+            // 
+            // 内部
+            // 
+            this.内部.Label = "内部";
+            this.内部.Name = "内部";
+            this.内部.ShowImage = true;
+            this.内部.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.内部_Click);
+            // 
+            // 移除密级
+            // 
+            this.移除密级.Label = "移除";
+            this.移除密级.Name = "移除密级";
+            this.移除密级.ShowImage = true;
+            this.移除密级.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.移除密级_Click);
             // 
             // MainRibbon
             // 
@@ -499,8 +560,8 @@
             this.公式处理.PerformLayout();
             this.图片处理.ResumeLayout(false);
             this.图片处理.PerformLayout();
-            this.其他.ResumeLayout(false);
-            this.其他.PerformLayout();
+            this.全文处理.ResumeLayout(false);
+            this.全文处理.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -518,7 +579,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator2;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 希腊字母;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 常用符号;
-        internal Microsoft.Office.Tools.Ribbon.RibbonGroup 其他;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup 全文处理;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 另存PDF;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup 公式处理;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 公式编号;
@@ -551,7 +612,15 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 高度刷;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 创建三线表;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton TypesettingButton;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton button1;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 位图化;
+        internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator5;
+        internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator6;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 文档拆分;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 文档合并;
+        internal Microsoft.Office.Tools.Ribbon.RibbonMenu 快速密级;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 公开;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 内部;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 移除密级;
     }
 
     partial class ThisRibbonCollection

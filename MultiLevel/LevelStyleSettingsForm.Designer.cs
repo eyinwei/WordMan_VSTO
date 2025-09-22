@@ -30,8 +30,8 @@ namespace WordMan_VSTO.MultiLevel
         {
             this.Dta_StyleList = new System.Windows.Forms.DataGridView();
             this.Grp_SetSelectedStyle = new System.Windows.Forms.GroupBox();
-            this.Txt_RightIndent = new System.Windows.Forms.TextBox();
-            this.Cmb_SpaceAfter = new System.Windows.Forms.ComboBox();
+            this.Txt_RightIndent = new WordMan_VSTO.StandardNumericUpDown();
+            this.Cmb_SpaceAfter = new WordMan_VSTO.StandardComboBox();
             this.label14 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
@@ -47,17 +47,17 @@ namespace WordMan_VSTO.MultiLevel
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.Btn_FontColor = new System.Windows.Forms.Button();
-            this.Txt_LeftIndent = new System.Windows.Forms.TextBox();
-            this.Btn_BreakBefore = new WordMan_VSTO.StylePane.ToggleButton();
-            this.Cmb_Alignment = new System.Windows.Forms.ComboBox();
-            this.Cmb_SpaceBefore = new System.Windows.Forms.ComboBox();
-            this.Cmb_FontSize = new System.Windows.Forms.ComboBox();
-            this.Cmb_LineSpacing = new System.Windows.Forms.ComboBox();
-            this.Cmb_EngFontName = new System.Windows.Forms.ComboBox();
-            this.Cmb_ChnFontName = new System.Windows.Forms.ComboBox();
-            this.Btn_Underline = new WordMan_VSTO.StylePane.ToggleButton();
-            this.Btn_Italic = new WordMan_VSTO.StylePane.ToggleButton();
-            this.Btn_Bold = new WordMan_VSTO.StylePane.ToggleButton();
+            this.Txt_LeftIndent = new WordMan_VSTO.StandardNumericUpDown();
+            this.Btn_BreakBefore = new WordMan_VSTO.ToggleButton();
+            this.Cmb_Alignment = new WordMan_VSTO.StandardComboBox();
+            this.Cmb_SpaceBefore = new WordMan_VSTO.StandardComboBox();
+            this.Cmb_FontSize = new WordMan_VSTO.StandardComboBox();
+            this.Cmb_LineSpacing = new WordMan_VSTO.StandardComboBox();
+            this.Cmb_EngFontName = new WordMan_VSTO.StandardComboBox();
+            this.Cmb_ChnFontName = new WordMan_VSTO.StandardComboBox();
+            this.Btn_Underline = new WordMan_VSTO.ToggleButton();
+            this.Btn_Italic = new WordMan_VSTO.ToggleButton();
+            this.Btn_Bold = new WordMan_VSTO.ToggleButton();
             this.Btn_SetStyles = new System.Windows.Forms.Button();
             this.Btn_Cancel = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.Dta_StyleList)).BeginInit();
@@ -115,19 +115,18 @@ namespace WordMan_VSTO.MultiLevel
             // 
             // Txt_RightIndent
             // 
-            this.Txt_RightIndent.Location = new System.Drawing.Point(270, 93);
+            this.Txt_RightIndent.Location = new System.Drawing.Point(495, 93);
             this.Txt_RightIndent.Name = "Txt_RightIndent";
-            this.Txt_RightIndent.Size = new System.Drawing.Size(100, 25);
+            this.Txt_RightIndent.Size = new System.Drawing.Size(150, 23);
             this.Txt_RightIndent.TabIndex = 39;
-            this.Txt_RightIndent.TextChanged += new System.EventHandler(this.Txt_Indent_TextChanged);
-            this.Txt_RightIndent.Validated += new System.EventHandler(this.Txt_Indent_Validated);
+            this.Txt_RightIndent.ValueChanged += new System.EventHandler(this.Txt_Indent_ValueChanged);
             // 
             // Cmb_SpaceAfter
             // 
             this.Cmb_SpaceAfter.FormattingEnabled = true;
-            this.Cmb_SpaceAfter.Location = new System.Drawing.Point(270, 126);
+            this.Cmb_SpaceAfter.Location = new System.Drawing.Point(495, 126);
             this.Cmb_SpaceAfter.Name = "Cmb_SpaceAfter";
-            this.Cmb_SpaceAfter.Size = new System.Drawing.Size(100, 26);
+            this.Cmb_SpaceAfter.Size = new System.Drawing.Size(150, 25);
             this.Cmb_SpaceAfter.TabIndex = 27;
             this.Cmb_SpaceAfter.TextChanged += new System.EventHandler(this.Cmb_SpaceValue_TextChanged);
             this.Cmb_SpaceAfter.Validated += new System.EventHandler(this.Cmb_SpaceValue_Validated);
@@ -135,152 +134,154 @@ namespace WordMan_VSTO.MultiLevel
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(201, 62);
+            this.label14.Location = new System.Drawing.Point(426, 64);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(64, 18);
+            this.label14.Size = new System.Drawing.Size(56, 17);
             this.label14.TabIndex = 54;
             this.label14.Text = "字体颜色";
             // 
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(12, 164);
+            this.label13.Location = new System.Drawing.Point(54, 164);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(64, 18);
+            this.label13.Size = new System.Drawing.Size(56, 17);
             this.label13.TabIndex = 53;
             this.label13.Text = "段落对齐";
             // 
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(406, 130);
+            this.label12.Location = new System.Drawing.Point(745, 158);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(64, 18);
+            this.label12.Size = new System.Drawing.Size(56, 17);
             this.label12.TabIndex = 52;
             this.label12.Text = "段前分页";
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(201, 130);
+            this.label11.Location = new System.Drawing.Point(426, 130);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(64, 18);
+            this.label11.Size = new System.Drawing.Size(56, 17);
             this.label11.TabIndex = 51;
             this.label11.Text = "段后间距";
             // 
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(12, 130);
+            this.label10.Location = new System.Drawing.Point(54, 130);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(64, 18);
+            this.label10.Size = new System.Drawing.Size(56, 17);
             this.label10.TabIndex = 50;
             this.label10.Text = "段前间距";
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(406, 96);
+            this.label9.Location = new System.Drawing.Point(426, 164);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(64, 18);
+            this.label9.Size = new System.Drawing.Size(56, 17);
             this.label9.TabIndex = 49;
             this.label9.Text = "段落行距";
+            this.label9.Click += new System.EventHandler(this.label9_Click);
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(201, 96);
+            this.label8.Location = new System.Drawing.Point(426, 98);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(50, 18);
+            this.label8.Size = new System.Drawing.Size(44, 17);
             this.label8.TabIndex = 48;
             this.label8.Text = "右缩进";
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(12, 96);
+            this.label7.Location = new System.Drawing.Point(54, 96);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(50, 18);
+            this.label7.Size = new System.Drawing.Size(44, 17);
             this.label7.TabIndex = 47;
             this.label7.Text = "左缩进";
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(491, 62);
+            this.label6.Location = new System.Drawing.Point(757, 116);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(50, 18);
+            this.label6.Size = new System.Drawing.Size(44, 17);
             this.label6.TabIndex = 46;
             this.label6.Text = "下划线";
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(410, 62);
+            this.label5.Location = new System.Drawing.Point(769, 75);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(36, 18);
+            this.label5.Size = new System.Drawing.Size(32, 17);
             this.label5.TabIndex = 45;
             this.label5.Text = "斜体";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(322, 62);
+            this.label4.Location = new System.Drawing.Point(770, 34);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(36, 18);
+            this.label4.Size = new System.Drawing.Size(32, 17);
             this.label4.TabIndex = 44;
             this.label4.Text = "粗体";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 62);
+            this.label3.Location = new System.Drawing.Point(54, 62);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(64, 18);
+            this.label3.Size = new System.Drawing.Size(56, 17);
             this.label3.TabIndex = 43;
             this.label3.Text = "字体大小";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(312, 28);
+            this.label2.Location = new System.Drawing.Point(425, 28);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(64, 18);
+            this.label2.Size = new System.Drawing.Size(56, 17);
             this.label2.TabIndex = 42;
             this.label2.Text = "西文字体";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 28);
+            this.label1.Location = new System.Drawing.Point(54, 28);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(64, 18);
+            this.label1.Size = new System.Drawing.Size(56, 17);
             this.label1.TabIndex = 3;
             this.label1.Text = "中文字体";
             // 
             // Btn_FontColor
             // 
-            this.Btn_FontColor.Location = new System.Drawing.Point(270, 56);
+            this.Btn_FontColor.BackColor = System.Drawing.Color.Black;
+            this.Btn_FontColor.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.Btn_FontColor.Location = new System.Drawing.Point(494, 58);
             this.Btn_FontColor.Name = "Btn_FontColor";
-            this.Btn_FontColor.Size = new System.Drawing.Size(40, 30);
+            this.Btn_FontColor.Size = new System.Drawing.Size(151, 27);
             this.Btn_FontColor.TabIndex = 41;
-            this.Btn_FontColor.UseVisualStyleBackColor = true;
+            this.Btn_FontColor.UseVisualStyleBackColor = false;
             this.Btn_FontColor.BackColorChanged += new System.EventHandler(this.Btn_FontColor_BackColorChanged);
             this.Btn_FontColor.Click += new System.EventHandler(this.Btn_FontColor_Click);
             // 
             // Txt_LeftIndent
             // 
-            this.Txt_LeftIndent.Location = new System.Drawing.Point(82, 93);
+            this.Txt_LeftIndent.Location = new System.Drawing.Point(124, 93);
             this.Txt_LeftIndent.Name = "Txt_LeftIndent";
-            this.Txt_LeftIndent.Size = new System.Drawing.Size(100, 25);
+            this.Txt_LeftIndent.Size = new System.Drawing.Size(150, 23);
             this.Txt_LeftIndent.TabIndex = 38;
-            this.Txt_LeftIndent.TextChanged += new System.EventHandler(this.Txt_Indent_TextChanged);
-            this.Txt_LeftIndent.Validated += new System.EventHandler(this.Txt_Indent_Validated);
+            this.Txt_LeftIndent.ValueChanged += new System.EventHandler(this.Txt_Indent_ValueChanged);
             // 
             // Btn_BreakBefore
             // 
             this.Btn_BreakBefore.BackColor = System.Drawing.Color.AliceBlue;
-            this.Btn_BreakBefore.Location = new System.Drawing.Point(482, 124);
+            this.Btn_BreakBefore.Location = new System.Drawing.Point(803, 152);
             this.Btn_BreakBefore.Name = "Btn_BreakBefore";
             this.Btn_BreakBefore.Pressed = false;
             this.Btn_BreakBefore.Size = new System.Drawing.Size(40, 30);
@@ -291,20 +292,20 @@ namespace WordMan_VSTO.MultiLevel
             // 
             // Cmb_Alignment
             // 
-            this.Cmb_Alignment.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Cmb_Alignment.AllowInput = false;
             this.Cmb_Alignment.FormattingEnabled = true;
-            this.Cmb_Alignment.Location = new System.Drawing.Point(82, 160);
+            this.Cmb_Alignment.Location = new System.Drawing.Point(124, 160);
             this.Cmb_Alignment.Name = "Cmb_Alignment";
-            this.Cmb_Alignment.Size = new System.Drawing.Size(100, 26);
+            this.Cmb_Alignment.Size = new System.Drawing.Size(150, 25);
             this.Cmb_Alignment.TabIndex = 30;
             this.Cmb_Alignment.SelectedIndexChanged += new System.EventHandler(this.Cmb_FontNameAndHV_SelectedIndexChanged);
             // 
             // Cmb_SpaceBefore
             // 
             this.Cmb_SpaceBefore.FormattingEnabled = true;
-            this.Cmb_SpaceBefore.Location = new System.Drawing.Point(82, 126);
+            this.Cmb_SpaceBefore.Location = new System.Drawing.Point(124, 126);
             this.Cmb_SpaceBefore.Name = "Cmb_SpaceBefore";
-            this.Cmb_SpaceBefore.Size = new System.Drawing.Size(100, 26);
+            this.Cmb_SpaceBefore.Size = new System.Drawing.Size(150, 25);
             this.Cmb_SpaceBefore.TabIndex = 26;
             this.Cmb_SpaceBefore.TextChanged += new System.EventHandler(this.Cmb_SpaceValue_TextChanged);
             this.Cmb_SpaceBefore.Validated += new System.EventHandler(this.Cmb_SpaceValue_Validated);
@@ -312,9 +313,9 @@ namespace WordMan_VSTO.MultiLevel
             // Cmb_FontSize
             // 
             this.Cmb_FontSize.FormattingEnabled = true;
-            this.Cmb_FontSize.Location = new System.Drawing.Point(82, 58);
+            this.Cmb_FontSize.Location = new System.Drawing.Point(124, 58);
             this.Cmb_FontSize.Name = "Cmb_FontSize";
-            this.Cmb_FontSize.Size = new System.Drawing.Size(100, 26);
+            this.Cmb_FontSize.Size = new System.Drawing.Size(150, 25);
             this.Cmb_FontSize.TabIndex = 24;
             this.Cmb_FontSize.TextChanged += new System.EventHandler(this.Cmb_FontSize_TextChanged);
             this.Cmb_FontSize.Validated += new System.EventHandler(this.Cmb_FontSize_Validated);
@@ -322,37 +323,37 @@ namespace WordMan_VSTO.MultiLevel
             // Cmb_LineSpacing
             // 
             this.Cmb_LineSpacing.FormattingEnabled = true;
-            this.Cmb_LineSpacing.Location = new System.Drawing.Point(482, 92);
+            this.Cmb_LineSpacing.Location = new System.Drawing.Point(495, 160);
             this.Cmb_LineSpacing.Name = "Cmb_LineSpacing";
-            this.Cmb_LineSpacing.Size = new System.Drawing.Size(100, 26);
+            this.Cmb_LineSpacing.Size = new System.Drawing.Size(150, 25);
             this.Cmb_LineSpacing.TabIndex = 23;
             this.Cmb_LineSpacing.TextChanged += new System.EventHandler(this.Cmb_LineSpace_TextChanged);
             this.Cmb_LineSpacing.Validated += new System.EventHandler(this.Cmb_LineSpace_Validated);
             // 
             // Cmb_EngFontName
             // 
-            this.Cmb_EngFontName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Cmb_EngFontName.AllowInput = false;
             this.Cmb_EngFontName.FormattingEnabled = true;
-            this.Cmb_EngFontName.Location = new System.Drawing.Point(382, 24);
+            this.Cmb_EngFontName.Location = new System.Drawing.Point(495, 24);
             this.Cmb_EngFontName.Name = "Cmb_EngFontName";
-            this.Cmb_EngFontName.Size = new System.Drawing.Size(200, 26);
+            this.Cmb_EngFontName.Size = new System.Drawing.Size(150, 25);
             this.Cmb_EngFontName.TabIndex = 15;
             this.Cmb_EngFontName.SelectedIndexChanged += new System.EventHandler(this.Cmb_FontNameAndHV_SelectedIndexChanged);
             // 
             // Cmb_ChnFontName
             // 
-            this.Cmb_ChnFontName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Cmb_ChnFontName.AllowInput = false;
             this.Cmb_ChnFontName.FormattingEnabled = true;
-            this.Cmb_ChnFontName.Location = new System.Drawing.Point(82, 24);
+            this.Cmb_ChnFontName.Location = new System.Drawing.Point(124, 24);
             this.Cmb_ChnFontName.Name = "Cmb_ChnFontName";
-            this.Cmb_ChnFontName.Size = new System.Drawing.Size(200, 26);
+            this.Cmb_ChnFontName.Size = new System.Drawing.Size(150, 25);
             this.Cmb_ChnFontName.TabIndex = 14;
             this.Cmb_ChnFontName.SelectedIndexChanged += new System.EventHandler(this.Cmb_FontNameAndHV_SelectedIndexChanged);
             // 
             // Btn_Underline
             // 
             this.Btn_Underline.BackColor = System.Drawing.Color.AliceBlue;
-            this.Btn_Underline.Location = new System.Drawing.Point(542, 56);
+            this.Btn_Underline.Location = new System.Drawing.Point(803, 110);
             this.Btn_Underline.Name = "Btn_Underline";
             this.Btn_Underline.Pressed = false;
             this.Btn_Underline.Size = new System.Drawing.Size(40, 30);
@@ -364,7 +365,7 @@ namespace WordMan_VSTO.MultiLevel
             // Btn_Italic
             // 
             this.Btn_Italic.BackColor = System.Drawing.Color.AliceBlue;
-            this.Btn_Italic.Location = new System.Drawing.Point(447, 56);
+            this.Btn_Italic.Location = new System.Drawing.Point(803, 69);
             this.Btn_Italic.Name = "Btn_Italic";
             this.Btn_Italic.Pressed = false;
             this.Btn_Italic.Size = new System.Drawing.Size(40, 30);
@@ -376,7 +377,7 @@ namespace WordMan_VSTO.MultiLevel
             // Btn_Bold
             // 
             this.Btn_Bold.BackColor = System.Drawing.Color.AliceBlue;
-            this.Btn_Bold.Location = new System.Drawing.Point(359, 56);
+            this.Btn_Bold.Location = new System.Drawing.Point(803, 28);
             this.Btn_Bold.Name = "Btn_Bold";
             this.Btn_Bold.Pressed = false;
             this.Btn_Bold.Size = new System.Drawing.Size(40, 30);
@@ -387,7 +388,7 @@ namespace WordMan_VSTO.MultiLevel
             // 
             // Btn_SetStyles
             // 
-            this.Btn_SetStyles.Location = new System.Drawing.Point(1000, 480);
+            this.Btn_SetStyles.Location = new System.Drawing.Point(946, 478);
             this.Btn_SetStyles.Name = "Btn_SetStyles";
             this.Btn_SetStyles.Size = new System.Drawing.Size(100, 30);
             this.Btn_SetStyles.TabIndex = 2;
@@ -397,7 +398,7 @@ namespace WordMan_VSTO.MultiLevel
             // 
             // Btn_Cancel
             // 
-            this.Btn_Cancel.Location = new System.Drawing.Point(1100, 480);
+            this.Btn_Cancel.Location = new System.Drawing.Point(1074, 478);
             this.Btn_Cancel.Name = "Btn_Cancel";
             this.Btn_Cancel.Size = new System.Drawing.Size(100, 30);
             this.Btn_Cancel.TabIndex = 3;
@@ -407,7 +408,7 @@ namespace WordMan_VSTO.MultiLevel
             // 
             // LevelStyleSettingsForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(96f, 96f);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.AliceBlue;
             this.ClientSize = new System.Drawing.Size(1200, 520);
@@ -416,7 +417,7 @@ namespace WordMan_VSTO.MultiLevel
             this.Controls.Add(this.Grp_SetSelectedStyle);
             this.Controls.Add(this.Dta_StyleList);
             this.DoubleBuffered = true;
-            this.Font = new System.Drawing.Font("Microsoft JhengHei UI", 10.5f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            this.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -427,14 +428,15 @@ namespace WordMan_VSTO.MultiLevel
             this.Grp_SetSelectedStyle.ResumeLayout(false);
             this.Grp_SetSelectedStyle.PerformLayout();
             this.ResumeLayout(false);
+
         }
 
         #endregion
 
         private System.Windows.Forms.DataGridView Dta_StyleList;
         private System.Windows.Forms.GroupBox Grp_SetSelectedStyle;
-        private System.Windows.Forms.TextBox Txt_RightIndent;
-        private System.Windows.Forms.ComboBox Cmb_SpaceAfter;
+        private WordMan_VSTO.StandardNumericUpDown Txt_RightIndent;
+        private WordMan_VSTO.StandardComboBox Cmb_SpaceAfter;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label12;
@@ -450,17 +452,17 @@ namespace WordMan_VSTO.MultiLevel
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button Btn_FontColor;
-        private System.Windows.Forms.TextBox Txt_LeftIndent;
-        private WordMan_VSTO.StylePane.ToggleButton Btn_BreakBefore;
-        private System.Windows.Forms.ComboBox Cmb_Alignment;
-        private System.Windows.Forms.ComboBox Cmb_SpaceBefore;
-        private System.Windows.Forms.ComboBox Cmb_FontSize;
-        private System.Windows.Forms.ComboBox Cmb_LineSpacing;
-        private System.Windows.Forms.ComboBox Cmb_EngFontName;
-        private System.Windows.Forms.ComboBox Cmb_ChnFontName;
-        private WordMan_VSTO.StylePane.ToggleButton Btn_Underline;
-        private WordMan_VSTO.StylePane.ToggleButton Btn_Italic;
-        private WordMan_VSTO.StylePane.ToggleButton Btn_Bold;
+        private WordMan_VSTO.StandardNumericUpDown Txt_LeftIndent;
+        private WordMan_VSTO.ToggleButton Btn_BreakBefore;
+        private WordMan_VSTO.StandardComboBox Cmb_Alignment;
+        private WordMan_VSTO.StandardComboBox Cmb_SpaceBefore;
+        private WordMan_VSTO.StandardComboBox Cmb_FontSize;
+        private WordMan_VSTO.StandardComboBox Cmb_LineSpacing;
+        private WordMan_VSTO.StandardComboBox Cmb_EngFontName;
+        private WordMan_VSTO.StandardComboBox Cmb_ChnFontName;
+        private WordMan_VSTO.ToggleButton Btn_Underline;
+        private WordMan_VSTO.ToggleButton Btn_Italic;
+        private WordMan_VSTO.ToggleButton Btn_Bold;
         private System.Windows.Forms.Button Btn_SetStyles;
         private System.Windows.Forms.Button Btn_Cancel;
     }

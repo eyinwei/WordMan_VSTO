@@ -1,1989 +1,809 @@
-﻿using Microsoft.Office.Interop.Word;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.IO;
+using System.Drawing.Text;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.Office.Interop.Word;
+using WordMan_VSTO;
+using WordMan_VSTO.MultiLevel;
+using Color = System.Drawing.Color;
+using Point = System.Drawing.Point;
 using Font = System.Drawing.Font;
 using CheckBox = System.Windows.Forms.CheckBox;
+using Word = Microsoft.Office.Interop.Word;
 
 namespace WordMan_VSTO
 {
+    /// <summary>
+    /// 样式设置窗体 - 按照WordFormatHelper的StyleSetGuider设计
+    /// </summary>
     public partial class StyleSettings : Form
     {
-        // UI设计器
-        private StyleSettingsUIDesigner _uiDesigner;
+        #region 私有字段
 
-        // 保存所有样式设置
-        public Hashtable Title1Settings { get; set; }
-        public Hashtable Title2Settings { get; set; }
-        public Hashtable Title3Settings { get; set; }
-        public Hashtable Title4Settings { get; set; }
-        public Hashtable Title5Settings { get; set; }
-        public Hashtable Title6Settings { get; set; }
-        public Hashtable BodyTextSettings { get; set; }
-        public Hashtable BodyTextIndentSettings { get; set; }
-        public Hashtable CaptionSettings { get; set; }
-        public Hashtable TableTextSettings { get; set; }
+        // 使用 MultiLevelDataManager 的字号相关方法，避免重复定义
 
-        // 页面设置相关属性（固定为GB/T 9704-2012标准）
-        public WdPaperSize PaperSize { get; set; } = WdPaperSize.wdPaperA4;
-        public WdOrientation PaperDirection { get; set; } = WdOrientation.wdOrientPortrait;
-        public float[] PageMargin { get; set; } = new float[] { 3.7f, 3.5f, 2.8f, 2.6f }; // 上、下、左、右（GB/T 9704-2012标准）
-        public bool SetGutter { get; set; } = false;
-        public WdGutterStyle GutterPosition { get; set; } = WdGutterStyle.wdGutterPosLeft;
-        public float GutterValue { get; set; } = 0f;
-
-        // 样式列表与预设样式
-        private List<string> _styleNames = new List<string>
+        private readonly List<WdPaperSize> PaperSize = new List<WdPaperSize>(4)
         {
-            "标题 1", "标题 2", "标题 3", "标题 4", "标题 5", "标题 6", "正文", "题注", "表内文字"
+            WdPaperSize.wdPaperA3,
+            WdPaperSize.wdPaperA4,
+            WdPaperSize.wdPaperA5,
+            WdPaperSize.wdPaperB5
         };
-        private string[] _presetStyles = { "公文风格", "学术风格" };
 
-        public StyleSettings()
+        private BindingList<string> StyleNames;
+        private readonly List<CustomStyle> Styles = new List<CustomStyle>(17);
+
+        #endregion
+
+        #region 私有方法
+
+        // IsChineseFont 方法已移除 - 现在直接使用 MultiLevelDataManager.GetSystemFonts() 统一获取系统字体
+
+        /// <summary>
+        /// 通用下拉框初始化方法
+        /// </summary>
+        private void InitializeComboBox(StandardComboBox comboBox, IEnumerable<string> items)
         {
-            InitializeComponent();
-            
-            // 启用双缓冲，减少闪烁
-            this.SetStyle(ControlStyles.AllPaintingInWmPaint | 
-                         ControlStyles.UserPaint | 
-                         ControlStyles.DoubleBuffer | 
-                         ControlStyles.ResizeRedraw, true);
-            
-            // 暂停布局更新
-            this.SuspendLayout();
-            
-            this.Text = "样式设置";
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.Font = new Font("微软雅黑", 9F);
-            
-            // 初始化UI设计器（不在这里设置Size和BackColor，避免冲突）
-            _uiDesigner = new StyleSettingsUIDesigner(this);
-            _uiDesigner.InitializeAllControls();
-            
-            // 绑定事件
-            BindEvents();
-            
-            // 恢复布局更新
-            this.ResumeLayout(true);
-            
-            // 延迟初始化默认样式，避免在窗体显示前更新UI
-            this.Load += (s, e) => InitializeDefaultStyles();
-            
-            // 窗体显示时也尝试读取当前文档样式
-            this.Shown += (s, e) => LoadCurrentDocumentStyles();
+            comboBox.Items.Clear();
+            comboBox.Items.AddRange(items.ToArray());
         }
 
         /// <summary>
-        /// 绑定事件
+        /// 通用选择索引设置方法
         /// </summary>
-        private void BindEvents()
+        private void SetComboBoxSelection(StandardComboBox comboBox, string value, IEnumerable<string> items)
         {
-            // 样式列表选择事件
-            var styleList = _uiDesigner.GetControl<ListBox>("lstStyleList");
-            if (styleList != null)
-                styleList.SelectedIndexChanged += StyleList_SelectedIndexChanged;
-
-            // 应用样式按钮事件
-            var applyBtn = _uiDesigner.GetControl<Button>("btnApplyStyle");
-            if (applyBtn != null)
-                applyBtn.Click += ApplyButton_Click;
-
-            // 读取样式按钮事件
-            var loadBtn = _uiDesigner.GetControl<Button>("btnLoadStyle");
-            if (loadBtn != null)
-                loadBtn.Click += LoadStyle_Click;
-
-            // 保存样式按钮事件
-            var saveBtn = _uiDesigner.GetControl<Button>("btnSaveStyle");
-            if (saveBtn != null)
-                saveBtn.Click += SaveStyle_Click;
-
-            // 添加样式按钮事件
-            var addBtn = _uiDesigner.GetControl<Button>("btnAddStyle");
-            if (addBtn != null)
-                addBtn.Click += AddStyle_Click;
-
-            // 删除样式按钮事件
-            var delBtn = _uiDesigner.GetControl<Button>("btnDeleteStyle");
-            if (delBtn != null)
-                delBtn.Click += DeleteStyle_Click;
-                
-            // 预设样式选择事件
-            var presetCombo = _uiDesigner.GetControl<ComboBox>("cmbPresetStyle");
-            if (presetCombo != null)
-                presetCombo.SelectedIndexChanged += PresetStyle_SelectedIndexChanged;
-
-            // 选择内置样式按钮事件
-            var selectBuiltInBtn = _uiDesigner.GetControl<Button>("btnSelectBuiltIn");
-            if (selectBuiltInBtn != null)
-                selectBuiltInBtn.Click += SelectBuiltInStyle_Click;
-
-            // 预设样式选择事件
-            var presetCmb = _uiDesigner.GetControl<ComboBox>("cmbPresetStyle");
-            if (presetCmb != null)
-                presetCmb.SelectedIndexChanged += PresetStyle_SelectedIndexChanged;
-
-            // 字体颜色按钮事件
-            var fontColorBtn = _uiDesigner.GetControl<Button>("btnFontColor");
-            if (fontColorBtn != null)
-                fontColorBtn.Click += FontColor_Click;
-
-            // 绑定控件值变化事件
-            BindControlValueChangedEvents();
-        }
-
-        // 初始化默认样式（按照GB/T 9704-2012标准）
-        private void InitializeDefaultStyles()
-        {
-            try
+            var itemList = items.ToList();
+            int selectedIndex = itemList.IndexOf(value);
+            if (selectedIndex >= 0)
             {
-                // 尝试读取当前文档的样式设置
-                LoadCurrentDocumentStyles();
-            }
-            catch (Exception ex)
-            {
-                // 如果读取失败，使用默认的公文风格样式
-                System.Diagnostics.Debug.WriteLine($"读取当前文档样式失败：{ex.Message}");
-                InitializeOfficialDocumentStyle();
-            }
-        }
-
-        /// <summary>
-        /// 读取当前文档的样式设置
-        /// </summary>
-        private void LoadCurrentDocumentStyles()
-        {
-            try
-            {
-                var app = WordAPIHelper.GetWordApplication();
-                var doc = WordAPIHelper.GetActiveDocument();
-                
-                if (doc == null)
-                {
-                    // 如果没有活动文档，使用默认样式
-                    InitializeOfficialDocumentStyle();
-                    return;
-                }
-
-                // 读取当前文档的样式设置到UI
-                LoadDocumentStylesToUI(doc);
-                
-                // 更新预览
-                _uiDesigner?.UpdateStylePreview();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"读取文档样式失败：{ex.Message}");
-                InitializeOfficialDocumentStyle();
-            }
-        }
-
-        /// <summary>
-        /// 将文档样式加载到UI
-        /// </summary>
-        private void LoadDocumentStylesToUI(Microsoft.Office.Interop.Word.Document doc)
-        {
-            try
-            {
-                var app = doc.Application;
-                
-                // 获取当前选择或文档的样式
-                var selection = app.Selection;
-                if (selection != null && selection.Range != null)
-                {
-                    var range = selection.Range;
-                    
-                    // 读取字体设置
-                    var chnFont = _uiDesigner.GetControl<ComboBox>("cmbChnFontName");
-                    if (chnFont != null)
-                        chnFont.Text = range.Font.Name;
-                    
-                    var engFont = _uiDesigner.GetControl<ComboBox>("cmbEngFontName");
-                    if (engFont != null)
-                        engFont.Text = range.Font.NameAscii;
-                    
-                    var fontSize = _uiDesigner.GetControl<ComboBox>("cmbFontSize");
-                    if (fontSize != null)
-                        fontSize.Text = range.Font.Size.ToString();
-                    
-                    var chkBold = _uiDesigner.GetControl<CheckBox>("chkBold");
-                    if (chkBold != null)
-                        chkBold.Checked = range.Font.Bold == 1;
-                    
-                    var chkItalic = _uiDesigner.GetControl<CheckBox>("chkItalic");
-                    if (chkItalic != null)
-                        chkItalic.Checked = range.Font.Italic == 1;
-                    
-                    var chkUnderline = _uiDesigner.GetControl<CheckBox>("chkUnderline");
-                    if (chkUnderline != null)
-                        chkUnderline.Checked = range.Font.Underline != Microsoft.Office.Interop.Word.WdUnderline.wdUnderlineNone;
-                    
-                    // 读取段落设置
-                    var alignment = _uiDesigner.GetControl<ComboBox>("cmbAlignment");
-                    if (alignment != null)
-                    {
-                        switch (range.ParagraphFormat.Alignment)
-                        {
-                            case Microsoft.Office.Interop.Word.WdParagraphAlignment.wdAlignParagraphLeft:
-                                alignment.Text = "左对齐";
-                                break;
-                            case Microsoft.Office.Interop.Word.WdParagraphAlignment.wdAlignParagraphCenter:
-                                alignment.Text = "居中";
-                                break;
-                            case Microsoft.Office.Interop.Word.WdParagraphAlignment.wdAlignParagraphRight:
-                                alignment.Text = "右对齐";
-                                break;
-                            case Microsoft.Office.Interop.Word.WdParagraphAlignment.wdAlignParagraphJustify:
-                                alignment.Text = "两端对齐";
-                                break;
-                        }
-                    }
-                    
-                    // 读取行距设置
-                    var lineSpace = _uiDesigner.GetControl<ComboBox>("cmbLineSpace");
-                    if (lineSpace != null)
-                    {
-                        switch (range.ParagraphFormat.LineSpacingRule)
-                        {
-                            case Microsoft.Office.Interop.Word.WdLineSpacing.wdLineSpaceSingle:
-                                lineSpace.Text = "单倍行距";
-                                break;
-                            case Microsoft.Office.Interop.Word.WdLineSpacing.wdLineSpace1pt5:
-                                lineSpace.Text = "1.5倍行距";
-                                break;
-                            case Microsoft.Office.Interop.Word.WdLineSpacing.wdLineSpaceDouble:
-                                lineSpace.Text = "2倍行距";
-                                break;
-                            case Microsoft.Office.Interop.Word.WdLineSpacing.wdLineSpaceExactly:
-                                lineSpace.Text = "固定值";
-                                break;
-                            case Microsoft.Office.Interop.Word.WdLineSpacing.wdLineSpaceAtLeast:
-                                lineSpace.Text = "最小值";
-                                break;
-                        }
-                    }
-                    
-                    // 读取间距设置
-                    var nudSpaceBefore = _uiDesigner.GetControl<NumericUpDownWithUnit>("nudSpaceBefore");
-                    if (nudSpaceBefore != null)
-                    {
-                        nudSpaceBefore.Value = (decimal)app.PointsToCentimeters(range.ParagraphFormat.SpaceBefore);
-                    }
-                    
-                    var nudSpaceAfter = _uiDesigner.GetControl<NumericUpDownWithUnit>("nudSpaceAfter");
-                    if (nudSpaceAfter != null)
-                    {
-                        nudSpaceAfter.Value = (decimal)app.PointsToCentimeters(range.ParagraphFormat.SpaceAfter);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"加载文档样式到UI失败：{ex.Message}");
-            }
-        }
-
-
-
-
-
-        // 预设样式选择事件
-        private void PresetStyle_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            var cmb = sender as ComboBox;
-            if (cmb == null) return;
-
-            switch (cmb.SelectedItem?.ToString())
-            {
-                case "公文风格":
-                    InitializeOfficialDocumentStyle();
-                    break;
-                case "学术风格":
-                    InitializeAcademicStyle();
-                    break;
-            }
-            
-            // 更新UI显示
-            UpdateUIFromCurrentStyles();
-            // 更新预览
-            _uiDesigner.UpdateStylePreview();
-        }
-
-        /// <summary>
-        /// 根据当前样式设置更新UI显示
-        /// </summary>
-        private void UpdateUIFromCurrentStyles()
-        {
-            // 获取当前选中的样式
-            var styleList = _uiDesigner.GetControl<ListBox>("lstStyleList");
-            if (styleList?.SelectedItem != null)
-            {
-                string selectedStyle = styleList.SelectedItem.ToString();
-                // 重新加载当前选中的样式到UI
-                switch (selectedStyle)
-                {
-                    case "标题 1":
-                        LoadTitleSettings("Title1", Title1Settings);
-                        break;
-                    case "标题 2":
-                        LoadTitleSettings("Title2", Title2Settings);
-                        break;
-                    case "标题 3":
-                        LoadTitleSettings("Title3", Title3Settings);
-                        break;
-                    case "标题 4":
-                        LoadTitleSettings("Title4", Title4Settings);
-                        break;
-                    case "标题 5":
-                        LoadTitleSettings("Title5", Title5Settings);
-                        break;
-                    case "标题 6":
-                        LoadTitleSettings("Title6", Title6Settings);
-                        break;
-                    case "正文":
-                        LoadBodyTextSettings(false);
-                        break;
-                    case "表内文字":
-                        LoadTableTextSettings();
-                        break;
-                    case "题注":
-                        LoadCaptionSettings();
-                        break;
-                }
-            }
-        }
-
-        // 公文风格初始化（按照GB/T 9704-2012标准）
-        private void InitializeOfficialDocumentStyle()
-        {
-            // 正文样式（GB/T 9704-2012：3号仿宋体字）
-            BodyTextSettings = new Hashtable
-            {
-                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", "16"}, // 三号=16磅
-                {"isBold", false}, {"alignment", WdParagraphAlignment.wdAlignParagraphJustify},
-                {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 28f} // 28磅行距（每页22行）
-            };
-
-            // 正文缩进样式
-            BodyTextIndentSettings = new Hashtable
-            {
-                {"leftIndent", 0f}, {"firstLineIndent", 32f} // 首行缩进2个字符
-            };
-
-            // 一级标题（GB/T 9704-2012：2号小标宋体字）
-            Title1Settings = new Hashtable
-            {
-                {"enFont", "小标宋"}, {"cnFont", "小标宋"}, {"fontSize", "22"}, // 二号=22磅
-                {"isBold", true}, {"alignment", WdParagraphAlignment.wdAlignParagraphCenter},
-                {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 28f}
-            };
-
-            // 二级标题（GB/T 9704-2012：3号黑体字）
-            Title2Settings = new Hashtable
-            {
-                {"enFont", "黑体"}, {"cnFont", "黑体"}, {"fontSize", "16"}, // 三号=16磅
-                {"isBold", true}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
-                {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 28f}
-            };
-
-            // 三级标题（GB/T 9704-2012：3号楷体字）
-            Title3Settings = new Hashtable
-            {
-                {"enFont", "楷体"}, {"cnFont", "楷体"}, {"fontSize", "16"}, // 三号=16磅
-                {"isBold", true}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
-                {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 28f}
-            };
-
-            // 四级标题（GB/T 9704-2012：3号仿宋体字）
-            Title4Settings = new Hashtable
-            {
-                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", "16"}, // 三号=16磅
-                {"isBold", true}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
-                {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 28f}
-            };
-
-            // 五级标题（GB/T 9704-2012：3号仿宋体字）
-            Title5Settings = new Hashtable
-            {
-                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", "16"}, // 三号=16磅
-                {"isBold", true}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
-                {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 28f}
-            };
-
-            // 六级标题（GB/T 9704-2012：3号仿宋体字）
-            Title6Settings = new Hashtable
-            {
-                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", "16"}, // 三号=16磅
-                {"isBold", true}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
-                {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 28f}
-            };
-
-            // 表中文本（GB/T 9704-2012：3号仿宋体字）
-            TableTextSettings = new Hashtable
-            {
-                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", "16"}, // 三号=16磅
-                {"alignment", WdParagraphAlignment.wdAlignParagraphCenter},
-                {"lineSpacing", 28f}
-            };
-
-            // 题注（GB/T 9704-2012：3号仿宋体字）
-            CaptionSettings = new Hashtable
-            {
-                {"enFont", "仿宋"}, {"cnFont", "仿宋"}, {"fontSize", "16"}, // 三号=16磅
-                {"alignment", WdParagraphAlignment.wdAlignParagraphCenter},
-                {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 28f}
-            };
-
-            LoadSettings(); // 刷新界面
-        }
-
-        // 学术风格初始化（按照学术论文标准）
-        private void InitializeAcademicStyle()
-        {
-            // 正文样式（学术论文：小四宋体字）
-            BodyTextSettings = new Hashtable
-            {
-                {"enFont", "宋体"}, {"cnFont", "宋体"}, {"fontSize", "14"}, // 小四=14磅
-                {"isBold", false}, {"alignment", WdParagraphAlignment.wdAlignParagraphJustify},
-                {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 20f} // 1.3倍行距
-            };
-
-            // 正文缩进样式
-            BodyTextIndentSettings = new Hashtable
-            {
-                {"leftIndent", 0f}, {"firstLineIndent", 28f} // 首行缩进2个字符
-            };
-
-            // 一级标题（学术论文：四号黑体字）
-            Title1Settings = new Hashtable
-            {
-                {"enFont", "黑体"}, {"cnFont", "黑体"}, {"fontSize", "18"}, // 四号=18磅
-                {"isBold", true}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
-                {"spaceBefore", 12f}, {"spaceAfter", 0f}, {"lineSpacing", 20f}
-            };
-
-            // 二级标题（学术论文：小四黑体字）
-            Title2Settings = new Hashtable
-            {
-                {"enFont", "黑体"}, {"cnFont", "黑体"}, {"fontSize", "14"}, // 小四=14磅
-                {"isBold", true}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
-                {"spaceBefore", 12f}, {"spaceAfter", 0f}, {"lineSpacing", 20f}
-            };
-
-            // 三级标题（学术论文：小四宋体字）
-            Title3Settings = new Hashtable
-            {
-                {"enFont", "宋体"}, {"cnFont", "宋体"}, {"fontSize", "14"}, // 小四=14磅
-                {"isBold", false}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
-                {"spaceBefore", 12f}, {"spaceAfter", 0f}, {"lineSpacing", 20f}
-            };
-
-            // 四级标题（学术论文：小四宋体字）
-            Title4Settings = new Hashtable
-            {
-                {"enFont", "宋体"}, {"cnFont", "宋体"}, {"fontSize", "14"}, // 小四=14磅
-                {"isBold", false}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
-                {"spaceBefore", 12f}, {"spaceAfter", 0f}, {"lineSpacing", 20f}
-            };
-
-            // 五级标题（学术论文：小四宋体字）
-            Title5Settings = new Hashtable
-            {
-                {"enFont", "宋体"}, {"cnFont", "宋体"}, {"fontSize", "14"}, // 小四=14磅
-                {"isBold", false}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
-                {"spaceBefore", 12f}, {"spaceAfter", 0f}, {"lineSpacing", 20f}
-            };
-
-            // 六级标题（学术论文：小四宋体字）
-            Title6Settings = new Hashtable
-            {
-                {"enFont", "宋体"}, {"cnFont", "宋体"}, {"fontSize", "14"}, // 小四=14磅
-                {"isBold", false}, {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
-                {"spaceBefore", 12f}, {"spaceAfter", 0f}, {"lineSpacing", 20f}
-            };
-
-            // 表中文本（学术论文：五号宋体字）
-            TableTextSettings = new Hashtable
-            {
-                {"enFont", "宋体"}, {"cnFont", "宋体"}, {"fontSize", "12"}, // 五号=12磅
-                {"alignment", WdParagraphAlignment.wdAlignParagraphLeft},
-                {"lineSpacing", 16f} // 单倍行距
-            };
-
-            // 题注（学术论文：小四宋体字）
-            CaptionSettings = new Hashtable
-            {
-                {"enFont", "宋体"}, {"cnFont", "宋体"}, {"fontSize", "14"}, // 小四=14磅
-                {"alignment", WdParagraphAlignment.wdAlignParagraphCenter},
-                {"spaceBefore", 0f}, {"spaceAfter", 0f}, {"lineSpacing", 20f}
-            };
-
-            LoadSettings(); // 刷新界面
-        }
-
-
-        // 应用预设样式
-        private void ApplyPresetStyle_Click(object sender, EventArgs e)
-        {
-            var cmb = FindControl<ComboBox>("cmbPreset");
-            if (cmb.SelectedIndex == -1)
-            {
-                MessageBox.Show("请先选择预设样式！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-            PresetStyle_SelectedIndexChanged(cmb, EventArgs.Empty);
-            MessageBox.Show($"已应用「{cmb.SelectedItem}」预设样式！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        // 样式列表选择事件
-        private void StyleList_SelectionChanged(object sender, EventArgs e)
-        {
-            var dgv = sender as DataGridView;
-            if (dgv == null || dgv.SelectedRows.Count == 0) return;
-
-            var selectedRow = dgv.SelectedRows[0];
-            var styleName = selectedRow.Cells["Col_StyleName"].Value?.ToString();
-
-            // 根据选择的样式加载对应设置
-            switch (styleName)
-            {
-                case "正文（无缩进）":
-                    LoadBodyTextSettings(false);
-                    break;
-                case "正文（缩进）":
-                    LoadBodyTextSettings(true);
-                    break;
-                case "一级标题":
-                    LoadTitleSettings("Title1", Title1Settings);
-                    break;
-                case "二级标题":
-                    LoadTitleSettings("Title2", Title2Settings);
-                    break;
-                case "三级标题":
-                    LoadTitleSettings("Title3", Title3Settings);
-                    break;
-                case "四级标题":
-                    LoadTitleSettings("Title4", Title4Settings);
-                    break;
-                case "五级标题":
-                    LoadTitleSettings("Title5", Title5Settings);
-                    break;
-                case "六级标题":
-                    LoadTitleSettings("Title6", Title6Settings);
-                    break;
-                case "表中文本":
-                    LoadTableTextSettings();
-                    break;
-                case "题注":
-                    LoadCaptionSettings();
-                    break;
-            }
-        }
-
-        // 加载所有样式
-        private void LoadSettings()
-        {
-            // 初始化DataGridView数据
-            InitializeStyleListData();
-
-            // 默认加载正文（无缩进）
-            LoadBodyTextSettings(false);
-        }
-
-        // 初始化样式列表数据
-        private void InitializeStyleListData()
-        {
-            if (_uiDesigner == null) return;
-            
-            var dgv = _uiDesigner.GetControl<DataGridView>("dgvStyleList");
-            if (dgv == null) return;
-
-            // 清空现有数据
-            dgv.Rows.Clear();
-
-            // 添加样式数据
-            var styleNames = new List<string>
-            {
-                "一级标题", "二级标题", "三级标题", "四级标题", "五级标题", "六级标题",
-                "正文（无缩进）", "正文（缩进）", "表中文本", "题注"
-            };
-
-            foreach (var styleName in styleNames)
-            {
-                dgv.Rows.Add(styleName, "仿宋", "仿宋", "16", false, false, false, "28磅", "0磅", "0磅", "两端对齐");
-            }
-
-            // 默认选择第一行
-            if (dgv.Rows.Count > 0)
-            {
-                dgv.Rows[0].Selected = true;
-            }
-        }
-
-        // 标题加载逻辑
-        private void LoadTitleSettings(string prefix, Hashtable settings)
-        {
-            if (settings == null || _uiDesigner == null) return;
-
-            var cmbEngFont = FindControl<ComboBox>("cmbEngFontName");
-            if (cmbEngFont != null)
-                cmbEngFont.Text = settings["enFont"].ToString();
-                
-            var cmbChnFont = FindControl<ComboBox>("cmbChnFontName");
-            if (cmbChnFont != null)
-                cmbChnFont.Text = settings["cnFont"].ToString();
-                
-            var cmbFontSize = FindControl<ComboBox>("cmbFontSize");
-            if (cmbFontSize != null)
-                cmbFontSize.Text = settings["fontSize"].ToString();
-                
-            var chkBold = FindControl<CheckBox>("chkBold");
-            if (chkBold != null)
-                chkBold.Checked = Convert.ToBoolean(settings["isBold"]);
-
-            // 对齐方式
-            var cmbAlign = FindControl<ComboBox>("cmbAlignment");
-            if (cmbAlign != null)
-            {
-                switch ((WdParagraphAlignment)settings["alignment"])
-                {
-                    case WdParagraphAlignment.wdAlignParagraphLeft:
-                        cmbAlign.Text = "左对齐";
-                        break;
-                    case WdParagraphAlignment.wdAlignParagraphCenter:
-                        cmbAlign.Text = "居中";
-                        break;
-                    case WdParagraphAlignment.wdAlignParagraphRight:
-                        cmbAlign.Text = "右对齐";
-                        break;
-                    case WdParagraphAlignment.wdAlignParagraphJustify:
-                        cmbAlign.Text = "两端对齐";
-                        break;
-                }
-            }
-
-            var txtSpaceBefore = FindControl<TextBox>("txtSpaceBefore");
-            if (txtSpaceBefore != null)
-                txtSpaceBefore.Text = settings["spaceBefore"].ToString() + "行";
-                
-            var txtSpaceAfter = FindControl<TextBox>("txtSpaceAfter");
-            if (txtSpaceAfter != null)
-                txtSpaceAfter.Text = settings["spaceAfter"].ToString() + "行";
-                
-            var cmbLineSpace = FindControl<ComboBox>("cmbLineSpace");
-            if (cmbLineSpace != null)
-                cmbLineSpace.Text = settings["lineSpacing"].ToString() + "磅";
-                
-            var txtFirstIndent = FindControl<TextBox>("txtFirstIndent");
-            if (txtFirstIndent != null)
-                txtFirstIndent.Text = "0字符";
-        }
-
-        // 加载正文样式（区分缩进/无缩进）
-        private void LoadBodyTextSettings(bool useIndent)
-        {
-            if (BodyTextSettings == null || _uiDesigner == null) return;
-
-            var cmbEngFont = FindControl<ComboBox>("cmbEngFontName");
-            if (cmbEngFont != null)
-                cmbEngFont.Text = BodyTextSettings["enFont"].ToString();
-                
-            var cmbChnFont = FindControl<ComboBox>("cmbChnFontName");
-            if (cmbChnFont != null)
-                cmbChnFont.Text = BodyTextSettings["cnFont"].ToString();
-                
-            var cmbFontSize = FindControl<ComboBox>("cmbFontSize");
-            if (cmbFontSize != null)
-                cmbFontSize.Text = BodyTextSettings["fontSize"].ToString();
-                
-            var chkBold = FindControl<CheckBox>("chkBold");
-            if (chkBold != null)
-                chkBold.Checked = Convert.ToBoolean(BodyTextSettings["isBold"]);
-
-            // 对齐方式
-            var cmbAlign = FindControl<ComboBox>("cmbAlignment");
-            if (cmbAlign != null)
-            {
-                switch ((WdParagraphAlignment)BodyTextSettings["alignment"])
-                {
-                    case WdParagraphAlignment.wdAlignParagraphLeft:
-                        cmbAlign.Text = "左对齐";
-                        break;
-                    case WdParagraphAlignment.wdAlignParagraphCenter:
-                        cmbAlign.Text = "居中";
-                        break;
-                    case WdParagraphAlignment.wdAlignParagraphRight:
-                        cmbAlign.Text = "右对齐";
-                        break;
-                    case WdParagraphAlignment.wdAlignParagraphJustify:
-                        cmbAlign.Text = "两端对齐";
-                        break;
-                }
-            }
-
-            var txtSpaceBefore = FindControl<TextBox>("txtSpaceBefore");
-            if (txtSpaceBefore != null)
-                txtSpaceBefore.Text = BodyTextSettings["spaceBefore"].ToString() + "行";
-                
-            var txtSpaceAfter = FindControl<TextBox>("txtSpaceAfter");
-            if (txtSpaceAfter != null)
-                txtSpaceAfter.Text = BodyTextSettings["spaceAfter"].ToString() + "行";
-                
-            var cmbLineSpace = FindControl<ComboBox>("cmbLineSpace");
-            if (cmbLineSpace != null)
-                cmbLineSpace.Text = BodyTextSettings["lineSpacing"].ToString() + "磅";
-
-            // 缩进设置
-            var txtFirstIndent = FindControl<TextBox>("txtFirstIndent");
-            
-            if (useIndent && BodyTextIndentSettings != null)
-            {
-                if (txtFirstIndent != null)
-                    txtFirstIndent.Text = BodyTextIndentSettings["firstLineIndent"].ToString() + "字符";
+                comboBox.SelectedIndex = selectedIndex;
             }
             else
             {
-                if (txtFirstIndent != null)
-                    txtFirstIndent.Text = "0字符";
+                comboBox.SelectedIndex = -1;
             }
         }
 
-        // 表中文本加载逻辑
-        private void LoadTableTextSettings()
+        /// <summary>
+        /// 通用文本验证和格式化
+        /// </summary>
+        private void ValidateAndFormatText(Control control, string unit)
         {
-            if (TableTextSettings == null || _uiDesigner == null) return;
-
-            var cmbEngFont = FindControl<ComboBox>("cmbEngFontName");
-            if (cmbEngFont != null)
-                cmbEngFont.Text = TableTextSettings["enFont"].ToString();
-                
-            var cmbChnFont = FindControl<ComboBox>("cmbChnFontName");
-            if (cmbChnFont != null)
-                cmbChnFont.Text = TableTextSettings["cnFont"].ToString();
-                
-            var cmbFontSize = FindControl<ComboBox>("cmbFontSize");
-            if (cmbFontSize != null)
-                cmbFontSize.Text = TableTextSettings["fontSize"].ToString();
-                
-            var chkBold = FindControl<CheckBox>("chkBold");
-            if (chkBold != null)
-                chkBold.Checked = false;
-
-            var cmbAlign = FindControl<ComboBox>("cmbAlignment");
-            if (cmbAlign != null)
-            {
-                switch ((WdParagraphAlignment)TableTextSettings["alignment"])
-                {
-                    case WdParagraphAlignment.wdAlignParagraphLeft:
-                        cmbAlign.Text = "左对齐";
-                        break;
-                    case WdParagraphAlignment.wdAlignParagraphCenter:
-                        cmbAlign.Text = "居中";
-                        break;
-                    case WdParagraphAlignment.wdAlignParagraphRight:
-                        cmbAlign.Text = "右对齐";
-                        break;
-                    case WdParagraphAlignment.wdAlignParagraphJustify:
-                        cmbAlign.Text = "两端对齐";
-                        break;
-                }
-            }
-
-            var txtSpaceBefore = FindControl<TextBox>("txtSpaceBefore");
-            if (txtSpaceBefore != null)
-                txtSpaceBefore.Text = "0.00行";
-                
-            var txtSpaceAfter = FindControl<TextBox>("txtSpaceAfter");
-            if (txtSpaceAfter != null)
-                txtSpaceAfter.Text = "0.00行";
-                
-            var cmbLineSpace = FindControl<ComboBox>("cmbLineSpace");
-            if (cmbLineSpace != null)
-                cmbLineSpace.Text = TableTextSettings["lineSpacing"].ToString() + "磅";
-                
-            var txtFirstIndent = FindControl<TextBox>("txtFirstIndent");
-            if (txtFirstIndent != null)
-                txtFirstIndent.Text = "0字符";
-        }
-
-        // 题注加载逻辑
-        private void LoadCaptionSettings()
-        {
-            if (CaptionSettings == null || _uiDesigner == null) return;
-
-            var cmbEngFont = FindControl<ComboBox>("cmbEngFontName");
-            if (cmbEngFont != null)
-                cmbEngFont.Text = CaptionSettings["enFont"].ToString();
-                
-            var cmbChnFont = FindControl<ComboBox>("cmbChnFontName");
-            if (cmbChnFont != null)
-                cmbChnFont.Text = CaptionSettings["cnFont"].ToString();
-                
-            var cmbFontSize = FindControl<ComboBox>("cmbFontSize");
-            if (cmbFontSize != null)
-                cmbFontSize.Text = CaptionSettings["fontSize"].ToString();
-                
-            var chkBold = FindControl<CheckBox>("chkBold");
-            if (chkBold != null)
-                chkBold.Checked = false;
-
-            var cmbAlign = FindControl<ComboBox>("cmbAlignment");
-            if (cmbAlign != null)
-            {
-                switch ((WdParagraphAlignment)CaptionSettings["alignment"])
-                {
-                    case WdParagraphAlignment.wdAlignParagraphLeft:
-                        cmbAlign.Text = "左对齐";
-                        break;
-                    case WdParagraphAlignment.wdAlignParagraphCenter:
-                        cmbAlign.Text = "居中";
-                        break;
-                    case WdParagraphAlignment.wdAlignParagraphRight:
-                        cmbAlign.Text = "右对齐";
-                        break;
-                    case WdParagraphAlignment.wdAlignParagraphJustify:
-                        cmbAlign.Text = "两端对齐";
-                        break;
-                }
-            }
-
-            var txtSpaceBefore = FindControl<TextBox>("txtSpaceBefore");
-            if (txtSpaceBefore != null)
-                txtSpaceBefore.Text = CaptionSettings["spaceBefore"].ToString() + "行";
-                
-            var txtSpaceAfter = FindControl<TextBox>("txtSpaceAfter");
-            if (txtSpaceAfter != null)
-                txtSpaceAfter.Text = CaptionSettings["spaceAfter"].ToString() + "行";
-                
-            var cmbLineSpace = FindControl<ComboBox>("cmbLineSpace");
-            if (cmbLineSpace != null)
-                cmbLineSpace.Text = CaptionSettings["lineSpacing"].ToString() + "磅";
-                
-            var txtFirstIndent = FindControl<TextBox>("txtFirstIndent");
-            if (txtFirstIndent != null)
-                txtFirstIndent.Text = "0字符";
-        }
-
-        // 查找控件
-        private T FindControl<T>(string name) where T : Control
-        {
-            return _uiDesigner.GetControl<T>(name);
-        }
-
-        // 应用按钮事件
-        private void ApplyButton_Click(object sender, EventArgs e)
-        {
-            // 保存标题样式
-            Title1Settings = GetTitleSettings();
-            Title2Settings = GetTitleSettings();
-            Title3Settings = GetTitleSettings();
-            Title4Settings = GetTitleSettings();
-            Title5Settings = GetTitleSettings();
-            Title6Settings = GetTitleSettings();
-
-            // 保存正文样式
-            BodyTextSettings = GetBodyTextSettings();
-            // 正文样式统一处理，不再区分缩进/无缩进
-
-            // 保存表中文本和题注样式
-            TableTextSettings = GetTableTextSettings();
-            CaptionSettings = GetCaptionSettings();
-
-            // 应用到文档
-            ApplySettingsToDocument();
-
-            MessageBox.Show("样式设置已应用到文档！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        // 获取标题样式设置
-        private Hashtable GetTitleSettings()
-        {
-            var cmbEngFont = FindControl<ComboBox>("cmbEngFontName");
-            var cmbChnFont = FindControl<ComboBox>("cmbChnFontName");
-            var cmbFontSize = FindControl<ComboBox>("cmbFontSize");
-            var chkBold = FindControl<CheckBox>("chkBold");
-            var txtSpaceBefore = FindControl<TextBox>("txtSpaceBefore");
-            var txtSpaceAfter = FindControl<TextBox>("txtSpaceAfter");
-            var cmbLineSpace = FindControl<ComboBox>("cmbLineSpace");
-
-            return new Hashtable
-            {
-                {"enFont", cmbEngFont?.Text ?? "仿宋"},
-                {"cnFont", cmbChnFont?.Text ?? "仿宋"},
-                {"fontSize", float.TryParse(cmbFontSize?.Text, out float fontSize) ? fontSize : 16f},
-                {"isBold", chkBold?.Checked ?? false},
-                {"alignment", GetAlignmentValue()},
-                {"spaceBefore", GetSpaceValue(txtSpaceBefore?.Text)},
-                {"spaceAfter", GetSpaceValue(txtSpaceAfter?.Text)},
-                {"lineSpacing", GetSpaceValue(cmbLineSpace?.Text)}
-            };
-        }
-
-        // 获取正文样式设置
-        private Hashtable GetBodyTextSettings()
-        {
-            var cmbEngFont = FindControl<ComboBox>("cmbEngFontName");
-            var cmbChnFont = FindControl<ComboBox>("cmbChnFontName");
-            var cmbFontSize = FindControl<ComboBox>("cmbFontSize");
-            var chkBold = FindControl<CheckBox>("chkBold");
-            var txtSpaceBefore = FindControl<TextBox>("txtSpaceBefore");
-            var txtSpaceAfter = FindControl<TextBox>("txtSpaceAfter");
-            var cmbLineSpace = FindControl<ComboBox>("cmbLineSpace");
-
-            return new Hashtable
-            {
-                {"enFont", cmbEngFont?.Text ?? "仿宋"},
-                {"cnFont", cmbChnFont?.Text ?? "仿宋"},
-                {"fontSize", float.TryParse(cmbFontSize?.Text, out float fontSize) ? fontSize : 16f},
-                {"isBold", chkBold?.Checked ?? false},
-                {"alignment", GetAlignmentValue()},
-                {"spaceBefore", GetSpaceValue(txtSpaceBefore?.Text)},
-                {"spaceAfter", GetSpaceValue(txtSpaceAfter?.Text)},
-                {"lineSpacing", GetSpaceValue(cmbLineSpace?.Text)}
-            };
-        }
-
-        // 获取正文缩进设置
-        private Hashtable GetBodyTextIndentSettings()
-        {
-            var txtFirstIndent = FindControl<TextBox>("txtFirstIndent");
-
-            return new Hashtable
-            {
-                {"leftIndent", 0f},
-                {"firstLineIndent", GetFirstLineIndentValue(txtFirstIndent?.Text)}
-            };
-        }
-
-        // 获取表中文本样式
-        private Hashtable GetTableTextSettings()
-        {
-            var cmbEngFont = FindControl<ComboBox>("cmbEngFontName");
-            var cmbChnFont = FindControl<ComboBox>("cmbChnFontName");
-            var cmbFontSize = FindControl<ComboBox>("cmbFontSize");
-            var cmbLineSpace = FindControl<ComboBox>("cmbLineSpace");
-
-            return new Hashtable
-            {
-                {"enFont", cmbEngFont?.Text ?? "仿宋"},
-                {"cnFont", cmbChnFont?.Text ?? "仿宋"},
-                {"fontSize", float.TryParse(cmbFontSize?.Text, out float fontSize) ? fontSize : 16f},
-                {"alignment", GetAlignmentValue()},
-                {"lineSpacing", GetSpaceValue(cmbLineSpace?.Text)}
-            };
-        }
-
-        // 获取题注样式
-        private Hashtable GetCaptionSettings()
-        {
-            var cmbEngFont = FindControl<ComboBox>("cmbEngFontName");
-            var cmbChnFont = FindControl<ComboBox>("cmbChnFontName");
-            var cmbFontSize = FindControl<ComboBox>("cmbFontSize");
-            var txtSpaceBefore = FindControl<TextBox>("txtSpaceBefore");
-            var txtSpaceAfter = FindControl<TextBox>("txtSpaceAfter");
-            var cmbLineSpace = FindControl<ComboBox>("cmbLineSpace");
-
-            return new Hashtable
-            {
-                {"enFont", cmbEngFont?.Text ?? "仿宋"},
-                {"cnFont", cmbChnFont?.Text ?? "仿宋"},
-                {"fontSize", float.TryParse(cmbFontSize?.Text, out float fontSize) ? fontSize : 16f},
-                {"alignment", GetAlignmentValue()},
-                {"spaceBefore", GetSpaceValue(txtSpaceBefore?.Text)},
-                {"spaceAfter", GetSpaceValue(txtSpaceAfter?.Text)},
-                {"lineSpacing", GetSpaceValue(cmbLineSpace?.Text)}
-            };
-        }
-
-        // 获取间距值（去除"磅"和"行"单位）
-        private float GetSpaceValue(string spaceText)
-        {
-            if (string.IsNullOrEmpty(spaceText)) return 0f;
-            var cleanText = spaceText.Replace("磅", "").Replace("行", "").Trim();
-            return float.TryParse(cleanText, out float value) ? value : 0f;
-        }
-
-        // 获取首行缩进值（字符转换为磅）
-        private float GetFirstLineIndentValue(string indentText)
-        {
-            if (string.IsNullOrEmpty(indentText)) return 0f;
+            if (control is StandardComboBox comboBox && comboBox.SelectedIndex != -1) return;
             
-            if (indentText.Contains("字符"))
+            if (control is StandardTextBox textBox)
             {
-                var cleanText = indentText.Replace("字符", "").Trim();
-                if (float.TryParse(cleanText, out float charValue))
+                string text = textBox.Text.Trim();
+                if (!string.IsNullOrEmpty(text) && !text.EndsWith(unit))
                 {
-                    // 1字符约等于16磅（仿宋三号字）
-                    return charValue * 16f;
+                    textBox.Text = text + unit;
                 }
-            }
-            else if (indentText.Contains("磅"))
-            {
-                var cleanText = indentText.Replace("磅", "").Trim();
-                if (float.TryParse(cleanText, out float pointValue))
-                {
-                    return pointValue;
-                }
-            }
-            
-            return 0f;
-        }
-
-        // 获取对齐方式对应的枚举值
-        private WdParagraphAlignment GetAlignmentValue()
-        {
-            var cmbAlign = FindControl<ComboBox>("cmbAlignment");
-            if (cmbAlign == null) return WdParagraphAlignment.wdAlignParagraphLeft;
-            
-            switch (cmbAlign.Text)
-            {
-                case "左对齐":
-                    return WdParagraphAlignment.wdAlignParagraphLeft;
-                case "居中":
-                    return WdParagraphAlignment.wdAlignParagraphCenter;
-                case "右对齐":
-                    return WdParagraphAlignment.wdAlignParagraphRight;
-                case "两端对齐":
-                    return WdParagraphAlignment.wdAlignParagraphJustify;
-                default:
-                    return WdParagraphAlignment.wdAlignParagraphLeft;
-            }
-        }
-
-
-        // 将设置应用到文档
-        private void ApplySettingsToDocument()
-        {
-            try
-            {
-                // 获取当前Word应用程序和文档
-                var app = Globals.ThisAddIn.Application;
-                var doc = app.ActiveDocument;
-                if (doc == null)
-                {
-                    MessageBox.Show("请先打开一个Word文档！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                // 应用页面设置（固定为GB/T 9704-2012标准）
-                ApplyPageSettings(doc, app);
-
-                // 应用样式设置
-                ApplyStyleToDocument("标题 1", Title1Settings, doc);
-                ApplyStyleToDocument("标题 2", Title2Settings, doc);
-                ApplyStyleToDocument("标题 3", Title3Settings, doc);
-                ApplyStyleToDocument("标题 4", Title4Settings, doc);
-                ApplyStyleToDocument("标题 5", Title5Settings, doc);
-                ApplyStyleToDocument("标题 6", Title6Settings, doc);
-                ApplyStyleToDocument("正文", BodyTextSettings, doc);
-                
-                // 应用自定义样式
-                ApplyCustomStyleToDocument("表中文本", TableTextSettings, doc);
-                ApplyCustomStyleToDocument("题注", CaptionSettings, doc);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"应用样式设置时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        // 应用页面设置
-        private void ApplyPageSettings(Document doc, Microsoft.Office.Interop.Word.Application app)
-        {
-            try
-            {
-                // 应用GB/T 9704-2012标准页面设置
-                doc.PageSetup.PaperSize = WdPaperSize.wdPaperA4; // A4纸张
-                doc.PageSetup.Orientation = WdOrientation.wdOrientPortrait; // 竖向
-                doc.PageSetup.TopMargin = app.InchesToPoints(3.7f / 2.54f); // 上边距37mm
-                doc.PageSetup.BottomMargin = app.InchesToPoints(3.5f / 2.54f); // 下边距35mm
-                doc.PageSetup.LeftMargin = app.InchesToPoints(2.8f / 2.54f); // 左边距28mm
-                doc.PageSetup.RightMargin = app.InchesToPoints(2.6f / 2.54f); // 右边距26mm
-                doc.PageSetup.Gutter = 0; // 无装订线
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"应用页面设置时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        // 应用单个样式到文档
-        private void ApplyStyleToDocument(string styleName, Hashtable settings, Document doc)
-        {
-            if (settings == null) return;
-
-            try
-            {
-                var style = doc.Styles[styleName];
-
-                // 设置字体
-                style.Font.Name = settings["cnFont"]?.ToString() ?? "仿宋";
-                style.Font.NameAscii = settings["enFont"]?.ToString() ?? "仿宋";
-                style.Font.Size = float.TryParse(settings["fontSize"]?.ToString(), out float fontSize) ? fontSize : 16f;
-                style.Font.Bold = Convert.ToBoolean(settings["isBold"]) ? 1 : 0;
-
-                // 设置段落格式
-                style.ParagraphFormat.Alignment = (WdParagraphAlignment)(settings["alignment"] ?? WdParagraphAlignment.wdAlignParagraphLeft);
-                style.ParagraphFormat.SpaceBefore = float.TryParse(settings["spaceBefore"]?.ToString(), out float spaceBefore) ? spaceBefore : 0f;
-                style.ParagraphFormat.SpaceAfter = float.TryParse(settings["spaceAfter"]?.ToString(), out float spaceAfter) ? spaceAfter : 0f;
-                style.ParagraphFormat.LineSpacing = float.TryParse(settings["lineSpacing"]?.ToString(), out float lineSpacing) ? lineSpacing : 28f;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"应用样式「{styleName}」时出错：{ex.Message}", "错误",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        // 应用自定义样式到文档
-        private void ApplyCustomStyleToDocument(string styleName, Hashtable settings, Document doc)
-        {
-            if (settings == null) return;
-
-            try
-            {
-                // 检查样式是否存在，如果不存在则创建
-                Style style;
-                try
-                {
-                    style = doc.Styles[styleName];
-                }
-                catch
-                {
-                    // 样式不存在，创建新样式
-                    style = doc.Styles.Add(styleName, WdStyleType.wdStyleTypeParagraph);
-                }
-
-                // 设置字体
-                style.Font.Name = settings["cnFont"]?.ToString() ?? "仿宋";
-                style.Font.NameAscii = settings["enFont"]?.ToString() ?? "仿宋";
-                style.Font.Size = float.TryParse(settings["fontSize"]?.ToString(), out float fontSize) ? fontSize : 16f;
-                style.Font.Bold = Convert.ToBoolean(settings["isBold"]) ? 1 : 0;
-
-                // 设置段落格式
-                style.ParagraphFormat.Alignment = (WdParagraphAlignment)(settings["alignment"] ?? WdParagraphAlignment.wdAlignParagraphLeft);
-                style.ParagraphFormat.SpaceBefore = float.TryParse(settings["spaceBefore"]?.ToString(), out float spaceBefore) ? spaceBefore : 0f;
-                style.ParagraphFormat.SpaceAfter = float.TryParse(settings["spaceAfter"]?.ToString(), out float spaceAfter) ? spaceAfter : 0f;
-                style.ParagraphFormat.LineSpacing = float.TryParse(settings["lineSpacing"]?.ToString(), out float lineSpacing) ? lineSpacing : 28f;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"应用自定义样式「{styleName}」时出错：{ex.Message}", "错误",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-
-        // 当前样式按钮事件
-        private void CurrentStyle_Click(object sender, EventArgs e)
-        {
-            var app = Globals.ThisAddIn.Application;
-            var doc = app.ActiveDocument;
-            if (doc == null) return;
-
-            try
-            {
-                // 从当前文档加载样式
-                Title1Settings = GetStyleFromDocument(doc.Styles["标题 1"]);
-                Title2Settings = GetStyleFromDocument(doc.Styles["标题 2"]);
-                Title3Settings = GetStyleFromDocument(doc.Styles["标题 3"]);
-                BodyTextSettings = GetStyleFromDocument(doc.Styles["正文"]);
-
-                // 加载页面设置
-                LoadPageSettingsFromDocument(doc);
-
-                LoadSettings();
-                MessageBox.Show("已加载当前文档样式！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"获取当前样式时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        // 从文档获取样式设置
-        private Hashtable GetStyleFromDocument(Style style)
-        {
-            return new Hashtable
-            {
-                {"enFont", style.Font.NameAscii},
-                {"cnFont", style.Font.Name},
-                {"fontSize", style.Font.Size},
-                {"isBold", style.Font.Bold},
-                {"alignment", style.ParagraphFormat.Alignment},
-                {"spaceBefore", style.ParagraphFormat.SpaceBefore},
-                {"spaceAfter", style.ParagraphFormat.SpaceAfter},
-                {"lineSpacing", style.ParagraphFormat.LineSpacing}
-            };
-        }
-
-        // 从文档加载页面设置（固定为GB/T 9704-2012标准）
-        private void LoadPageSettingsFromDocument(Document doc)
-        {
-            // 固定为GB/T 9704-2012标准页面设置
-            PageMargin = new float[] { 3.7f, 3.5f, 2.8f, 2.6f }; // 上、下、左、右
-            PaperSize = WdPaperSize.wdPaperA4;
-            PaperDirection = WdOrientation.wdOrientPortrait;
-            SetGutter = false;
-            GutterValue = 0f;
-            GutterPosition = WdGutterStyle.wdGutterPosLeft;
-        }
-
-        // 取消按钮事件
-        private void CancelButton_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
-
-        /// <summary>
-        /// 获取当前样式名称
-        /// </summary>
-        private string GetCurrentStyleName()
-        {
-            var currentStyleLabel = _uiDesigner.GetControl<Label>("lblCurrentStyleName");
-            return currentStyleLabel?.Text ?? "公文风格";
-        }
-
-        /// <summary>
-        /// 更新当前样式名称显示
-        /// </summary>
-        private void UpdateCurrentStyleName(string styleName)
-        {
-            var currentStyleLabel = _uiDesigner.GetControl<Label>("lblCurrentStyleName");
-            if (currentStyleLabel != null)
-            {
-                currentStyleLabel.Text = styleName;
-            }
-        }
-
-
-        /// <summary>
-        /// 获取对齐方式文本
-        /// </summary>
-        private string GetAlignmentText(WdParagraphAlignment alignment)
-        {
-            switch (alignment)
-            {
-                case WdParagraphAlignment.wdAlignParagraphLeft:
-                    return "左对齐";
-                case WdParagraphAlignment.wdAlignParagraphCenter:
-                    return "居中";
-                case WdParagraphAlignment.wdAlignParagraphRight:
-                    return "右对齐";
-                case WdParagraphAlignment.wdAlignParagraphJustify:
-                    return "两端对齐";
-                default:
-                    return "左对齐";
             }
         }
 
         /// <summary>
-        /// 获取对齐方式枚举值
+        /// 获取控件值
         /// </summary>
-        private WdParagraphAlignment GetAlignmentValue(string alignmentText)
+        private object GetControlValue(Control control)
         {
-            switch (alignmentText)
-            {
-                case "左对齐":
-                    return WdParagraphAlignment.wdAlignParagraphLeft;
-                case "居中":
-                    return WdParagraphAlignment.wdAlignParagraphCenter;
-                case "右对齐":
-                    return WdParagraphAlignment.wdAlignParagraphRight;
-                case "两端对齐":
-                    return WdParagraphAlignment.wdAlignParagraphJustify;
-                default:
-                    return WdParagraphAlignment.wdAlignParagraphLeft;
-            }
-        }
-
-        #region 缺失的事件处理方法
-
-        /// <summary>
-        /// 样式列表选择变化事件
-        /// </summary>
-        private void StyleList_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            var listBox = sender as ListBox;
-            if (listBox == null || listBox.SelectedIndex == -1) return;
-
-            var selectedStyle = listBox.SelectedItem?.ToString();
-            if (string.IsNullOrEmpty(selectedStyle)) return;
-
-            // 根据选择的样式加载对应设置
-            switch (selectedStyle)
-            {
-                case "标题 1":
-                    LoadTitleSettings("Title1", Title1Settings);
-                    break;
-                case "标题 2":
-                    LoadTitleSettings("Title2", Title2Settings);
-                    break;
-                case "标题 3":
-                    LoadTitleSettings("Title3", Title3Settings);
-                    break;
-                case "标题 4":
-                    LoadTitleSettings("Title4", Title4Settings);
-                    break;
-                case "标题 5":
-                    LoadTitleSettings("Title5", Title5Settings);
-                    break;
-                case "标题 6":
-                    LoadTitleSettings("Title6", Title6Settings);
-                    break;
-                case "正文":
-                    LoadBodyTextSettings(false);
-                    break;
-                case "表内文字":
-                    LoadTableTextSettings();
-                    break;
-                case "题注":
-                    LoadCaptionSettings();
-                    break;
-            }
-            
-            // 更新预览
-            _uiDesigner.UpdateStylePreview();
-        }
-
-        /// <summary>
-        /// 加载样式按钮点击事件
-        /// </summary>
-        private void LoadStyle_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                // 显示打开文件对话框
-                using (var openDialog = new OpenFileDialog())
-                {
-                    openDialog.Filter = "样式文件|*.xml|所有文件|*.*";
-                    openDialog.Title = "加载样式设置";
-                    openDialog.DefaultExt = "xml";
-                    openDialog.CheckFileExists = true;
-                    openDialog.Multiselect = false;
-
-                    if (openDialog.ShowDialog() == DialogResult.OK)
-                    {
-                        // 从XML文件加载样式
-                        var styleInfos = StyleSerializationHelper.DeserializeListFromXml<StyleInfo>(openDialog.FileName);
-                        
-                        // 应用加载的样式设置
-                        foreach (var styleInfo in styleInfos)
-                        {
-                            var settings = styleInfo.ToHashtable();
-                            
-                            switch (styleInfo.StyleName)
-                            {
-                                case "正文":
-                                    BodyTextSettings = settings;
-                                    break;
-                                case "标题 1":
-                                    Title1Settings = settings;
-                                    break;
-                                case "标题 2":
-                                    Title2Settings = settings;
-                                    break;
-                                case "标题 3":
-                                    Title3Settings = settings;
-                                    break;
-                                case "标题 4":
-                                    Title4Settings = settings;
-                                    break;
-                                case "标题 5":
-                                    Title5Settings = settings;
-                                    break;
-                                case "标题 6":
-                                    Title6Settings = settings;
-                                    break;
-                                case "表中文本":
-                                    TableTextSettings = settings;
-                                    break;
-                                case "题注":
-                                    CaptionSettings = settings;
-                                    break;
-                            }
-                        }
-
-                        // 刷新界面
-                        LoadSettings();
-                        MessageBox.Show($"已从文件加载样式设置：{openDialog.FileName}", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"加载样式时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        /// <summary>
-        /// 保存样式按钮点击事件
-        /// </summary>
-        private void SaveStyle_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                // 获取当前设置
-                var currentStyle = GetCurrentStyleName();
-                
-                // 保存标题样式
-                Title1Settings = GetTitleSettings();
-                Title2Settings = GetTitleSettings();
-                Title3Settings = GetTitleSettings();
-                Title4Settings = GetTitleSettings();
-                Title5Settings = GetTitleSettings();
-                Title6Settings = GetTitleSettings();
-
-                // 保存正文样式
-                BodyTextSettings = GetBodyTextSettings();
-                BodyTextIndentSettings = GetBodyTextIndentSettings();
-
-                // 保存表中文本和题注样式
-                TableTextSettings = GetTableTextSettings();
-                CaptionSettings = GetCaptionSettings();
-
-                // 创建样式信息列表
-                var styleInfos = new List<StyleInfo>
-                {
-                    StyleInfo.FromHashtable("正文", BodyTextSettings),
-                    StyleInfo.FromHashtable("标题 1", Title1Settings),
-                    StyleInfo.FromHashtable("标题 2", Title2Settings),
-                    StyleInfo.FromHashtable("标题 3", Title3Settings),
-                    StyleInfo.FromHashtable("标题 4", Title4Settings),
-                    StyleInfo.FromHashtable("标题 5", Title5Settings),
-                    StyleInfo.FromHashtable("标题 6", Title6Settings),
-                    StyleInfo.FromHashtable("表中文本", TableTextSettings),
-                    StyleInfo.FromHashtable("题注", CaptionSettings)
-                };
-
-                // 显示保存文件对话框
-                using (var saveDialog = new SaveFileDialog())
-                {
-                    saveDialog.Filter = "样式文件|*.xml";
-                    saveDialog.Title = "保存样式设置";
-                    saveDialog.DefaultExt = "xml";
-                    saveDialog.AddExtension = true;
-                    saveDialog.FileName = $"样式设置_{DateTime.Now:yyyyMMdd_HHmmss}.xml";
-
-                    if (saveDialog.ShowDialog() == DialogResult.OK)
-                    {
-                        StyleSerializationHelper.SerializeListToXml(styleInfos, saveDialog.FileName);
-                        MessageBox.Show($"样式设置已保存到：{saveDialog.FileName}", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"保存样式时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        /// <summary>
-        /// 添加样式按钮点击事件
-        /// </summary>
-        private void AddStyle_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                // 获取新样式名称
-                var txtNewStyleName = _uiDesigner.GetControl<TextBox>("txtNewStyleName");
-                if (txtNewStyleName == null) return;
-                
-                string newStyleName = txtNewStyleName.Text.Trim();
-                
-                // 检查是否为提示文本
-                if (newStyleName == "输入添加样式的名称" || string.IsNullOrEmpty(newStyleName))
-                {
-                    MessageBox.Show("请输入样式名称！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                // 检查样式名称是否已存在
-                if (_styleNames.Contains(newStyleName))
-                {
-                    MessageBox.Show("样式名称已存在！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                // 添加到样式列表
-                _styleNames.Add(newStyleName);
-                
-                // 刷新样式列表显示
-                var styleList = _uiDesigner.GetControl<ListBox>("lstStyleList");
-                if (styleList != null)
-                {
-                    styleList.Items.Add(newStyleName);
-                }
-
-                // 清空输入框并恢复提示文本
-                txtNewStyleName.Text = "输入添加样式的名称";
-                txtNewStyleName.ForeColor = Color.Gray;
-
-                MessageBox.Show($"样式「{newStyleName}」已添加到列表！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"添加样式时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        /// <summary>
-        /// 删除样式按钮点击事件
-        /// </summary>
-        private void DeleteStyle_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var styleList = _uiDesigner.GetControl<ListBox>("lstStyleList");
-                if (styleList == null || styleList.SelectedIndex == -1)
-                {
-                    MessageBox.Show("请先选择要删除的样式！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                var selectedStyle = styleList.SelectedItem?.ToString();
-                if (string.IsNullOrEmpty(selectedStyle))
-                    return;
-
-                // 确认删除
-                var result = MessageBox.Show($"确定要从列表中删除样式「{selectedStyle}」吗？", "确认删除", 
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                
-                if (result == DialogResult.Yes)
-                {
-                    // 从列表中移除
-                    _styleNames.Remove(selectedStyle);
-                    styleList.Items.Remove(selectedStyle);
-                    
-                    MessageBox.Show($"样式「{selectedStyle}」已从列表中删除！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"删除样式时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        /// <summary>
-        /// 选择内置样式按钮点击事件
-        /// </summary>
-        private void SelectBuiltInStyle_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var app = Globals.ThisAddIn.Application;
-                var doc = app.ActiveDocument;
-                if (doc == null)
-                {
-                    MessageBox.Show("请先打开一个Word文档！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                // 获取所有内置样式
-                var allBuiltInStyles = new List<string>();
-                var currentStyles = new List<string>();
-                
-                foreach (Style style in doc.Styles)
-                {
-                    if (style.BuiltIn)
-                    {
-                        allBuiltInStyles.Add(style.NameLocal);
-                        // 检查是否已经在当前样式列表中
-                        if (_styleNames.Contains(style.NameLocal))
-                        {
-                            currentStyles.Add(style.NameLocal);
-                        }
-                    }
-                }
-
-                if (allBuiltInStyles.Count == 0)
-                {
-                    MessageBox.Show("未找到内置样式！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-                // 显示内置样式选择对话框
-                var selectedStyles = ShowBuiltInStyleSelector(allBuiltInStyles, currentStyles);
-                if (selectedStyles != null && selectedStyles.Count > 0)
-                {
-                    // 更新样式列表
-                    UpdateStyleListFromBuiltIn(selectedStyles);
-                    MessageBox.Show($"已添加 {selectedStyles.Count} 个内置样式到列表！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"选择内置样式时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        /// <summary>
-        /// 显示内置样式选择对话框
-        /// </summary>
-        private List<string> ShowBuiltInStyleSelector(List<string> allStyles, List<string> currentStyles)
-        {
-            var form = new Form
-            {
-                Text = "选择内置样式",
-                Size = new Size(400, 500),
-                StartPosition = FormStartPosition.CenterParent,
-                FormBorderStyle = FormBorderStyle.FixedDialog,
-                MaximizeBox = false,
-                MinimizeBox = false
-            };
-
-            var checkedListBox = new CheckedListBox
-            {
-                Location = new System.Drawing.Point(10, 10),
-                Size = new Size(360, 400),
-                CheckOnClick = true
-            };
-
-            // 添加所有样式到列表
-            foreach (var style in allStyles)
-            {
-                checkedListBox.Items.Add(style, currentStyles.Contains(style));
-            }
-
-            var btnOK = new Button
-            {
-                Text = "确定",
-                Location = new System.Drawing.Point(200, 420),
-                Size = new Size(80, 30),
-                DialogResult = DialogResult.OK
-            };
-
-            var btnCancel = new Button
-            {
-                Text = "取消",
-                Location = new System.Drawing.Point(290, 420),
-                Size = new Size(80, 30),
-                DialogResult = DialogResult.Cancel
-            };
-
-            form.Controls.Add(checkedListBox);
-            form.Controls.Add(btnOK);
-            form.Controls.Add(btnCancel);
-
-            if (form.ShowDialog() == DialogResult.OK)
-            {
-                var selectedStyles = new List<string>();
-                foreach (string item in checkedListBox.CheckedItems)
-                {
-                    selectedStyles.Add(item);
-                }
-                return selectedStyles;
-            }
-
+            if (control is StandardComboBox comboBox)
+                return comboBox.Text;
+            if (control is StandardTextBox textBox)
+                return textBox.Text;
+            if (control is StandardNumericUpDown numericUpDown)
+                return numericUpDown.Value;
+            if (control is ToggleButton toggleButton)
+                return toggleButton.Pressed;
             return null;
         }
 
         /// <summary>
-        /// 从内置样式更新样式列表
+        /// 获取对齐方式文本（与 LevelStyleSettingsForm 保持一致）
         /// </summary>
-        private void UpdateStyleListFromBuiltIn(List<string> selectedStyles)
+        private string GetAlignmentText(int alignment)
         {
-            var styleList = _uiDesigner.GetControl<ListBox>("lstStyleList");
-            if (styleList == null) return;
-
-            // 清空当前列表
-            styleList.Items.Clear();
-            _styleNames.Clear();
-
-            // 添加选中的样式
-            foreach (var style in selectedStyles)
-            {
-                _styleNames.Add(style);
-                styleList.Items.Add(style);
-            }
+            string[] alignments = WordStyleInfo.HAlignments;
+            return alignment >= 0 && alignment < alignments.Length ? alignments[alignment] : "左对齐";
         }
 
+        // 使用 MultiLevelDataManager 的行距相关方法，避免重复实现
+
         /// <summary>
-        /// 行距选择变化事件
+        /// 设置缩进值到StandardNumericUpDown控件（与 LevelStyleSettingsForm 保持一致）
         /// </summary>
-        private void LineSpace_SelectedIndexChanged(object sender, EventArgs e)
+        private void SetIndentValue(StandardNumericUpDown numericUpDown, string indentText)
         {
-            var cmbLineSpace = sender as ComboBox;
-            if (cmbLineSpace == null) return;
-
-            var txtLineSpaceValue = _uiDesigner.GetControl<TextBox>("txtLineSpaceValue");
-            if (txtLineSpaceValue == null) return;
-
-            // 根据选择显示或隐藏输入框
-            string selectedText = cmbLineSpace.SelectedItem?.ToString();
-            if (selectedText == "固定值" || selectedText == "最小值")
+            if (string.IsNullOrEmpty(indentText))
             {
-                txtLineSpaceValue.Visible = true;
-                if (selectedText == "固定值")
-                    txtLineSpaceValue.Text = "12磅";
+                numericUpDown.Value = 0;
+                return;
+            }
+
+            // 解析缩进文本，提取数值和单位
+            var cleanText = indentText.Replace("厘米", "").Replace("磅", "").Replace("字符", "").Replace("行", "").Trim();
+            if (decimal.TryParse(cleanText, out decimal value))
+            {
+                // 根据单位设置值
+                if (indentText.Contains("厘米"))
+                {
+                    numericUpDown.SetValueInCentimeters(value);
+                }
+                else if (indentText.Contains("磅"))
+                {
+                    numericUpDown.SetValueInUnit(value, "磅");
+                }
+                else if (indentText.Contains("字符"))
+                {
+                    numericUpDown.SetValueInUnit(value, "字符");
+                }
+                else if (indentText.Contains("行"))
+                {
+                    numericUpDown.SetValueInUnit(value, "行");
+                }
                 else
-                    txtLineSpaceValue.Text = "12磅";
+                {
+                    // 默认按厘米处理
+                    numericUpDown.SetValueInCentimeters(value);
+                }
             }
             else
             {
-                txtLineSpaceValue.Visible = false;
+                numericUpDown.Value = 0;
             }
+        }
 
-            // 触发值变化事件
-            ControlValueChanged(sender, e);
+        // 使用 MultiLevelDataManager.MultiLevelDataManager.ConvertFontSizeToString 方法，避免重复实现
+
+        /// <summary>
+        /// 首行缩进方式选择事件处理
+        /// </summary>
+        private void Cmb_FirstLineIndentType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateFirstLineIndentVisibility();
         }
 
         /// <summary>
-        /// 行距值验证事件
+        /// 预设样式选择事件处理
         /// </summary>
-        private void LineSpaceValue_Validated(object sender, EventArgs e)
+        private void Cmb_PreSettings_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var textBox = sender as TextBox;
-            if (textBox == null) return;
-
-            string text = textBox.Text.TrimEnd(' ', '磅', '行');
-            try
+            if (Cmb_PreSettings.SelectedIndex >= 0)
             {
-                float value = float.Parse(text);
-                if (textBox.Text.EndsWith("行"))
-                {
-                    textBox.Text = value.ToString("0.00 行");
-                }
-                else
-                {
-                    textBox.Text = value.ToString("0.00 磅");
-                }
-            }
-            catch
-            {
-                textBox.Text = "12.00 磅";
+                LoadPresetStyle(Cmb_PreSettings.SelectedItem.ToString());
             }
         }
 
         /// <summary>
-        /// 段落间距验证事件
+        /// 加载预设样式
         /// </summary>
-        private void ParagraphSpace_Validated(object sender, EventArgs e)
+        private void LoadPresetStyle(string presetName)
         {
-            var textBox = sender as TextBox;
-            if (textBox == null) return;
-
-            string text = textBox.Text.TrimEnd(' ', '行', '磅');
-            try
+            switch (presetName)
             {
-                float value = float.Parse(text);
-                string unit = "行";
-                if (textBox.Text.EndsWith("磅"))
-                {
-                    unit = "磅";
-                }
-                textBox.Text = value.ToString("0.00");
-                
-                // 更新单位标签
-                UpdateUnitLabel(textBox, unit);
-            }
-            catch
-            {
-                textBox.Text = "0.00";
-                UpdateUnitLabel(textBox, "行");
+                case "公文风格":
+                    LoadOfficialDocumentStyle();
+                    break;
+                case "论文风格":
+                    LoadThesisStyle();
+                    break;
+                case "报告风格":
+                    LoadReportStyle();
+                    break;
+                case "条文风格":
+                    LoadRegulationStyle();
+                    break;
             }
         }
 
         /// <summary>
-        /// 缩进距离验证事件（现在使用NumericUpDownWithUnit，不需要此方法）
+        /// 公文风格预设
         /// </summary>
-        private void IndentDistance_Validated(object sender, EventArgs e)
+        private void LoadOfficialDocumentStyle()
         {
-            // NumericUpDownWithUnit控件自动处理单位转换，不需要手动验证
+            SetComboBoxSelection(Cmb_ChnFontName, "仿宋", MultiLevelDataManager.GetSystemFonts());
+            SetComboBoxSelection(Cmb_FontSize, "三号", MultiLevelDataManager.GetFontSizes());
+            Btn_Bold.Pressed = false;
+            Btn_Italic.Pressed = false;
+            Btn_UnderLine.Pressed = false;
+            SetComboBoxSelection(Cmb_ParaAligment, "两端对齐", WordStyleInfo.HAlignments);
+            SetComboBoxSelection(Cmb_LineSpacing, "1.5倍行距", WordStyleInfo.LineSpacings);
+            Nud_LeftIndent.Value = 0;
+            Nud_FirstLineIndent.Value = 2; // 首行缩进2字符
+            Nud_LineSpacing.Value = 1.5m; // 1.5倍行距
+            Nud_BefreSpacing.Value = 0;
+            Nud_AfterSpacing.Value = 0;
         }
 
         /// <summary>
-        /// 更新单位标签
+        /// 论文风格预设
         /// </summary>
-        private void UpdateUnitLabel(TextBox textBox, string unit)
+        private void LoadThesisStyle()
         {
-            string textBoxName = textBox.Name;
-            string unitLabelName = "";
+            SetComboBoxSelection(Cmb_ChnFontName, "宋体", MultiLevelDataManager.GetSystemFonts());
+            SetComboBoxSelection(Cmb_FontSize, "小四", MultiLevelDataManager.GetFontSizes());
+            Btn_Bold.Pressed = false;
+            Btn_Italic.Pressed = false;
+            Btn_UnderLine.Pressed = false;
+            SetComboBoxSelection(Cmb_ParaAligment, "两端对齐", WordStyleInfo.HAlignments);
+            SetComboBoxSelection(Cmb_LineSpacing, "多倍行距", WordStyleInfo.LineSpacings);
+            Nud_LeftIndent.Value = 0;
+            Nud_FirstLineIndent.Value = 2; // 首行缩进2字符
+            Nud_LineSpacing.Value = 1.25m; // 1.25倍行距
+            Nud_BefreSpacing.Value = 0;
+            Nud_AfterSpacing.Value = 0;
+        }
+
+        /// <summary>
+        /// 报告风格预设
+        /// </summary>
+        private void LoadReportStyle()
+        {
+            SetComboBoxSelection(Cmb_ChnFontName, "微软雅黑", MultiLevelDataManager.GetSystemFonts());
+            SetComboBoxSelection(Cmb_FontSize, "四号", MultiLevelDataManager.GetFontSizes());
+            Btn_Bold.Pressed = false;
+            Btn_Italic.Pressed = false;
+            Btn_UnderLine.Pressed = false;
+            SetComboBoxSelection(Cmb_ParaAligment, "左对齐", WordStyleInfo.HAlignments);
+            SetComboBoxSelection(Cmb_LineSpacing, "多倍行距", WordStyleInfo.LineSpacings);
+            Nud_LeftIndent.Value = 0;
+            Nud_FirstLineIndent.Value = 0; // 无首行缩进
+            Nud_LineSpacing.Value = 1.2m; // 1.2倍行距
+            Nud_BefreSpacing.Value = 6; // 段前6磅
+            Nud_AfterSpacing.Value = 6; // 段后6磅
+        }
+
+        /// <summary>
+        /// 条文风格预设
+        /// </summary>
+        private void LoadRegulationStyle()
+        {
+            SetComboBoxSelection(Cmb_ChnFontName, "仿宋", MultiLevelDataManager.GetSystemFonts());
+            SetComboBoxSelection(Cmb_FontSize, "四号", MultiLevelDataManager.GetFontSizes());
+            Btn_Bold.Pressed = false;
+            Btn_Italic.Pressed = false;
+            Btn_UnderLine.Pressed = false;
+            SetComboBoxSelection(Cmb_ParaAligment, "两端对齐", WordStyleInfo.HAlignments);
+            SetComboBoxSelection(Cmb_LineSpacing, "1.5倍行距", WordStyleInfo.LineSpacings);
+            Nud_LeftIndent.Value = 0;
+            Nud_FirstLineIndent.Value = 2; // 首行缩进2字符
+            Nud_LineSpacing.Value = 1.5m; // 1.5倍行距
+            Nud_BefreSpacing.Value = 0;
+            Nud_AfterSpacing.Value = 0;
+        }
+
+        /// <summary>
+        /// 更新首行缩进输入框的可见性
+        /// </summary>
+        private void UpdateFirstLineIndentVisibility()
+        {
+            if (Cmb_FirstLineIndentType.SelectedIndex == 0) // 无
+            {
+                label7.Visible = false;
+                Nud_FirstLineIndent.Visible = false;
+                // label8.Visible = false; // label8控件已移除
+                Nud_FirstLineIndentByChar.Visible = false;
+            }
+            else if (Cmb_FirstLineIndentType.SelectedIndex == 1) // 悬挂缩进
+            {
+                label7.Visible = true;
+                Nud_FirstLineIndent.Visible = true;
+                // label8.Visible = false; // label8控件已移除
+                Nud_FirstLineIndentByChar.Visible = false;
+                label7.Text = "悬挂缩进";
+                Nud_FirstLineIndent.Unit = "厘米";
+            }
+            else if (Cmb_FirstLineIndentType.SelectedIndex == 2) // 首行缩进
+            {
+                label7.Visible = true;
+                Nud_FirstLineIndent.Visible = true;
+                // label8.Visible = false; // label8控件已移除
+                Nud_FirstLineIndentByChar.Visible = false;
+                label7.Text = "首行缩进";
+                Nud_FirstLineIndent.Unit = "厘米";
+            }
+        }
+
+        #endregion
+
+        #region 构造函数
+
+        public StyleSettings()
+        {
+            InitializeComponent();
+            InitializeData();
+            BindEvents();
+        }
+
+        #endregion
+
+        #region 初始化方法
+
+        private void InitializeData()
+        {
+            // 初始化控件状态
+
+            // 初始化样式列表
+            StyleNames = new BindingList<string>();
+            InitializeDefaultStyles();
             
-            switch (textBoxName)
-            {
-                case "txtSpaceBefore":
-                    unitLabelName = "lblSpaceBeforeUnit";
-                    break;
-                case "txtSpaceAfter":
-                    unitLabelName = "lblSpaceAfterUnit";
-                    break;
-                case "txtIndentDistance":
-                    unitLabelName = "lblIndentUnit";
-                    break;
-            }
+            Lst_Styles.DataSource = StyleNames;
             
-            if (!string.IsNullOrEmpty(unitLabelName))
+            // 使用 MultiLevelDataManager 的统一方法初始化字体列表
+            var systemFonts = MultiLevelDataManager.GetSystemFonts();
+            InitializeComboBox(Cmb_ChnFontName, systemFonts);
+            InitializeComboBox(Cmb_EngFontName, systemFonts);
+            
+            // 初始化其他下拉框
+            InitializeComboBox(Cmb_FontSize, MultiLevelDataManager.GetFontSizes());
+            InitializeComboBox(Cmb_ParaAligment, WordStyleInfo.HAlignments);
+            InitializeComboBox(Cmb_SetLevel, new[] { "无", "1", "2", "3", "4", "5", "6", "7", "8", "9" });
+            InitializeComboBox(Cmb_PreSettings, new[] { "公文风格", "论文风格", "报告风格", "条文风格" });
+            
+            // 初始化行距下拉框 - 使用 WordStyleInfo.LineSpacings
+            InitializeComboBox(Cmb_LineSpacing, WordStyleInfo.LineSpacings);
+            
+            Cmb_SetLevel.SelectedIndex = 3;
+            Lst_Styles.SelectedIndex = -1;
+            Cmb_ParaAligment.SelectedIndex = -1;
+            
+            // 初始化首行缩进方式
+            Cmb_FirstLineIndentType.Items.AddRange(new[] { "无", "悬挂缩进", "首行缩进" });
+            Cmb_FirstLineIndentType.SelectedIndex = 0; // 默认选择"无"
+            
+            // 设置首行缩进方式选择事件
+            Cmb_FirstLineIndentType.SelectedIndexChanged += Cmb_FirstLineIndentType_SelectedIndexChanged;
+            
+            // 设置预设样式选择事件
+            Cmb_PreSettings.SelectedIndexChanged += Cmb_PreSettings_SelectedIndexChanged;
+
+            // 初始状态：隐藏首行缩进输入框
+            UpdateFirstLineIndentVisibility();
+            
+            // 启用字体设置和段落设置面板
+            Pal_Font.Enabled = true;
+            Pal_ParaIndent.Enabled = true;
+        }
+
+        private void InitializeDefaultStyles()
+        {
+            Styles.Clear();
+            Styles.AddRange(new CustomStyle[]
             {
-                var unitLabel = _uiDesigner.GetControl<Label>(unitLabelName);
-                if (unitLabel != null)
+                new CustomStyle(name: "正文", fontName: null, fontSize: 0f, bold: false, italic: false, underline: false, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false),
+                new CustomStyle(name: "标题 1", fontName: null, fontSize: 14f, bold: true, italic: false, underline: false, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false),
+                new CustomStyle(name: "标题 2", fontName: null, fontSize: 12f, bold: true, italic: false, underline: false, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false),
+                new CustomStyle(name: "标题 3", fontName: null, fontSize: 0f, bold: false, italic: false, underline: false, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false),
+                new CustomStyle(name: "题注", fontName: null, fontSize: 0f, bold: false, italic: false, underline: false, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false),
+                new CustomStyle(name: "表内文字", fontName: null, fontSize: 0f, bold: false, italic: false, underline: false, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false)
+            });
+
+            foreach (CustomStyle style in Styles)
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(style.Name, "标题 [4-9]"))
                 {
-                    unitLabel.Text = unit;
+                    StyleNames.Add(style.Name);
                 }
             }
         }
 
-        /// <summary>
-        /// 字体颜色按钮点击事件
-        /// </summary>
-        private void FontColor_Click(object sender, EventArgs e)
+        private void BindEvents()
         {
-            try
-            {
-                var fontColorBtn = sender as Button;
-                if (fontColorBtn == null) return;
-                
-                // 使用Word API的颜色选择器
-                var selectedColor = _uiDesigner.ShowWordColorDialog(fontColorBtn.BackColor);
-                
-                // 更新字体颜色显示
-                fontColorBtn.BackColor = selectedColor;
-                fontColorBtn.Text = $"颜色: {selectedColor.Name}";
-                
-                // 更新预览
-                UpdateStylePreview();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"选择字体颜色时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            Lst_Styles.SelectedIndexChanged += Lst_Styles_SelectedIndexChanged;
+            Cmb_ChnFontName.SelectedIndexChanged += StyleFontChanged;
+            Cmb_EngFontName.SelectedIndexChanged += StyleFontChanged;
+            Cmb_FontSize.SelectedIndexChanged += StyleFontChanged;
+            Cmb_ParaAligment.SelectedIndexChanged += StyleFontChanged;
+            Cmb_LineSpacing.SelectedIndexChanged += IndentSpacingChanged;
+            Nud_LeftIndent.ValueChanged += IndentSpacingChanged;
+            Nud_FirstLineIndent.ValueChanged += IndentSpacingChanged;
+            Nud_FirstLineIndentByChar.ValueChanged += IndentSpacingChanged;
+            Nud_LineSpacing.ValueChanged += IndentSpacingChanged;
+            Nud_BefreSpacing.ValueChanged += IndentSpacingChanged;
+            Nud_AfterSpacing.ValueChanged += IndentSpacingChanged;
+            Btn_Bold.PressedChanged += FontStyleChanged;
+            Btn_Italic.PressedChanged += FontStyleChanged;
+            Btn_UnderLine.PressedChanged += FontStyleChanged;
+            // Chk_BeforeBreak.CheckedChanged += FontStyleChanged; // Chk_BeforeBreak控件已移除
+            Cmb_SetLevel.SelectedIndexChanged += Cmb_SetLevel_SelectedIndexChanged;
+            Btn_AddStyle.Click += Btn_AddStyle_Click;
+            Btn_DelStyle.Click += Btn_DelStyle_Click;
+            Btn_ApplySet.Click += Btn_ApplySet_Click;
+            Btn_ReadDocumentStyle.Click += Btn_ReadDocumentStyle_Click;
         }
 
-        /// <summary>
-        /// 绑定控件值变化事件
-        /// </summary>
-        private void BindControlValueChangedEvents()
+        #endregion
+
+        #region 事件处理方法
+
+        private void Lst_Styles_SelectedIndexChanged(object sender, EventArgs e)
         {
-            try
+            if (Lst_Styles.SelectedIndex >= 0)
             {
-                // 绑定字体相关控件
-                var cmbEngFont = _uiDesigner.GetControl<ComboBox>("cmbEngFontName");
-                if (cmbEngFont != null)
-                    cmbEngFont.SelectedIndexChanged += ControlValueChanged;
-
-                var cmbChnFont = _uiDesigner.GetControl<ComboBox>("cmbChnFontName");
-                if (cmbChnFont != null)
-                    cmbChnFont.SelectedIndexChanged += ControlValueChanged;
-
-                var cmbFontSize = _uiDesigner.GetControl<ComboBox>("cmbFontSize");
-                if (cmbFontSize != null)
-                    cmbFontSize.SelectedIndexChanged += ControlValueChanged;
-
-                // 绑定格式复选框
-                var chkBold = _uiDesigner.GetControl<CheckBox>("chkBold");
-                if (chkBold != null)
-                    chkBold.CheckedChanged += ControlValueChanged;
-
-                var chkItalic = _uiDesigner.GetControl<CheckBox>("chkItalic");
-                if (chkItalic != null)
-                    chkItalic.CheckedChanged += ControlValueChanged;
-
-                var chkUnderline = _uiDesigner.GetControl<CheckBox>("chkUnderline");
-                if (chkUnderline != null)
-                    chkUnderline.CheckedChanged += ControlValueChanged;
-
-                // 绑定对齐方式控件
-                var cmbAlign = _uiDesigner.GetControl<ComboBox>("cmbAlignment");
-                if (cmbAlign != null)
-                    cmbAlign.SelectedIndexChanged += ControlValueChanged;
-
-                // 绑定间距控件
-                var nudSpaceBefore = _uiDesigner.GetControl<NumericUpDownWithUnit>("nudSpaceBefore");
-                if (nudSpaceBefore != null)
+                string selectedStyle = Lst_Styles.SelectedItem.ToString();
+                var style = Styles.FirstOrDefault(s => s.Name == selectedStyle);
+                if (style != null)
                 {
-                    nudSpaceBefore.ValueChanged += ControlValueChanged;
-                }
-
-                var nudSpaceAfter = _uiDesigner.GetControl<NumericUpDownWithUnit>("nudSpaceAfter");
-                if (nudSpaceAfter != null)
-                {
-                    nudSpaceAfter.ValueChanged += ControlValueChanged;
-                }
-
-                var cmbLineSpace = _uiDesigner.GetControl<ComboBox>("cmbLineSpace");
-                if (cmbLineSpace != null)
-                    cmbLineSpace.SelectedIndexChanged += LineSpace_SelectedIndexChanged;
-
-                var txtLineSpaceValue = _uiDesigner.GetControl<TextBox>("txtLineSpaceValue");
-                if (txtLineSpaceValue != null)
-                {
-                    txtLineSpaceValue.TextChanged += ControlValueChanged;
-                    txtLineSpaceValue.Validated += LineSpaceValue_Validated;
-                }
-
-                // 绑定缩进控件
-                var txtFirstIndent = _uiDesigner.GetControl<TextBox>("txtFirstIndent");
-                if (txtFirstIndent != null)
-                    txtFirstIndent.TextChanged += ControlValueChanged;
-
-                var nudIndentDistance = _uiDesigner.GetControl<NumericUpDownWithUnit>("nudIndentDistance");
-                if (nudIndentDistance != null)
-                {
-                    nudIndentDistance.ValueChanged += ControlValueChanged;
-                }
+                    LoadStyleToControls(style);
+                    UpdateStyleInfo(style);
                     
-                // 绑定段前分页复选框
-                var chkPageBreakBefore = _uiDesigner.GetControl<CheckBox>("chkPageBreakBefore");
-                if (chkPageBreakBefore != null)
-                    chkPageBreakBefore.CheckedChanged += ControlValueChanged;
-
-                // 绑定大纲级别和缩进方式
-                var cmbOutlineLevel = _uiDesigner.GetControl<ComboBox>("cmbOutlineLevel");
-                if (cmbOutlineLevel != null)
-                    cmbOutlineLevel.SelectedIndexChanged += ControlValueChanged;
-
-                var cmbIndentType = _uiDesigner.GetControl<ComboBox>("cmbIndentType");
-                if (cmbIndentType != null)
-                    cmbIndentType.SelectedIndexChanged += ControlValueChanged;
+                    // 启用字体设置和段落设置面板
+                    Pal_Font.Enabled = true;
+                    Pal_ParaIndent.Enabled = true;
+                }
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show($"绑定控件事件时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // 如果没有选中样式，禁用编辑面板
+                Pal_Font.Enabled = false;
+                Pal_ParaIndent.Enabled = false;
             }
         }
 
-        /// <summary>
-        /// 控件值变化事件处理
-        /// </summary>
-        private void ControlValueChanged(object sender, EventArgs e)
+        private void StyleFontChanged(object sender, EventArgs e)
         {
-            try
+            UpdateCurrentStyle();
+        }
+
+        private void IndentSpacingChanged(object sender, EventArgs e)
+        {
+            UpdateCurrentStyle();
+        }
+
+        private void FontStyleChanged(object sender, EventArgs e)
+        {
+            UpdateCurrentStyle();
+        }
+
+
+        private void Cmb_SetLevel_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // 处理标题级别变化
+        }
+
+        private void Btn_AddStyle_Click(object sender, EventArgs e)
+        {
+            string styleName = Txt_AddStyleName.Text.Trim();
+            if (string.IsNullOrEmpty(styleName))
             {
-                // 这里可以添加实时预览逻辑
-                // 当用户修改样式设置时，可以实时更新预览
-                UpdateStylePreview();
+                MessageBox.Show("请输入样式名称", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
-            catch (Exception ex)
+
+            if (StyleNames.Contains(styleName))
             {
-                // 静默处理，避免频繁弹窗
-                System.Diagnostics.Debug.WriteLine($"控件值变化处理出错：{ex.Message}");
+                MessageBox.Show("样式名称已存在", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 创建新样式
+            var newStyle = CreateStyleFromControls(styleName);
+            Styles.Add(newStyle);
+            StyleNames.Add(styleName);
+            Lst_Styles.SelectedItem = styleName;
+        }
+
+        private void Btn_DelStyle_Click(object sender, EventArgs e)
+        {
+            if (Lst_Styles.SelectedIndex >= 0)
+            {
+                string selectedStyle = Lst_Styles.SelectedItem.ToString();
+                var style = Styles.FirstOrDefault(s => s.Name == selectedStyle);
+                if (style != null && style.UserDefined)
+                {
+                    Styles.Remove(style);
+                    StyleNames.Remove(selectedStyle);
+                    ClearControls();
+                }
             }
         }
 
-        /// <summary>
-        /// 更新样式预览
-        /// </summary>
-        private void UpdateStylePreview()
+        private void Btn_ApplySet_Click(object sender, EventArgs e)
         {
             try
             {
-                // 调用UI设计器的预览更新方法
-                _uiDesigner?.UpdateStylePreview();
+                ApplyStylesToDocument();
+                MessageBox.Show("样式设置已应用", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"更新样式预览出错：{ex.Message}");
+                MessageBox.Show($"应用样式时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void Btn_ReadDocumentStyle_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                ReadDocumentStyles();
+                MessageBox.Show("文档样式读取完成", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"读取文档样式时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        #endregion
+
+        #region 辅助方法
+
+        private void LoadStyleToControls(CustomStyle style)
+        {
+            // 使用通用方法加载样式到控件
+            if (!string.IsNullOrEmpty(style.FontName))
+            {
+                // 分别设置中文字体和英文字体（与 LevelStyleSettingsForm 保持一致）
+                SetComboBoxSelection(Cmb_ChnFontName, style.FontName, MultiLevelDataManager.GetSystemFonts());
+                SetComboBoxSelection(Cmb_EngFontName, style.FontName, MultiLevelDataManager.GetSystemFonts());
+            }
+
+            if (style.FontSize > 0)
+            {
+                SetComboBoxSelection(Cmb_FontSize, MultiLevelDataManager.ConvertFontSizeToString(style.FontSize), MultiLevelDataManager.GetFontSizes());
+            }
+
+            Btn_Bold.Pressed = style.Bold;
+            Btn_Italic.Pressed = style.Italic;
+            Btn_UnderLine.Pressed = style.Underline;
+
+            if (style.ParaAlignment >= 0)
+            {
+                SetComboBoxSelection(Cmb_ParaAligment, GetAlignmentText(style.ParaAlignment), WordStyleInfo.HAlignments);
+            }
+
+            // 设置行距下拉框
+            if (style.LineSpacing > 0)
+            {
+                string lineSpacingText = MultiLevelDataManager.ConvertFontSizeToString(style.LineSpacing);
+                SetComboBoxSelection(Cmb_LineSpacing, lineSpacingText, WordStyleInfo.LineSpacings);
+            }
+
+            // 设置缩进控件（从数值转换为字符串格式，与 LevelStyleSettingsForm 保持一致）
+            SetIndentValue(Nud_LeftIndent, $"{style.LeftIndent:F1} 厘米");
+            SetIndentValue(Nud_RightIndent, $"{style.RightIndent:F1} 厘米");
+            Nud_FirstLineIndent.Value = (decimal)style.FirstLineIndent;
+            Nud_FirstLineIndentByChar.Value = style.FirstLineIndentByChar;
+            Nud_LineSpacing.Value = (decimal)style.LineSpacing;
+            Nud_BefreSpacing.Value = (decimal)style.BeforeSpacing;
+            Nud_AfterSpacing.Value = (decimal)style.AfterSpacing;
+            // Chk_BeforeBreak.Checked = style.BeforeBreak; // Chk_BeforeBreak控件已移除
+        }
+
+        private void UpdateCurrentStyle()
+        {
+            if (Lst_Styles.SelectedIndex >= 0)
+            {
+                string selectedStyle = Lst_Styles.SelectedItem.ToString();
+                var style = Styles.FirstOrDefault(s => s.Name == selectedStyle);
+                if (style != null)
+                {
+                    UpdateStyleFromControls(style);
+                    UpdateStyleInfo(style);
+                }
+            }
+        }
+
+        private void UpdateStyleFromControls(CustomStyle style)
+        {
+            // 分别获取中文字体和英文字体（与 LevelStyleSettingsForm 保持一致）
+            style.FontName = Cmb_ChnFontName.SelectedItem?.ToString() ?? Cmb_EngFontName.SelectedItem?.ToString();
+            if (Cmb_FontSize.SelectedIndex >= 0)
+            {
+                style.FontSize = MultiLevelDataManager.ConvertFontSize(Cmb_FontSize.SelectedItem?.ToString());
+            }
+            style.Bold = Btn_Bold.Pressed;
+            style.Italic = Btn_Italic.Pressed;
+            style.Underline = Btn_UnderLine.Pressed;
+            style.ParaAlignment = Cmb_ParaAligment.SelectedIndex;
+            style.LeftIndent = (float)Nud_LeftIndent.Value;
+            style.RightIndent = (float)Nud_RightIndent.Value;
+            style.FirstLineIndent = (float)Nud_FirstLineIndent.Value;
+            style.FirstLineIndentByChar = (int)Nud_FirstLineIndentByChar.Value;
+            
+            // 处理行距设置
+            if (Cmb_LineSpacing.SelectedIndex >= 0)
+            {
+                string lineSpacingText = Cmb_LineSpacing.SelectedItem?.ToString();
+                style.LineSpacing = MultiLevelDataManager.ConvertFontSize(lineSpacingText);
+            }
+            else
+            {
+                style.LineSpacing = (float)Nud_LineSpacing.Value;
+            }
+            
+            style.BeforeSpacing = (float)Nud_BefreSpacing.Value;
+            style.AfterSpacing = (float)Nud_AfterSpacing.Value;
+            // style.BeforeBreak = Chk_BeforeBreak.Checked; // Chk_BeforeBreak控件已移除
+        }
+
+        private CustomStyle CreateStyleFromControls(string name)
+        {
+            // 分别获取中文字体和英文字体（与 LevelStyleSettingsForm 保持一致）
+            string fontName = !string.IsNullOrEmpty(Cmb_ChnFontName.Text) ? Cmb_ChnFontName.Text : Cmb_EngFontName.Text;
+            
+            // 处理行距设置
+            float lineSpacing = (float)Nud_LineSpacing.Value;
+            if (Cmb_LineSpacing.SelectedIndex >= 0)
+            {
+                string lineSpacingText = Cmb_LineSpacing.SelectedItem?.ToString();
+                lineSpacing = MultiLevelDataManager.ConvertFontSize(lineSpacingText);
+            }
+            
+            return new CustomStyle(
+                name: name,
+                fontName: fontName,
+                fontSize: Cmb_FontSize.SelectedIndex >= 0 ? MultiLevelDataManager.ConvertFontSize(Cmb_FontSize.SelectedItem?.ToString()) : 0f,
+                bold: Btn_Bold.Pressed,
+                italic: Btn_Italic.Pressed,
+                underline: Btn_UnderLine.Pressed,
+                paraAlignment: Cmb_ParaAligment.SelectedIndex,
+                leftIndent: (float)Nud_LeftIndent.Value,
+                rightIndent: (float)Nud_RightIndent.Value,
+                firstLineIndent: (float)Nud_FirstLineIndent.Value,
+                firstLineIndentByChar: (int)Nud_FirstLineIndentByChar.Value,
+                lineSpacing: lineSpacing,
+                beforeBreak: false, // Chk_BeforeBreak控件已移除，使用默认值false
+                beforeSpacing: (float)Nud_BefreSpacing.Value,
+                afterSpacing: (float)Nud_AfterSpacing.Value,
+                numberStyle: 0,
+                numberFormat: null,
+                userDefined: true
+            );
+        }
+
+        private void UpdateStyleInfo(CustomStyle style)
+        {
+            string info = $"样式名称：{style.Name}\n" +
+                         $"字体：{style.FontName ?? "默认"}\n" +
+                         $"大小：{style.FontSize}磅\n" +
+                         $"格式：{(style.Bold ? "粗体 " : "")}{(style.Italic ? "斜体 " : "")}{(style.Underline ? "下划线" : "")}\n" +
+                         $"对齐：{GetAlignmentText(style.ParaAlignment)}\n" +
+                         $"缩进：左{style.LeftIndent}，首行{style.FirstLineIndent}";
+            
+            // Lab_StyleInfo控件已移除，样式信息显示功能暂时禁用
+        }
+
+
+        private void ClearControls()
+        {
+            Cmb_ChnFontName.SelectedIndex = -1;
+            Cmb_EngFontName.SelectedIndex = -1;
+            Cmb_FontSize.SelectedIndex = -1;
+            Btn_Bold.Pressed = false;
+            Btn_Italic.Pressed = false;
+            Btn_UnderLine.Pressed = false;
+            Cmb_ParaAligment.SelectedIndex = -1;
+            Nud_LeftIndent.Value = 0;
+            Nud_FirstLineIndent.Value = 0;
+            Nud_FirstLineIndentByChar.Value = 0;
+            Nud_LineSpacing.Value = 0;
+            Nud_BefreSpacing.Value = 0;
+            Nud_AfterSpacing.Value = 0;
+            // Chk_BeforeBreak.Checked = false; // Chk_BeforeBreak控件已移除
+            // Lab_StyleInfo控件已移除，样式信息显示功能暂时禁用
+        }
+
+        private void ApplyStylesToDocument()
+        {
+            var app = Globals.ThisAddIn.Application;
+            var doc = app.ActiveDocument;
+
+            foreach (var style in Styles)
+        {
+            try
+            {
+                    // 应用样式到文档
+                    ApplyStyleToDocument(doc, style);
+            }
+            catch (Exception ex)
+            {
+                    System.Diagnostics.Debug.WriteLine($"应用样式 {style.Name} 时出错：{ex.Message}");
+                }
+            }
+        }
+
+        private void ApplyStyleToDocument(Document doc, CustomStyle style)
+        {
+            // 这里实现具体的样式应用逻辑
+            // 使用Word API将样式应用到文档
+        }
+
+        private void ReadDocumentStyles()
+            {
+                var app = Globals.ThisAddIn.Application;
+                var doc = app.ActiveDocument;
+
+            // 读取文档中的样式
+            foreach (Word.Style wordStyle in doc.Styles)
+            {
+                if (wordStyle.Type == WdStyleType.wdStyleTypeParagraph)
+                {
+                    // 读取样式属性并更新到列表中
+                }
+            }
+        }
+
+        #endregion
+
+        private void label16_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        /// <summary>
+        /// 字体颜色选择事件（与 LevelStyleSettingsForm 保持一致）
+        /// </summary>
+        private void Btn_FontColor_Click(object sender, EventArgs e)
+        {
+            ColorDialog colorDialog = new ColorDialog
+            {
+                Color = Btn_FontColor.BackColor,
+                AnyColor = true,
+                SolidColorOnly = true
+            };
+
+            if (colorDialog.ShowDialog(this) == DialogResult.OK)
+            {
+                Btn_FontColor.BackColor = colorDialog.Color;
+                UpdateCurrentStyle();
+            }
+        }
+    }
+
+    #region CustomStyle 类
+
+    /// <summary>
+    /// 自定义样式类
+    /// </summary>
+    public class CustomStyle
+    {
+        public string Name { get; set; }
+        public string FontName { get; set; }
+        public float FontSize { get; set; }
+        public bool Bold { get; set; }
+        public bool Italic { get; set; }
+        public bool Underline { get; set; }
+        public int ParaAlignment { get; set; }
+        public float LeftIndent { get; set; }
+        public float RightIndent { get; set; }
+        public float FirstLineIndent { get; set; }
+        public int FirstLineIndentByChar { get; set; }
+        public float LineSpacing { get; set; }
+        public float BeforeSpacing { get; set; }
+        public bool BeforeBreak { get; set; }
+        public float AfterSpacing { get; set; }
+        public int NumberStyle { get; set; }
+        public string NumberFormat { get; set; }
+        public bool UserDefined { get; set; }
+
+        public CustomStyle(string name, string fontName, float fontSize, bool bold, bool italic, bool underline,
+            int paraAlignment, float leftIndent, float rightIndent, float firstLineIndent, int firstLineIndentByChar, float lineSpacing,
+            float beforeSpacing, bool beforeBreak, float afterSpacing, int numberStyle, string numberFormat, bool userDefined)
+        {
+            Name = name;
+            FontName = fontName;
+            FontSize = fontSize;
+            Bold = bold;
+            Italic = italic;
+            Underline = underline;
+            ParaAlignment = paraAlignment;
+            LeftIndent = leftIndent;
+            RightIndent = rightIndent;
+            FirstLineIndent = firstLineIndent;
+            FirstLineIndentByChar = firstLineIndentByChar;
+            LineSpacing = lineSpacing;
+            BeforeSpacing = beforeSpacing;
+            BeforeBreak = beforeBreak;
+            AfterSpacing = afterSpacing;
+            NumberStyle = numberStyle;
+            NumberFormat = numberFormat;
+            UserDefined = userDefined;
             }
         }
 
         #endregion
     }
-}

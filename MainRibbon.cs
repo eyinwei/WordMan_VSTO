@@ -9,7 +9,7 @@ using Microsoft.VisualBasic;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Word = Microsoft.Office.Interop.Word;
-using WordMan_VSTO.StylePane;
+using WordMan_VSTO.SplitAndMerge;
 
 namespace WordMan_VSTO
 {
@@ -1467,39 +1467,265 @@ namespace WordMan_VSTO
             TypesettingTaskPane.TriggerShowOrHide();
         }
 
+        // 位图化按钮点击事件
+        private void 位图化_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                var selection = app.Selection;
+                
+                // 检查是否选中了单个图形并转换
+                if (selection.InlineShapes.Count == 1)
+                    ConvertToBitmap(selection.InlineShapes[1], app);
+                else if (selection.ShapeRange.Count == 1)
+                    ConvertToBitmap(selection.ShapeRange[1], app);
+            }
+            catch
+            {
+                // 静默处理错误，不显示提示
+            }
+        }
+
+        // 转换方法
+        private void ConvertToBitmap(object shape, Word.Application app)
+        {
+            // 如果不是位图则转换
+            if (!IsBitmap(shape))
+            {
+                // 统一处理：选择、复制、删除、粘贴
+                if (shape is Word.InlineShape inlineShape)
+                {
+                    inlineShape.Select();
+                    app.Selection.Copy();
+                    inlineShape.Delete();
+                }
+                else if (shape is Word.Shape wordShape)
+                {
+                    wordShape.Select();
+                    app.Selection.Copy();
+                    wordShape.Delete();
+                }
+                app.Selection.PasteSpecial(DataType: Word.WdPasteDataType.wdPasteBitmap);
+            }
+        }
+
+        // 判断是否为位图
+        private bool IsBitmap(object shape)
+        {
+            if (shape is Word.InlineShape inlineShape)
+            {
+                var type = inlineShape.Type;
+                return (type == Word.WdInlineShapeType.wdInlineShapePicture ||
+                        type == Word.WdInlineShapeType.wdInlineShapeLinkedPicture) &&
+                       inlineShape.PictureFormat != null;
+            }
+            else if (shape is Word.Shape wordShape)
+            {
+                var type = wordShape.Type;
+                return (type == Microsoft.Office.Core.MsoShapeType.msoPicture ||
+                        type == Microsoft.Office.Core.MsoShapeType.msoLinkedPicture) &&
+                       wordShape.PictureFormat != null;
+            }
+            return false;
+        }
+
+
+
+        // 快速密级相关功能
+        private void 公开_Click(object sender, RibbonControlEventArgs e)
+        {
+            AddSecurityLevel("公开");
+        }
+
+        private void 内部_Click(object sender, RibbonControlEventArgs e)
+        {
+            AddSecurityLevel("内部★");
+        }
+
+        private void 移除密级_Click(object sender, RibbonControlEventArgs e)
+        {
+            RemoveSecurityLevelFromCurrentPage();
+        }
+
+        // 添加密级标签
+        private void AddSecurityLevel(string levelText)
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                var doc = app.ActiveDocument;
+                var selection = app.Selection;
+
+                // 先移除当前页的密级标签
+                RemoveSecurityLevelFromCurrentPage();
+
+                // 获取当前页信息
+                int currentPage = selection.Information[Word.WdInformation.wdActiveEndPageNumber];
+                
+                // 获取页面设置信息
+                var pageSetup = doc.PageSetup;
+                float leftMargin = pageSetup.LeftMargin;
+                float topMargin = pageSetup.TopMargin;
+                
+                // 在页边距外侧添加密级标签
+                // 移动到当前页开始位置
+                selection.HomeKey(Word.WdUnits.wdLine, Word.WdMovementType.wdMove);
+                
+                // 使用Shapes.AddTextbox方法创建文本框，锚点到当前选区
+                var textBox = doc.Shapes.AddTextbox(Microsoft.Office.Core.MsoTextOrientation.msoTextOrientationHorizontal, 0, 0, 100, 20);
+                
+                // 设置文本框内容
+                textBox.TextFrame.TextRange.Text = levelText;
+                
+                // 设置文本框格式
+                var textRange = textBox.TextFrame.TextRange;
+                textRange.Font.Name = "黑体";
+                textRange.Font.Size = 12; // 小三号字体
+                textRange.Font.Bold = 1;
+                textRange.Font.Color = Word.WdColor.wdColorBlack; // 黑色字体
+                
+                // 设置文本框边框和背景
+                textBox.Line.Visible = Microsoft.Office.Core.MsoTriState.msoFalse; // 无边框
+                textBox.Fill.Visible = Microsoft.Office.Core.MsoTriState.msoFalse; // 无背景
+                // 先设置文本框大小
+                textBox.Width = app.CentimetersToPoints(3.0f);  // 3厘米宽
+                textBox.Height = app.CentimetersToPoints(0.8f); // 0.8厘米高
+                
+                // 设置文本框位置
+                // 水平方向：相对于页边距左对齐
+                textBox.RelativeHorizontalPosition = Word.WdRelativeHorizontalPosition.wdRelativeHorizontalPositionMargin;
+                textBox.Left = 0; // 页边距起始位置
+                
+                // 垂直方向：相对于页边距，文本框底部与页边距对齐
+                textBox.RelativeVerticalPosition = Word.WdRelativeVerticalPosition.wdRelativeVerticalPositionMargin;
+                textBox.Top = -textBox.Height; // 上页边距位置减去文本框高度
+                
+                textBox.WrapFormat.Type = Word.WdWrapType.wdWrapNone;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"添加密级标签失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // 移除当前页密级标签
+        private void RemoveSecurityLevelFromCurrentPage()
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                var doc = app.ActiveDocument;
+                var selection = app.Selection;
+                
+                // 获取当前页信息
+                int currentPage = selection.Information[Word.WdInformation.wdActiveEndPageNumber];
+                
+                // 查找并删除当前页包含密级文本的文本框
+                foreach (Word.Shape shape in doc.Shapes)
+                {
+                    if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoTextBox)
+                    {
+                        string text = shape.TextFrame.TextRange.Text.Trim();
+                        if (text == "公开" || text == "内部★" || text.Contains("密级"))
+                        {
+                            // 检查文本框是否在当前页
+                            try
+                            {
+                                int shapePage = shape.Anchor.Information[Word.WdInformation.wdActiveEndPageNumber];
+                                if (shapePage == currentPage)
+                                {
+                                    shape.Delete();
+                                }
+                            }
+                            catch
+                            {
+                                // 如果无法确定页数，也删除（可能是浮动文本框）
+                                shape.Delete();
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // 静默处理错误，避免影响用户体验
+            }
+        }
+
+        // 移除所有密级标签（保留原方法用于其他用途）
+        private void RemoveSecurityLevel()
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                var doc = app.ActiveDocument;
+                
+                // 查找并删除所有包含密级文本的文本框
+                foreach (Word.Shape shape in doc.Shapes)
+                {
+                    if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoTextBox)
+                    {
+                        string text = shape.TextFrame.TextRange.Text.Trim();
+                        if (text == "公开" || text == "内部★" || text.Contains("密级"))
+                        {
+                            shape.Delete();
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // 静默处理错误，避免影响用户体验
+            }
+        }
+
         // 文档样式设置按钮点击事件
         private void button1_Click(object sender, RibbonControlEventArgs e)
         {
             try
             {
-                // 创建文档样式设置窗口
-                DocumentStyleSettings documentStyleSettings = new DocumentStyleSettings();
-                
-                // 创建窗体来包含UserControl
-                Form styleForm = new Form();
-                styleForm.Text = "文档样式设置";
-                styleForm.Size = new Size(600, 650);
-                styleForm.StartPosition = FormStartPosition.CenterParent;
-                styleForm.FormBorderStyle = FormBorderStyle.FixedDialog;
-                styleForm.MaximizeBox = false;
-                styleForm.MinimizeBox = false;
-                
-                // 将UserControl添加到窗体
-                documentStyleSettings.Dock = DockStyle.Fill;
-                styleForm.Controls.Add(documentStyleSettings);
-                
-                // 显示窗体
-                styleForm.ShowDialog();
+                var styleSettings = new StyleSettings();
+                styleSettings.ShowDialog();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"打开文档样式设置失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"打开样式设置失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // 文档拆分按钮点击事件
+        private void 文档拆分_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var splitter = new DocumentSplitter(Globals.ThisAddIn.Application);
+                splitter.ShowSplitDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"文档拆分失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // 文档合并按钮点击事件
+        private void 文档合并_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var merger = new DocumentMerger(Globals.ThisAddIn.Application);
+                merger.ShowMergeDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"文档合并失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
 
     }
 }
+
 
 
 

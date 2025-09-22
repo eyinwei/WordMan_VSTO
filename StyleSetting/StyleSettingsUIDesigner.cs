@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using Word = Microsoft.Office.Interop.Word;
+using Color = System.Drawing.Color;
 
 namespace WordMan_VSTO
 {
@@ -99,7 +100,8 @@ namespace WordMan_VSTO
                 Size = new Size(180, 25),
                 Font = new Font("微软雅黑", 9.5F), // 字体稍微增大
                 Text = "输入添加样式的名称",
-                ForeColor = Color.Gray
+                ForeColor = Color.Gray,
+                TextAlign = HorizontalAlignment.Center
             };
             
             // 添加输入事件处理
@@ -406,8 +408,8 @@ namespace WordMan_VSTO
 
             var lblIndentDistance = CreateLabel("缩进距离", 350, 220);
             
-            // 使用NumericUpDownWithUnit控件替代TextBox
-            var nudIndentDistance = new NumericUpDownWithUnit(WordAPIHelper.GetWordApplication(), "字符")
+            // 使用StandardNumericUpDown控件替代TextBox
+            var nudIndentDistance = new StandardNumericUpDown(Globals.ThisAddIn.Application, "字符")
             {
                 Name = "nudIndentDistance",
                 Location = new Point(430, 217),
@@ -422,7 +424,7 @@ namespace WordMan_VSTO
 
             // 第四行：段前间距和段后间距
             var lblSpaceBefore = CreateLabel("段前间距", 20, 255);
-            var nudSpaceBefore = new NumericUpDownWithUnit(WordAPIHelper.GetWordApplication(), "行")
+            var nudSpaceBefore = new StandardNumericUpDown(Globals.ThisAddIn.Application, "行")
             {
                 Name = "nudSpaceBefore",
                 Location = new Point(100, 252),
@@ -430,13 +432,13 @@ namespace WordMan_VSTO
                 Value = 0,
                 Minimum = 0,
                 Maximum = 100,
-                DecimalPlaces = 2,
+                DecimalPlaces = 1,
                 Increment = 0.1m
             };
             _controls["nudSpaceBefore"] = nudSpaceBefore;
 
             var lblSpaceAfter = CreateLabel("段后间距", 350, 255);
-            var nudSpaceAfter = new NumericUpDownWithUnit(WordAPIHelper.GetWordApplication(), "行")
+            var nudSpaceAfter = new StandardNumericUpDown(Globals.ThisAddIn.Application, "行")
             {
                 Name = "nudSpaceAfter",
                 Location = new Point(430, 252),
@@ -444,44 +446,124 @@ namespace WordMan_VSTO
                 Value = 0,
                 Minimum = 0,
                 Maximum = 100,
-                DecimalPlaces = 2,
+                DecimalPlaces = 1,
                 Increment = 0.1m
             };
             _controls["nudSpaceAfter"] = nudSpaceAfter;
+
+            // 第五行：显示顺序和可见状态
+            var lblDisplayOrder = CreateLabel("显示顺序", 20, 290);
+            var cmbDisplayOrder = new ComboBox
+            {
+                Name = "cmbDisplayOrder",
+                Location = new Point(100, 287),
+                Size = new Size(120, 25),
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("微软雅黑", 9F)
+            };
+            cmbDisplayOrder.Items.AddRange(new string[] { "1", "2", "3", "4", "5", "6", "7", "8", "9" });
+            cmbDisplayOrder.SelectedIndex = 0;
+            _controls["cmbDisplayOrder"] = cmbDisplayOrder;
+
+            var lblVisibilityStatus = CreateLabel("可见状态", 350, 290);
+            var cmbVisibilityStatus = new ComboBox
+            {
+                Name = "cmbVisibilityStatus",
+                Location = new Point(430, 287),
+                Size = new Size(120, 25),
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("微软雅黑", 9F)
+            };
+            cmbVisibilityStatus.Items.AddRange(new string[] { "显示", "隐藏", "使用前隐藏" });
+            cmbVisibilityStatus.SelectedIndex = 0;
+            _controls["cmbVisibilityStatus"] = cmbVisibilityStatus;
 
             parentPanel.Controls.AddRange(new Control[] {
                 lblAlignment, cmbAlignment, chkPageBreakBefore,
                 lblOutlineLevel, cmbOutlineLevel, lblLineSpace, cmbLineSpace, txtLineSpaceValue,
                 lblIndentType, cmbIndentType, lblIndentDistance, nudIndentDistance,
-                lblSpaceBefore, nudSpaceBefore, lblSpaceAfter, nudSpaceAfter
+                lblSpaceBefore, nudSpaceBefore, lblSpaceAfter, nudSpaceAfter,
+                lblDisplayOrder, cmbDisplayOrder, lblVisibilityStatus, cmbVisibilityStatus
             });
         }
 
         /// <summary>
-        /// 创建样式预览
+        /// 创建样式预览 - 两段布局，每段五个连续的样式预览
         /// </summary>
         private void CreateStylePreview(Control parentPanel)
         {
-            // 样式预览标签（向下平移50）
-            var lblPreview = CreateLabel("样式预览", 20, 300);
-            lblPreview.Font = new Font("微软雅黑", 9.5F, FontStyle.Bold); // 字体稍微增大
+            // 样式预览标签
+            var lblPreview = CreateLabel("样式预览", 20, 320);
+            lblPreview.Font = new Font("微软雅黑", 9.5F, FontStyle.Bold);
 
-            // 样式预览文本框
-            var txtPreview = new TextBox
+            // 第一段样式预览（5个连续的预览框）
+            var firstRowPanel = new Panel
             {
-                Name = "txtStylePreview",
-                Location = new Point(20, 325),
-                Size = new Size(610, 190), // 高度从140增加到190
-                Multiline = true,
-                ReadOnly = true,
-                Font = new Font("微软雅黑", 12.5F), // 字体稍微增大
-                BackColor = Color.FromArgb(248, 249, 250),
+                Location = new Point(20, 345),
+                Size = new Size(610, 30),
+                BackColor = Color.FromArgb(250, 250, 250),
                 BorderStyle = BorderStyle.FixedSingle
             };
-            _controls["txtStylePreview"] = txtPreview;
+            _controls["firstRowPanel"] = firstRowPanel;
 
+            // 创建第一段的5个样式预览框
+            for (int i = 0; i < 5; i++)
+            {
+                var previewBox = new TextBox
+                {
+                    Name = $"txtStylePreview{i + 1}",
+                    Location = new Point(i * 122, 0), // 每个框宽度122像素，间隔2像素
+                    Size = new Size(120, 28),
+                    Multiline = false,
+                    ReadOnly = true,
+                    Font = new Font("微软雅黑", 10F),
+                    BackColor = Color.FromArgb(255, 255, 255),
+                    BorderStyle = BorderStyle.FixedSingle,
+                    TextAlign = HorizontalAlignment.Center
+                };
+                _controls[$"txtStylePreview{i + 1}"] = previewBox;
+                firstRowPanel.Controls.Add(previewBox);
+            }
+
+            // 间隔标签
+            var lblSeparator = CreateLabel("─────────────────────────────────────", 20, 380);
+            lblSeparator.Font = new Font("微软雅黑", 8F);
+            lblSeparator.ForeColor = Color.FromArgb(150, 150, 150);
+
+            // 第二段样式预览（5个连续的预览框）
+            var secondRowPanel = new Panel
+            {
+                Location = new Point(20, 400),
+                Size = new Size(610, 30),
+                BackColor = Color.FromArgb(250, 250, 250),
+                BorderStyle = BorderStyle.FixedSingle
+            };
+            _controls["secondRowPanel"] = secondRowPanel;
+
+            // 创建第二段的5个样式预览框
+            for (int i = 0; i < 5; i++)
+            {
+                var previewBox = new TextBox
+                {
+                    Name = $"txtStylePreview{i + 6}",
+                    Location = new Point(i * 122, 0), // 每个框宽度122像素，间隔2像素
+                    Size = new Size(120, 28),
+                    Multiline = false,
+                    ReadOnly = true,
+                    Font = new Font("微软雅黑", 10F),
+                    BackColor = Color.FromArgb(255, 255, 255),
+                    BorderStyle = BorderStyle.FixedSingle,
+                    TextAlign = HorizontalAlignment.Center
+                };
+                _controls[$"txtStylePreview{i + 6}"] = previewBox;
+                secondRowPanel.Controls.Add(previewBox);
+            }
+
+            // 添加控件到父面板
             parentPanel.Controls.Add(lblPreview);
-            parentPanel.Controls.Add(txtPreview);
+            parentPanel.Controls.Add(firstRowPanel);
+            parentPanel.Controls.Add(lblSeparator);
+            parentPanel.Controls.Add(secondRowPanel);
         }
 
         /// <summary>
@@ -494,8 +576,8 @@ namespace WordMan_VSTO
                 Text = text,
                 Location = new Point(x, y),
                 Size = new Size(80, 20),
-                Font = new Font("微软雅黑", 9.5F), // 字体稍微增大
-                ForeColor = Color.FromArgb(64, 64, 64),
+                Font = new Font("微软雅黑", 9F),
+                ForeColor = Color.FromArgb(73, 80, 87),
                 TextAlign = ContentAlignment.MiddleLeft
             };
         }
@@ -544,7 +626,7 @@ namespace WordMan_VSTO
             List<string> fontNames;
             try
             {
-                fontNames = WordAPIHelper.GetSystemFonts();
+                fontNames = MultiLevelDataManager.GetSystemFonts();
                 comboBox.Items.AddRange(fontNames.ToArray());
             }
             catch (Exception ex)
@@ -657,11 +739,11 @@ namespace WordMan_VSTO
             };
             
             // 通过Word API获取字体大小选项
-            List<string> sizes;
+            string[] sizes;
             try
             {
-                sizes = WordAPIHelper.GetFontSizes();
-                comboBox.Items.AddRange(sizes.ToArray());
+                sizes = MultiLevelDataManager.GetFontSizes();
+                comboBox.Items.AddRange(sizes);
             }
             catch (Exception ex)
             {
@@ -671,13 +753,13 @@ namespace WordMan_VSTO
                     "四号", "小四", "五号", "小五", "六号", "小六", "七号", "八号",
                     "8", "9", "10", "10.5", "11", "12", "14", "16", "18", "20", "22", "24", "26", "28", "36", "48", "72"
                 };
-                sizes = fallbackSizes.ToList();
+                sizes = fallbackSizes;
                 comboBox.Items.AddRange(fallbackSizes);
                 System.Diagnostics.Debug.WriteLine($"使用备用字体大小选项：{ex.Message}");
             }
             
             // 设置默认选择（小四号，对应12磅）
-            var defaultIndex = sizes.IndexOf("小四");
+            var defaultIndex = Array.IndexOf(sizes, "小四");
             comboBox.SelectedIndex = defaultIndex >= 0 ? defaultIndex : 5; // 如果找不到小四，则选择12
             
             // 添加智能大小匹配功能
@@ -985,7 +1067,7 @@ namespace WordMan_VSTO
         {
             try
             {
-                WordAPIHelper.ShowWordFontDialog();
+                Globals.ThisAddIn.Application.Dialogs[Microsoft.Office.Interop.Word.WdWordDialog.wdDialogFormatFont].Show();
             }
             catch (Exception ex)
             {
@@ -1000,7 +1082,7 @@ namespace WordMan_VSTO
         {
             try
             {
-                WordAPIHelper.ShowWordParagraphDialog();
+                Globals.ThisAddIn.Application.Dialogs[Microsoft.Office.Interop.Word.WdWordDialog.wdDialogFormatParagraph].Show();
             }
             catch (Exception ex)
             {
@@ -1015,13 +1097,26 @@ namespace WordMan_VSTO
         {
             try
             {
-                return WordAPIHelper.ShowWordColorDialog(currentColor);
+                using (var colorDialog = new ColorDialog())
+                {
+                    colorDialog.Color = currentColor;
+                    colorDialog.AnyColor = true;
+                    colorDialog.SolidColorOnly = true;
+                    colorDialog.AllowFullOpen = true;
+                    colorDialog.FullOpen = true;
+                    
+                    if (colorDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        return colorDialog.Color;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"调用Word颜色对话框失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return currentColor;
             }
+            
+            return currentColor;
         }
 
         /// <summary>
@@ -1184,9 +1279,6 @@ namespace WordMan_VSTO
         {
             try
             {
-                var previewTextBox = GetControl<TextBox>("txtStylePreview");
-                if (previewTextBox == null) return;
-
                 // 获取当前字体设置
                 var chnFont = GetControl<ComboBox>("cmbChnFontName")?.Text ?? "仿宋";
                 var engFont = GetControl<ComboBox>("cmbEngFontName")?.Text ?? "Arial";
@@ -1201,60 +1293,121 @@ namespace WordMan_VSTO
                 var lineSpaceValue = GetControl<TextBox>("txtLineSpaceValue")?.Text ?? "";
                 var outlineLevel = GetControl<ComboBox>("cmbOutlineLevel")?.Text ?? "正文文本";
                 var indentType = GetControl<ComboBox>("cmbIndentType")?.Text ?? "首行缩进";
-                var nudIndentDistance = GetControl<NumericUpDownWithUnit>("nudIndentDistance");
-                var indentDistance = nudIndentDistance != null ? nudIndentDistance.ValueInCentimeters.ToString("F1") + "厘米" : "2字符";
+                var nudIndentDistance = GetControl<StandardNumericUpDown>("nudIndentDistance");
+                var indentDistance = nudIndentDistance != null ? nudIndentDistance.GetValueInCentimeters().ToString("F1") + "厘米" : "2字符";
                 
-                var nudSpaceBefore = GetControl<NumericUpDownWithUnit>("nudSpaceBefore");
-                var spaceBefore = nudSpaceBefore != null ? nudSpaceBefore.Value.ToString("F2") + "行" : "0.00行";
+                var nudSpaceBefore = GetControl<StandardNumericUpDown>("nudSpaceBefore");
+                var spaceBefore = nudSpaceBefore != null ? nudSpaceBefore.Value.ToString("F1") + "行" : "0.0行";
                 
-                var nudSpaceAfter = GetControl<NumericUpDownWithUnit>("nudSpaceAfter");
-                var spaceAfter = nudSpaceAfter != null ? nudSpaceAfter.Value.ToString("F2") + "行" : "0.00行";
+                var nudSpaceAfter = GetControl<StandardNumericUpDown>("nudSpaceAfter");
+                var spaceAfter = nudSpaceAfter != null ? nudSpaceAfter.Value.ToString("F1") + "行" : "0.0行";
                 var pageBreakBefore = GetControl<CheckBox>("chkPageBreakBefore")?.Checked ?? false;
 
-                // 使用Word API创建样式预览
-                try
+                // 获取显示顺序和可见状态
+                var displayOrder = GetControl<ComboBox>("cmbDisplayOrder")?.Text ?? "1";
+                var visibilityStatus = GetControl<ComboBox>("cmbVisibilityStatus")?.Text ?? "显示";
+
+                // 定义样式名称列表
+                var styleNames = new[] { "标题 1", "标题 2", "标题 3", "标题 4", "标题 5", "标题 6", "正文", "题注", "表内文字", "自定义" };
+
+                // 更新第一段的5个样式预览框
+                for (int i = 0; i < 5; i++)
                 {
-                    WordAPIHelper.CreateStylePreview(previewTextBox, chnFont, engFont, fontSize, 
-                        isBold, isItalic, isUnderline, alignment, lineSpace, lineSpaceValue, 
-                        outlineLevel, indentType, indentDistance, spaceBefore, spaceAfter, pageBreakBefore);
-                }
-                catch (Exception ex)
-                {
-                    // 如果Word API失败，使用备用方法
-                    CreateFallbackPreview(previewTextBox, chnFont, engFont, fontSize, 
-                        isBold, isItalic, isUnderline, alignment, lineSpace, lineSpaceValue, 
-                        outlineLevel, indentType, indentDistance, spaceBefore, spaceAfter, pageBreakBefore);
-                    System.Diagnostics.Debug.WriteLine($"使用备用预览方法：{ex.Message}");
+                    var previewBox = GetControl<TextBox>($"txtStylePreview{i + 1}");
+                    if (previewBox != null)
+                    {
+                        UpdateSingleStylePreview(previewBox, styleNames[i], chnFont, engFont, fontSize, 
+                            isBold, isItalic, isUnderline, alignment, lineSpace, lineSpaceValue, 
+                            outlineLevel, indentType, indentDistance, spaceBefore, spaceAfter, pageBreakBefore);
+                    }
                 }
 
-                // 构建样式信息文本
-                var formatInfo = "";
-                if (isBold) formatInfo += "粗体";
-                if (isItalic) formatInfo += (formatInfo.Length > 0 ? "、" : "") + "斜体";
-                if (isUnderline) formatInfo += (formatInfo.Length > 0 ? "、" : "") + "下划线";
-                if (formatInfo.Length == 0) formatInfo = "常规";
-                
-                var lineSpaceInfo = lineSpace;
-                if (!string.IsNullOrEmpty(lineSpaceValue) && (lineSpace == "固定值" || lineSpace == "最小值"))
+                // 更新第二段的5个样式预览框
+                for (int i = 0; i < 5; i++)
                 {
-                    lineSpaceInfo += $" {lineSpaceValue}";
+                    var previewBox = GetControl<TextBox>($"txtStylePreview{i + 6}");
+                    if (previewBox != null)
+                    {
+                        UpdateSingleStylePreview(previewBox, styleNames[i + 5], chnFont, engFont, fontSize, 
+                            isBold, isItalic, isUnderline, alignment, lineSpace, lineSpaceValue, 
+                            outlineLevel, indentType, indentDistance, spaceBefore, spaceAfter, pageBreakBefore);
+                    }
                 }
-                
-                var spaceInfo = $"段前间距：{spaceBefore}，段后间距：{spaceAfter}";
-                if (pageBreakBefore)
-                {
-                    spaceInfo += "，段前分页";
-                }
-                
-                var styleInfo = $"字体：{chnFont}（中文）/{engFont}（西文），大小：{fontSize}号，格式：{formatInfo}，对齐：{alignment}，行距：{lineSpaceInfo}，大纲级别：{outlineLevel}，缩进：{indentType} {indentDistance}，{spaceInfo}。\r\n\r\n";
-                
-                // 将样式信息添加到预览文本前面
-                previewTextBox.Text = styleInfo + previewTextBox.Text;
             }
             catch (Exception ex)
             {
                 // 预览更新失败时静默处理
                 System.Diagnostics.Debug.WriteLine($"更新样式预览失败：{ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 更新单个样式预览框
+        /// </summary>
+        private void UpdateSingleStylePreview(TextBox previewBox, string styleName, string chnFont, string engFont, 
+            string fontSize, bool isBold, bool isItalic, bool isUnderline, string alignment, 
+            string lineSpace, string lineSpaceValue, string outlineLevel, string indentType, 
+            string indentDistance, string spaceBefore, string spaceAfter, bool pageBreakBefore)
+        {
+            try
+            {
+                // 创建样式预览文本
+                var previewText = styleName;
+                
+                // 根据样式类型调整显示
+                if (styleName.StartsWith("标题"))
+                {
+                    previewText = $"{styleName}\n{chnFont} {fontSize}pt";
+                    if (isBold) previewText += " 粗体";
+                }
+                else if (styleName == "正文")
+                {
+                    previewText = $"正文\n{chnFont} {fontSize}pt";
+                }
+                else if (styleName == "题注")
+                {
+                    previewText = $"题注\n{chnFont} {fontSize}pt";
+                }
+                else if (styleName == "表内文字")
+                {
+                    previewText = $"表内文字\n{chnFont} {fontSize}pt";
+                }
+                else
+                {
+                    previewText = $"自定义\n{chnFont} {fontSize}pt";
+                }
+
+                previewBox.Text = previewText;
+                
+                // 应用字体样式
+                var fontStyle = FontStyle.Regular;
+                if (isBold) fontStyle |= FontStyle.Bold;
+                if (isItalic) fontStyle |= FontStyle.Italic;
+                if (isUnderline) fontStyle |= FontStyle.Underline;
+                
+                previewBox.Font = new Font(chnFont, 9F, fontStyle);
+                
+                // 根据对齐方式设置文本对齐
+                switch (alignment)
+                {
+                    case "左对齐":
+                        previewBox.TextAlign = HorizontalAlignment.Left;
+                        break;
+                    case "居中":
+                        previewBox.TextAlign = HorizontalAlignment.Center;
+                        break;
+                    case "右对齐":
+                        previewBox.TextAlign = HorizontalAlignment.Right;
+                        break;
+                    case "两端对齐":
+                        previewBox.TextAlign = HorizontalAlignment.Left;
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                previewBox.Text = styleName;
+                System.Diagnostics.Debug.WriteLine($"更新单个样式预览失败：{ex.Message}");
             }
         }
 
@@ -1274,7 +1427,7 @@ namespace WordMan_VSTO
                 if (isItalic) fontStyle |= FontStyle.Italic;
                 if (isUnderline) fontStyle |= FontStyle.Underline;
 
-                var font = new Font(new FontFamily(chnFont), WordAPIHelper.ConvertFontSize(fontSize), fontStyle);
+                var font = new Font(new FontFamily(chnFont), MultiLevelDataManager.ConvertFontSize(fontSize), fontStyle);
                 previewTextBox.Font = font;
 
                 // 应用段落格式到预览文本框
@@ -1715,7 +1868,7 @@ namespace WordMan_VSTO
                 var number = double.Parse(numberMatch.Value);
 
                 // 使用Word API进行单位检测
-                return WordAPIHelper.DetectUnitFromNumber(number, validUnits);
+                return MultiLevelDataManager.DetectUnitFromNumber(number, validUnits);
             }
             catch (Exception ex)
             {

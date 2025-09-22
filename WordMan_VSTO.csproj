@@ -211,8 +211,8 @@
     can be found.
   -->
   <ItemGroup>
+    <Compile Include="MultiLevel\ConfigurationManager.cs" />
     <Compile Include="MultiLevel\MultiLevelDataManager.cs" />
-    <Compile Include="InputHelper.cs" />
     <Compile Include="Syboms\CommonSymbolForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -226,27 +226,12 @@
       <DependentUpon>StyleSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="StyleSetting\StyleSettingsUIDesigner.cs" />
-    <Compile Include="StyleSetting\StyleSerializationHelper.cs" />
-    <Compile Include="StyleSetting\StyleInfo.cs" />
-    <Compile Include="StylePane\WordStyleInfo.cs" />
-    <Compile Include="StylePane\StyleSerializationHelper.cs" />
-    <Compile Include="StylePane\NumericUpDownWithUnit.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="StylePane\ToggleButton.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="StylePane\DocumentStyleSettings.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="StylePane\DocumentStyleSettings.Designer.cs">
-      <DependentUpon>DocumentStyleSettings.cs</DependentUpon>
-    </Compile>
+    <Compile Include="StyleSetting\StyleFileManager.cs" />
     <Compile Include="MultiLevel\WordStyleInfo.cs" />
-    <Compile Include="WordAPIHelper.cs" />
-    <Compile Include="CustomControls.cs">
+    <Compile Include="MultiLevel\ToggleButton.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="ControlsManager.cs" />
     <Compile Include="MultiLevel\MultiLevelListForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -268,6 +253,21 @@
     <Compile Include="TypesettingTaskPane.Designer.cs">
       <DependentUpon>TypesettingTaskPane.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="MultiLevel\LevelStyleSettingsForm.resx">
+      <DependentUpon>LevelStyleSettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MultiLevel\MultiLevelListForm.resx">
+      <DependentUpon>MultiLevelListForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SplitAndMerge\DocumentMergeForm.resx">
+      <DependentUpon>DocumentMergeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SplitAndMerge\DocumentSplitForm.resx">
+      <DependentUpon>DocumentSplitForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="StyleSetting\StyleSettings.resx">
+      <DependentUpon>StyleSettings.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Syboms\CommonSymbolForm.resx">
       <DependentUpon>CommonSymbolForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -320,8 +320,17 @@
     <Compile Include="ThisAddIn.Designer.cs">
       <DependentUpon>ThisAddIn.Designer.xml</DependentUpon>
     </Compile>
+    <Compile Include="SplitAndMerge\DocumentSplitter.cs" />
+    <Compile Include="SplitAndMerge\DocumentSplitForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SplitAndMerge\DocumentMerger.cs" />
+    <Compile Include="SplitAndMerge\DocumentMergeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <AppDesigner Include="Properties\" />
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

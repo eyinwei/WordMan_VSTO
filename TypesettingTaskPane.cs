@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using Font = System.Drawing.Font;
+using Color = System.Drawing.Color;
 
 namespace WordMan_VSTO
 {

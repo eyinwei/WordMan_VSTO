@@ -45,12 +45,12 @@ namespace WordMan_VSTO.MultiLevel
                     Italic = false,
                     Underline = false,
                     HAlignment = "左对齐",
-                    LeftIndent = "0.0 厘米",
-                    RightIndent = "0.0 厘米",
+                    LeftIndent = "0.0 字符",
+                    RightIndent = "0.0 字符",
                     FirstLineIndent = "0.0 磅",
                     LineSpace = "单倍行距",
-                    SpaceBefore = "0.0 行",
-                    SpaceAfter = "0.0 行",
+                    SpaceBefore = "0.0 磅",
+                    SpaceAfter = "0.0 磅",
                     BreakBefore = false,
                     NumberStyle = -1,
                     NumberFormat = ""
@@ -64,9 +64,9 @@ namespace WordMan_VSTO.MultiLevel
 
         public static readonly string[] LineSpacings = new string[4] { "单倍行距", "1.5倍行距", "双倍行距", "多倍行距" };
 
-        public static readonly string[] SpaceBeforeValues = new string[6] { "0.0 行", "0.5 行", "1.0 行", "1.5 行", "2.0 行", "3.0 行" };
+        public static readonly string[] SpaceBeforeValues = new string[6] { "0.0 磅", "6.0 磅", "12.0 磅", "18.0 磅", "24.0 磅", "36.0 磅" };
 
-        public static readonly string[] SpaceAfterValues = new string[6] { "0.0 行", "0.5 行", "1.0 行", "1.5 行", "2.0 行", "3.0 行" };
+        public static readonly string[] SpaceAfterValues = new string[6] { "0.0 磅", "6.0 磅", "12.0 磅", "18.0 磅", "24.0 磅", "36.0 磅" };
 
         public static readonly string[] FontSizes = new string[32]
         {
@@ -155,10 +155,11 @@ namespace WordMan_VSTO.MultiLevel
             Bold = style.Font.Bold == -1;
             Italic = style.Font.Italic == -1;
             Underline = style.Font.Underline != WdUnderline.wdUnderlineNone;
-            FontColor = ColorFromInt((int)style.Font.Color);
+            FontColor = GetWordFontColor(style.Font, style);
 
-            LeftIndent = (style.ParagraphFormat.LeftIndent * 2.54f / 72f).ToString("0.0 厘米");
-            RightIndent = (style.ParagraphFormat.RightIndent * 2.54f / 72f).ToString("0.0 厘米");
+            // 将磅转换为字符单位（1字符 ≈ 0.5厘米 ≈ 14.175磅）
+            LeftIndent = (style.ParagraphFormat.LeftIndent / 14.175f).ToString("0.0 字符");
+            RightIndent = (style.ParagraphFormat.RightIndent / 14.175f).ToString("0.0 字符");
 
             switch (style.ParagraphFormat.LineSpacingRule)
             {
@@ -172,15 +173,22 @@ namespace WordMan_VSTO.MultiLevel
                     LineSpace = "1.5倍行距";
                     break;
                 case WdLineSpacing.wdLineSpaceMultiple:
-                    LineSpace = "多倍行距";
+                    // 保存具体的倍数值
+                    float multipleValue = MultiLevelDataManager.PointsToLines(style.ParagraphFormat.LineSpacing);
+                    LineSpace = $"{multipleValue:0.0} 倍行距";
+                    break;
+                case WdLineSpacing.wdLineSpaceExactly:
+                    // 固定行距，保存磅值
+                    LineSpace = $"{style.ParagraphFormat.LineSpacing:0.0} 磅";
                     break;
                 default:
                     LineSpace = "单倍行距";
                     break;
             }
 
-            SpaceBefore = MultiLevelDataManager.PointsToLines(style.ParagraphFormat.SpaceBefore).ToString("0.0 行");
-            SpaceAfter = MultiLevelDataManager.PointsToLines(style.ParagraphFormat.SpaceAfter).ToString("0.0 行");
+            // 直接使用磅值，不转换为行
+            SpaceBefore = style.ParagraphFormat.SpaceBefore.ToString("0.0 磅");
+            SpaceAfter = style.ParagraphFormat.SpaceAfter.ToString("0.0 磅");
             FirstLineIndent = style.ParagraphFormat.FirstLineIndent.ToString("0.0 磅");
 
             switch (style.ParagraphFormat.Alignment)
@@ -322,6 +330,29 @@ namespace WordMan_VSTO.MultiLevel
             return text;
         }
 
+        /// <summary>
+        /// 正确获取Word字体颜色
+        /// </summary>
+        private Color GetWordFontColor(Microsoft.Office.Interop.Word.Font font, Style style = null)
+        {
+            try
+            {
+                // 检查是否是自动颜色
+                if (font.Color == WdColor.wdColorAutomatic)
+                {
+                    return Color.Black;
+                }
+                
+                // 使用ColorTranslator.FromOle方法，这是处理Word颜色的标准方法
+                // 参考StyleSettings.cs中的成功实现
+                return ColorTranslator.FromOle((int)font.Color);
+            }
+            catch
+            {
+                return Color.Black;
+            }
+        }
+
         private Color ColorFromInt(int colorInt)
         {
             // 处理Word的特殊颜色值
@@ -348,12 +379,16 @@ namespace WordMan_VSTO.MultiLevel
                 case 0: // 透明或未设置
                     return Color.Black;
                 default:
-                    // 对于其他颜色值，直接转换为ARGB
-                    // Word使用BGR格式，需要转换
+                    // 对于其他颜色值，正确处理Word的BGR格式
                     if (colorInt < 0)
                     {
-                        // 处理负数颜色值
-                        return Color.FromArgb(colorInt);
+                        // 处理负数颜色值，Word使用BGR格式
+                        // 将负数转换为正数进行处理
+                        uint unsignedColor = (uint)(colorInt & 0xFFFFFF);
+                        int b = (int)((unsignedColor >> 16) & 0xFF);
+                        int g = (int)((unsignedColor >> 8) & 0xFF);
+                        int r = (int)(unsignedColor & 0xFF);
+                        return Color.FromArgb(r, g, b);
                     }
                     else
                     {
@@ -457,7 +492,16 @@ namespace WordMan_VSTO.MultiLevel
                 }
                 
                 // 设置缩进
-                if (LeftIndent.EndsWith("厘米"))
+                if (LeftIndent.EndsWith("字符"))
+                {
+                    string s = LeftIndent.TrimEnd(' ', '字', '符');
+                    if (float.TryParse(s, out float result))
+                    {
+                        // 字符转磅：1字符 ≈ 14.175磅
+                        paragraphFormat.LeftIndent = result * 14.175f;
+                    }
+                }
+                else if (LeftIndent.EndsWith("厘米"))
                 {
                     string s = LeftIndent.TrimEnd(' ', '厘', '米');
                     if (float.TryParse(s, out float result))
@@ -465,7 +509,17 @@ namespace WordMan_VSTO.MultiLevel
                         paragraphFormat.LeftIndent = MultiLevelDataManager.CentimetersToPoints(result);
                     }
                 }
-                if (RightIndent.EndsWith("厘米"))
+                
+                if (RightIndent.EndsWith("字符"))
+                {
+                    string s = RightIndent.TrimEnd(' ', '字', '符');
+                    if (float.TryParse(s, out float result))
+                    {
+                        // 字符转磅：1字符 ≈ 14.175磅
+                        paragraphFormat.RightIndent = result * 14.175f;
+                    }
+                }
+                else if (RightIndent.EndsWith("厘米"))
                 {
                     string s = RightIndent.TrimEnd(' ', '厘', '米');
                     if (float.TryParse(s, out float result))
@@ -483,25 +537,54 @@ namespace WordMan_VSTO.MultiLevel
                 }
 
                 // 设置行距
-                switch (LineSpace)
+                if (LineSpace == "单倍行距")
                 {
-                    case "单倍行距":
-                        paragraphFormat.LineSpacingRule = WdLineSpacing.wdLineSpaceSingle;
-                        break;
-                    case "1.5倍行距":
-                        paragraphFormat.LineSpacingRule = WdLineSpacing.wdLineSpace1pt5;
-                        break;
-                    case "双倍行距":
-                        paragraphFormat.LineSpacingRule = WdLineSpacing.wdLineSpaceDouble;
-                        break;
-                    case "多倍行距":
+                    paragraphFormat.LineSpacingRule = WdLineSpacing.wdLineSpaceSingle;
+                }
+                else if (LineSpace == "1.5倍行距")
+                {
+                    paragraphFormat.LineSpacingRule = WdLineSpacing.wdLineSpace1pt5;
+                }
+                else if (LineSpace == "双倍行距")
+                {
+                    paragraphFormat.LineSpacingRule = WdLineSpacing.wdLineSpaceDouble;
+                }
+                else if (LineSpace.EndsWith("倍行距"))
+                {
+                    // 处理多倍行距，提取倍数值
+                    string valueText = LineSpace.Replace("倍行距", "").Trim();
+                    if (float.TryParse(valueText, out float multipleValue))
+                    {
                         paragraphFormat.LineSpacingRule = WdLineSpacing.wdLineSpaceMultiple;
-                        paragraphFormat.LineSpacing = 1.5f;
-                        break;
+                        paragraphFormat.LineSpacing = MultiLevelDataManager.LinesToPoints(multipleValue);
+                    }
+                }
+                else if (LineSpace.EndsWith("磅"))
+                {
+                    // 处理固定行距
+                    string valueText = LineSpace.Replace("磅", "").Trim();
+                    if (float.TryParse(valueText, out float exactValue))
+                    {
+                        paragraphFormat.LineSpacingRule = WdLineSpacing.wdLineSpaceExactly;
+                        paragraphFormat.LineSpacing = exactValue;
+                    }
+                }
+                else
+                {
+                    // 默认单倍行距
+                    paragraphFormat.LineSpacingRule = WdLineSpacing.wdLineSpaceSingle;
                 }
 
                 // 设置段前段后间距
-                if (SpaceBefore.EndsWith("行"))
+                if (SpaceBefore.EndsWith("磅"))
+                {
+                    string s = SpaceBefore.TrimEnd(' ', '磅');
+                    if (float.TryParse(s, out float result))
+                    {
+                        paragraphFormat.SpaceBefore = result;
+                    }
+                }
+                else if (SpaceBefore.EndsWith("行"))
                 {
                     string s = SpaceBefore.TrimEnd(' ', '行');
                     if (float.TryParse(s, out float result))
@@ -509,7 +592,16 @@ namespace WordMan_VSTO.MultiLevel
                         paragraphFormat.SpaceBefore = MultiLevelDataManager.LinesToPoints(result);
                     }
                 }
-                if (SpaceAfter.EndsWith("行"))
+                
+                if (SpaceAfter.EndsWith("磅"))
+                {
+                    string s = SpaceAfter.TrimEnd(' ', '磅');
+                    if (float.TryParse(s, out float result))
+                    {
+                        paragraphFormat.SpaceAfter = result;
+                    }
+                }
+                else if (SpaceAfter.EndsWith("行"))
                 {
                     string s = SpaceAfter.TrimEnd(' ', '行');
                     if (float.TryParse(s, out float result))

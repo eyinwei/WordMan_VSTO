@@ -15,28 +15,36 @@ namespace WordMan_VSTO
         #region 配置文件操作
 
         /// <summary>
-        /// 保存配置到CSV文件
+        /// 保存配置到TXT文件（使用分号分割）
         /// </summary>
         /// <param name="filePath">文件路径</param>
         /// <param name="levelDataList">级别数据列表</param>
         /// <param name="currentLevels">当前级别数</param>
         public static void SaveConfigurationToFile(string filePath, List<LevelData> levelDataList, int currentLevels)
         {
-            var csv = new StringBuilder();
-            csv.AppendLine("Level,NumberStyle,NumberFormat,NumberIndent,TextIndent,AfterNumberType,TabPosition,LinkedStyle");
+            var content = new StringBuilder();
+            // 第一行：列表级数信息
+            content.AppendLine($"列表级数;{currentLevels}");
+            // 第二行：列标题
+            content.AppendLine("级别;编号样式;编号格式;编号缩进;文本缩进;编号之后类型;制表位位置;链接样式");
             
-            foreach (var levelData in levelDataList)
+            // 只导出当前设置的级数（1到currentLevels）
+            for (int i = 1; i <= currentLevels; i++)
             {
-                csv.AppendLine($"{levelData.Level},{levelData.NumberStyle},{levelData.NumberFormat}," +
-                             $"{levelData.NumberIndent},{levelData.TextIndent},{levelData.AfterNumberType}," +
-                             $"{levelData.TabPosition},{levelData.LinkedStyle}");
+                var levelData = levelDataList.FirstOrDefault(x => x.Level == i);
+                if (levelData != null)
+                {
+                    content.AppendLine($"{levelData.Level};{levelData.NumberStyle};{levelData.NumberFormat};" +
+                                     $"{levelData.NumberIndent};{levelData.TextIndent};{levelData.AfterNumberType};" +
+                                     $"{levelData.TabPosition};{levelData.LinkedStyle}");
+                }
             }
             
-            File.WriteAllText(filePath, csv.ToString(), Encoding.UTF8);
+            File.WriteAllText(filePath, content.ToString(), Encoding.UTF8);
         }
 
         /// <summary>
-        /// 从CSV文件加载配置
+        /// 从TXT文件加载配置（使用分号分割）
         /// </summary>
         /// <param name="filePath">文件路径</param>
         /// <param name="levelDataList">输出的级别数据列表</param>
@@ -50,12 +58,26 @@ namespace WordMan_VSTO
                 return;
             
             var lines = File.ReadAllLines(filePath, Encoding.UTF8);
-            if (lines.Length <= 1) // 只有标题行
+            if (lines.Length <= 2) // 只有列表级数行和标题行
                 return;
             
-            for (int i = 1; i < lines.Length; i++) // 跳过标题行
+            // 第一行：读取列表级数信息
+            if (lines.Length > 0)
             {
-                var parts = lines[i].Split(',');
+                var levelInfoParts = lines[0].Split(';');
+                if (levelInfoParts.Length >= 2 && levelInfoParts[0] == "列表级数")
+                {
+                    if (int.TryParse(levelInfoParts[1], out int parsedLevels))
+                    {
+                        currentLevels = parsedLevels;
+                    }
+                }
+            }
+            
+            // 从第三行开始读取数据（跳过列表级数行和标题行）
+            for (int i = 2; i < lines.Length; i++)
+            {
+                var parts = lines[i].Split(';');
                 if (parts.Length >= 8)
                 {
                     var levelData = new LevelData
@@ -73,7 +95,11 @@ namespace WordMan_VSTO
                 }
             }
             
-            currentLevels = levelDataList.Count > 0 ? levelDataList.Max(x => x.Level) : 0;
+            // 如果没有从文件中读取到列表级数，则根据数据计算
+            if (currentLevels == 0 && levelDataList.Count > 0)
+            {
+                currentLevels = levelDataList.Max(x => x.Level);
+            }
         }
 
 
@@ -89,9 +115,9 @@ namespace WordMan_VSTO
         {
             using (var openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.Filter = "CSV文件|*.csv|所有文件|*.*";
+                openFileDialog.Filter = "TXT文件|*.txt|所有文件|*.*";
                 openFileDialog.Title = "导入多级列表配置";
-                openFileDialog.DefaultExt = "csv";
+                openFileDialog.DefaultExt = "txt";
                 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
@@ -109,10 +135,10 @@ namespace WordMan_VSTO
         {
             using (var saveFileDialog = new SaveFileDialog())
             {
-                saveFileDialog.Filter = "CSV文件|*.csv|文本文件|*.txt|所有文件|*.*";
+                saveFileDialog.Filter = "TXT文件|*.txt|所有文件|*.*";
                 saveFileDialog.Title = "导出多级列表配置";
-                saveFileDialog.DefaultExt = "csv";
-                saveFileDialog.FileName = $"多级列表配置_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                saveFileDialog.DefaultExt = "txt";
+                saveFileDialog.FileName = $"多级列表配置_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
                 
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {

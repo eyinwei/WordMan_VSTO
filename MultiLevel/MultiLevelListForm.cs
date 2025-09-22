@@ -22,6 +22,12 @@ namespace WordMan_VSTO
         private const int MAX_LEVELS = 9;
         private const decimal DEFAULT_INDENT = 0.8m;
         
+        // 魔法数字常量定义
+        private const float INVALID_TAB_POSITION = 9999999f;
+        private const int DEFAULT_FONT_SIZE = 12;
+        private const int MAX_INDENT_CM = 50;
+        
+        // 使用MultiLevelDataManager中的统一常量定义
         private static readonly WdListNumberStyle[] LevelNumStyle = new WdListNumberStyle[]
         {
             WdListNumberStyle.wdListNumberStyleArabic,           // 0: 1,2,3...
@@ -49,9 +55,10 @@ namespace WordMan_VSTO
             { 9, new LevelConfig("(%9)", "标题 9", DEFAULT_INDENT, "a,b,c...") }
         };
         
-        private static readonly string[] NumberStyleOptions = { "1,2,3...", "01,02,03...", "A,B,C...", "a,b,c...", "I,II,III...", "i,ii,iii...", "一,二,三...", "壹,贰,叁...", "甲,乙,丙...", "正规编号" };
-        private static readonly string[] AfterNumberOptions = { "无", "空格", "制表位" };
-        private static readonly string[] LinkedStyleOptions = { "无", "标题 1", "标题 2", "标题 3", "标题 4", "标题 5", "标题 6", "标题 7", "标题 8", "标题 9" };
+        // 使用MultiLevelDataManager中的统一常量定义
+        private static readonly string[] NumberStyleOptions = MultiLevelDataManager.ValidationConstants.ValidNumberStyles;
+        private static readonly string[] AfterNumberOptions = MultiLevelDataManager.ValidationConstants.ValidAfterNumberTypes;
+        private static readonly string[] LinkedStyleOptions = MultiLevelDataManager.ValidationConstants.ValidLinkedStyles;
         #endregion
         
         #region 私有字段
@@ -62,13 +69,39 @@ namespace WordMan_VSTO
         #endregion
         
         #region 内部类
+        
+        /// <summary>
+        /// 级别配置类 - 存储每个级别的默认配置信息
+        /// </summary>
         private class LevelConfig
         {
+            /// <summary>
+            /// 编号格式（如：第%1章、%1.%2等）
+            /// </summary>
             public string NumberFormat { get; }
+            
+            /// <summary>
+            /// 链接的样式名称
+            /// </summary>
             public string LinkedStyle { get; }
+            
+            /// <summary>
+            /// 编号缩进值（厘米）
+            /// </summary>
             public decimal NumberIndent { get; }
+            
+            /// <summary>
+            /// 编号样式（如：1,2,3...、A,B,C...等）
+            /// </summary>
             public string NumberStyle { get; }
             
+            /// <summary>
+            /// 初始化级别配置
+            /// </summary>
+            /// <param name="numberFormat">编号格式</param>
+            /// <param name="linkedStyle">链接样式</param>
+            /// <param name="numberIndent">编号缩进</param>
+            /// <param name="numberStyle">编号样式</param>
             public LevelConfig(string numberFormat, string linkedStyle, decimal numberIndent, string numberStyle = "1,2,3...")
             {
                 NumberFormat = numberFormat;
@@ -79,20 +112,34 @@ namespace WordMan_VSTO
         }
         #endregion
 
+        /// <summary>
+        /// 初始化多级列表表单
+        /// </summary>
         public MultiLevelListForm()
         {
             InitializeComponent();
+            
+            // 添加空引用检查
+            if (Globals.ThisAddIn?.Application == null)
+            {
+                throw new InvalidOperationException("Word应用程序不可用，无法初始化多级列表表单。");
+            }
+            
             app = Globals.ThisAddIn.Application;
             
-            
+            // 初始化表单数据、事件处理和控件
             InitializeData();
             SetupEventHandlers();
             CreateLevelControls();
         }
 
 
+        /// <summary>
+        /// 初始化表单数据 - 创建默认的级别数据配置
+        /// </summary>
         private void InitializeData()
         {
+            // 为每个级别创建默认配置数据
             for (int i = 1; i <= MAX_LEVELS; i++)
             {
                 var config = DefaultLevelConfigs.ContainsKey(i) ? DefaultLevelConfigs[i] : new LevelConfig("", "无", 0m);
@@ -115,6 +162,9 @@ namespace WordMan_VSTO
             currentLevels = 0;
         }
 
+        /// <summary>
+        /// 创建级别控件 - 动态生成多级列表配置界面
+        /// </summary>
         private void CreateLevelControls()
         {
             levelsContainer.Controls.Clear();
@@ -153,6 +203,10 @@ namespace WordMan_VSTO
         }
 
 
+        /// <summary>
+        /// 创建单个级别的控件行
+        /// </summary>
+        /// <param name="level">级别编号（1-9）</param>
         private void CreateLevelRow(int level)
         {
             var rowPanel = new Panel();
@@ -324,6 +378,13 @@ namespace WordMan_VSTO
 
         private void BtnLoadCurrentList_Click(object sender, EventArgs e)
         {
+            // 添加空引用检查
+            if (app?.Selection == null)
+            {
+                MessageBox.Show("Word应用程序或选区不可用！", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            
             var selection = app.Selection;
             var listTemplate = selection.Range.ListFormat.ListTemplate;
 
@@ -364,7 +425,7 @@ namespace WordMan_VSTO
                 
                 decimal numberIndent = (decimal)app.PointsToCentimeters(listLevel.NumberPosition);
                 decimal textIndent = (decimal)app.PointsToCentimeters(listLevel.TextPosition);
-                decimal tabPosition = listLevel.TabPosition != 9999999f ? (decimal)app.PointsToCentimeters(listLevel.TabPosition) : 0;
+                decimal tabPosition = listLevel.TabPosition != INVALID_TAB_POSITION ? (decimal)app.PointsToCentimeters(listLevel.TabPosition) : 0;
                 
                 MultiLevelListControlFactory.SetInputValues(levelsContainer, i, numberIndent, textIndent, tabPosition);
             }
@@ -459,9 +520,15 @@ namespace WordMan_VSTO
             float[] numberIndents, float[] textIndents, string[] afterNumberTypes, float[] tabPositions, string[] linkedStyles)
         {
             // 验证参数
-            if (levelCount <= 0 || levelCount > 9)
+            if (levelCount <= 0 || levelCount > MAX_LEVELS)
             {
-                throw new ArgumentException($"级别数量无效: {levelCount}");
+                throw new ArgumentException($"级别数量无效: {levelCount}，有效范围：1-{MAX_LEVELS}");
+            }
+            
+            // 添加空引用检查
+            if (app?.ActiveDocument == null)
+            {
+                throw new InvalidOperationException("Word文档不可用，无法创建多级列表模板。");
             }
             
             ListTemplate listTemplate;

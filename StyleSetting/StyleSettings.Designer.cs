@@ -16,7 +16,7 @@ namespace WordMan_VSTO
 
         #region 控件声明
         private GroupBox groupBox3;
-        private StandardButton Btn_DelStyle;
+        private StandardButton 删除;
         private Label label9;
         private Label label10;
         private Label label11;
@@ -40,7 +40,7 @@ namespace WordMan_VSTO
         private StandardNumericUpDown Nud_RightIndent;
         private Label label19;
         private StandardComboBox Cmb_FirstLineIndentType;
-        private StandardButton Btn_AddStyle;
+        private StandardButton 添加;
         private StandardComboBox Cmb_SetLevel;
         private Label label12;
         private ListBox Lst_Styles;
@@ -55,6 +55,7 @@ namespace WordMan_VSTO
         private StandardNumericUpDown Nud_LeftIndent;
         private StandardNumericUpDown Nud_FirstLineIndent;
         private StandardNumericUpDown Nud_FirstLineIndentByChar;
+        private StandardButton 关闭;
 
         #endregion
 
@@ -83,7 +84,7 @@ namespace WordMan_VSTO
             this.关闭 = new WordMan_VSTO.StandardButton();
             this.Txt_AddStyleName = new WordMan_VSTO.StandardTextBox();
             this.Btn_ApplySet = new WordMan_VSTO.StandardButton();
-            this.Btn_DelStyle = new WordMan_VSTO.StandardButton();
+            this.删除 = new WordMan_VSTO.StandardButton();
             this.Cmb_SetLevel = new WordMan_VSTO.StandardComboBox();
             this.Cmb_PreSettings = new WordMan_VSTO.StandardComboBox();
             this.label12 = new System.Windows.Forms.Label();
@@ -119,8 +120,9 @@ namespace WordMan_VSTO
             this.Nud_FirstLineIndent = new WordMan_VSTO.StandardNumericUpDown();
             this.Nud_FirstLineIndentByChar = new WordMan_VSTO.StandardNumericUpDown();
             this.Btn_ReadDocumentStyle = new WordMan_VSTO.StandardButton();
-            this.Btn_AddStyle = new WordMan_VSTO.StandardButton();
+            this.添加 = new WordMan_VSTO.StandardButton();
             this.Lst_Styles = new System.Windows.Forms.ListBox();
+            this.加载 = new WordMan_VSTO.StandardButton();
             this.groupBox3.SuspendLayout();
             this.Pal_Font.SuspendLayout();
             this.Pal_ParaIndent.SuspendLayout();
@@ -135,10 +137,11 @@ namespace WordMan_VSTO
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.加载);
             this.groupBox3.Controls.Add(this.关闭);
             this.groupBox3.Controls.Add(this.Txt_AddStyleName);
             this.groupBox3.Controls.Add(this.Btn_ApplySet);
-            this.groupBox3.Controls.Add(this.Btn_DelStyle);
+            this.groupBox3.Controls.Add(this.删除);
             this.groupBox3.Controls.Add(this.Cmb_SetLevel);
             this.groupBox3.Controls.Add(this.Cmb_PreSettings);
             this.groupBox3.Controls.Add(this.label12);
@@ -146,7 +149,7 @@ namespace WordMan_VSTO
             this.groupBox3.Controls.Add(this.label16);
             this.groupBox3.Controls.Add(this.Pal_ParaIndent);
             this.groupBox3.Controls.Add(this.Btn_ReadDocumentStyle);
-            this.groupBox3.Controls.Add(this.Btn_AddStyle);
+            this.groupBox3.Controls.Add(this.添加);
             this.groupBox3.Controls.Add(this.Lst_Styles);
             this.groupBox3.Location = new System.Drawing.Point(0, 0);
             this.groupBox3.Name = "groupBox3";
@@ -184,7 +187,7 @@ namespace WordMan_VSTO
             this.Btn_ApplySet.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
             this.Btn_ApplySet.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.Btn_ApplySet.Font = new System.Drawing.Font("微软雅黑", 10F, System.Drawing.FontStyle.Bold);
-            this.Btn_ApplySet.ForeColor = System.Drawing.Color.Black;
+            this.Btn_ApplySet.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
             this.Btn_ApplySet.Location = new System.Drawing.Point(407, 334);
             this.Btn_ApplySet.Name = "Btn_ApplySet";
             this.Btn_ApplySet.Size = new System.Drawing.Size(120, 31);
@@ -192,19 +195,19 @@ namespace WordMan_VSTO
             this.Btn_ApplySet.Text = "应用设置";
             this.Btn_ApplySet.UseVisualStyleBackColor = false;
             // 
-            // Btn_DelStyle
+            // 删除
             // 
-            this.Btn_DelStyle.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
-            this.Btn_DelStyle.Enabled = false;
-            this.Btn_DelStyle.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Btn_DelStyle.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
-            this.Btn_DelStyle.ForeColor = System.Drawing.Color.Black;
-            this.Btn_DelStyle.Location = new System.Drawing.Point(100, 334);
-            this.Btn_DelStyle.Name = "Btn_DelStyle";
-            this.Btn_DelStyle.Size = new System.Drawing.Size(72, 31);
-            this.Btn_DelStyle.TabIndex = 29;
-            this.Btn_DelStyle.Text = "删除样式";
-            this.Btn_DelStyle.UseVisualStyleBackColor = false;
+            this.删除.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.删除.Enabled = false;
+            this.删除.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.删除.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
+            this.删除.ForeColor = System.Drawing.Color.Black;
+            this.删除.Location = new System.Drawing.Point(122, 334);
+            this.删除.Name = "删除";
+            this.删除.Size = new System.Drawing.Size(50, 31);
+            this.删除.TabIndex = 29;
+            this.删除.Text = "删除";
+            this.删除.UseVisualStyleBackColor = false;
             // 
             // Cmb_SetLevel
             // 
@@ -432,9 +435,8 @@ namespace WordMan_VSTO
             // 
             // Cmb_LineSpacing
             // 
-            this.Cmb_LineSpacing.AllowInput = false;
+            this.Cmb_LineSpacing.AllowInput = true;
             this.Cmb_LineSpacing.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
-            this.Cmb_LineSpacing.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.Cmb_LineSpacing.Font = new System.Drawing.Font("微软雅黑", 9F);
             this.Cmb_LineSpacing.FormattingEnabled = true;
             this.Cmb_LineSpacing.Items.AddRange(new object[] {
@@ -741,19 +743,19 @@ namespace WordMan_VSTO
             this.Btn_ReadDocumentStyle.Text = "读取文中样式";
             this.Btn_ReadDocumentStyle.UseVisualStyleBackColor = false;
             // 
-            // Btn_AddStyle
+            // 添加
             // 
-            this.Btn_AddStyle.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
-            this.Btn_AddStyle.Enabled = false;
-            this.Btn_AddStyle.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Btn_AddStyle.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
-            this.Btn_AddStyle.ForeColor = System.Drawing.Color.Black;
-            this.Btn_AddStyle.Location = new System.Drawing.Point(14, 334);
-            this.Btn_AddStyle.Name = "Btn_AddStyle";
-            this.Btn_AddStyle.Size = new System.Drawing.Size(72, 31);
-            this.Btn_AddStyle.TabIndex = 27;
-            this.Btn_AddStyle.Text = "添加样式";
-            this.Btn_AddStyle.UseVisualStyleBackColor = false;
+            this.添加.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.添加.Enabled = false;
+            this.添加.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.添加.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
+            this.添加.ForeColor = System.Drawing.Color.Black;
+            this.添加.Location = new System.Drawing.Point(68, 334);
+            this.添加.Name = "添加";
+            this.添加.Size = new System.Drawing.Size(50, 31);
+            this.添加.TabIndex = 27;
+            this.添加.Text = "添加";
+            this.添加.UseVisualStyleBackColor = false;
             // 
             // Lst_Styles
             // 
@@ -764,6 +766,20 @@ namespace WordMan_VSTO
             this.Lst_Styles.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.Lst_Styles.Size = new System.Drawing.Size(158, 276);
             this.Lst_Styles.TabIndex = 0;
+            // 
+            // 加载
+            // 
+            this.加载.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.加载.Enabled = false;
+            this.加载.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.加载.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
+            this.加载.ForeColor = System.Drawing.Color.Black;
+            this.加载.Location = new System.Drawing.Point(14, 334);
+            this.加载.Name = "加载";
+            this.加载.Size = new System.Drawing.Size(50, 31);
+            this.加载.TabIndex = 35;
+            this.加载.Text = "加载";
+            this.加载.UseVisualStyleBackColor = false;
             // 
             // StyleSettings
             // 
@@ -796,6 +812,6 @@ namespace WordMan_VSTO
         #endregion
 
         private StandardButton Btn_ReadDocumentStyle;
-        private StandardButton 关闭;
+        private StandardButton 加载;
     }
 }

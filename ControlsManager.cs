@@ -27,13 +27,39 @@ namespace WordMan_VSTO
     /// </summary>
     public static class UnitConverter
     {
+        #region 转换常量
+        /// <summary>
+        /// 厘米到磅的转换系数（1厘米 = 28.35磅）
+        /// </summary>
+        private static readonly double CentimetersToPointsRatio = 28.35;
+        
+        /// <summary>
+        /// 磅到厘米的转换系数
+        /// </summary>
+        private static readonly double PointsToCentimetersRatio = 1.0 / CentimetersToPointsRatio;
+        
+        /// <summary>
+        /// 字符到厘米的转换系数（1字符 ≈ 0.5厘米）
+        /// </summary>
+        private static readonly double CharactersToCentimetersRatio = 0.5;
+        
+        /// <summary>
+        /// 行到磅的转换系数（1行 ≈ 12磅）
+        /// </summary>
+        private static readonly double LinesToPointsRatio = 12.0;
+        #endregion
+
         /// <summary>
         /// 转换数值单位
         /// </summary>
-        public static double UnitConvert(double value, string fromUnit, string toUnit)
+        /// <param name="value">要转换的数值</param>
+        /// <param name="sourceUnit">源单位</param>
+        /// <param name="targetUnit">目标单位</param>
+        /// <returns>转换后的数值</returns>
+        public static double UnitConvert(double value, string sourceUnit, string targetUnit)
         {
             // 单位相同直接返回
-            if (fromUnit == toUnit)
+            if (string.Equals(sourceUnit, targetUnit, StringComparison.OrdinalIgnoreCase))
                 return value;
 
             var wordApp = Globals.ThisAddIn?.Application;
@@ -41,40 +67,42 @@ namespace WordMan_VSTO
             // 如果Word Application不可用，使用默认转换
             if (wordApp == null)
             {
-                return ConvertWithoutWordApp(value, fromUnit, toUnit);
+                return ConvertWithoutWordApp(value, sourceUnit, targetUnit);
             }
             
             // 第一步：将所有单位转换为中间单位（磅）
-            double valueInPoints = ConvertToPoints(value, fromUnit, wordApp);
+            double valueInPoints = ConvertToPoints(value, sourceUnit, wordApp);
             
             // 第二步：将中间单位（磅）转换为目标单位
-            return ConvertFromPoints(valueInPoints, toUnit, wordApp);
+            return ConvertFromPoints(valueInPoints, targetUnit, wordApp);
         }
 
         /// <summary>
         /// 不使用Word Application的简单单位转换（用于设计时）
         /// </summary>
-        private static double ConvertWithoutWordApp(double value, string fromUnit, string toUnit)
+        /// <param name="value">要转换的数值</param>
+        /// <param name="sourceUnit">源单位</param>
+        /// <param name="targetUnit">目标单位</param>
+        /// <returns>转换后的数值</returns>
+        private static double ConvertWithoutWordApp(double value, string sourceUnit, string targetUnit)
         {
             // 简化的转换逻辑，用于设计时
-            const double CM_TO_POINTS = 28.35; // 1厘米 = 28.35磅
-            const double POINTS_TO_CM = 1.0 / CM_TO_POINTS;
             
             // 转换为磅
             double valueInPoints;
-            switch (fromUnit)
+            switch (sourceUnit)
             {
                 case "磅":
                     valueInPoints = value;
                     break;
                 case "厘米":
-                    valueInPoints = value * CM_TO_POINTS;
+                    valueInPoints = value * CentimetersToPointsRatio;
                     break;
                 case "字符":
-                    valueInPoints = value * CM_TO_POINTS * 0.5; // 1字符 ≈ 0.5厘米
+                    valueInPoints = value * CentimetersToPointsRatio * CharactersToCentimetersRatio; // 1字符 ≈ 0.5厘米
                     break;
                 case "行":
-                    valueInPoints = value * 12; // 1行 ≈ 12磅
+                    valueInPoints = value * LinesToPointsRatio; // 1行 ≈ 12磅
                     break;
                 default:
                     valueInPoints = value;
@@ -82,22 +110,28 @@ namespace WordMan_VSTO
             }
             
             // 从磅转换
-            switch (toUnit)
+            switch (targetUnit)
             {
                 case "磅":
                     return valueInPoints;
                 case "厘米":
-                    return valueInPoints * POINTS_TO_CM;
+                    return valueInPoints * PointsToCentimetersRatio;
                 case "字符":
-                    return valueInPoints * POINTS_TO_CM * 2; // 1厘米 ≈ 2字符
+                    return valueInPoints * PointsToCentimetersRatio * 2; // 1厘米 ≈ 2字符
                 case "行":
-                    return valueInPoints / 12; // 1磅 ≈ 1/12行
+                    return valueInPoints / LinesToPointsRatio; // 1磅 ≈ 1/12行
                 default:
                     return valueInPoints;
             }
         }
 
+        /// <summary>
         /// 将各种单位转换为磅
+        /// </summary>
+        /// <param name="value">要转换的数值</param>
+        /// <param name="unit">源单位</param>
+        /// <param name="wordApp">Word应用程序实例</param>
+        /// <returns>转换后的磅值</returns>
         private static double ConvertToPoints(double value, string unit, Microsoft.Office.Interop.Word.Application wordApp)
         {
             switch (unit)
@@ -108,16 +142,22 @@ namespace WordMan_VSTO
                     return wordApp.CentimetersToPoints((float)value);
                 case "字符":
                     // 字符转换：1字符 ≈ 0.5厘米，1厘米 ≈ 28.35磅
-                    return wordApp.CentimetersToPoints((float)(value * 0.5));
+                    return wordApp.CentimetersToPoints((float)(value * CharactersToCentimetersRatio));
                 case "行":
                     // 行转换：1行 ≈ 12磅（标准行距）
-                    return value * 12;
+                    return value * LinesToPointsRatio;
                 default:
                     return value; // 默认返回原值
             }
         }
 
+        /// <summary>
         /// 将磅转换为各种单位
+        /// </summary>
+        /// <param name="valueInPoints">磅值</param>
+        /// <param name="unit">目标单位</param>
+        /// <param name="wordApp">Word应用程序实例</param>
+        /// <returns>转换后的数值</returns>
         private static double ConvertFromPoints(double valueInPoints, string unit, Microsoft.Office.Interop.Word.Application wordApp)
         {
             switch (unit)
@@ -131,7 +171,7 @@ namespace WordMan_VSTO
                     return wordApp.PointsToCentimeters((float)valueInPoints) * 2;
                 case "行":
                     // 行转换：1磅 ≈ 1/12行
-                    return valueInPoints / 12;
+                    return valueInPoints / LinesToPointsRatio;
                 default:
                     return valueInPoints; // 默认返回原值
             }
@@ -156,10 +196,20 @@ namespace WordMan_VSTO
             Small       // 小按钮（导入导出）
         }
 
+        /// <summary>
+        /// 初始化标准按钮
+        /// </summary>
         public StandardButton() : this(ButtonType.Secondary, "", null, null)
         {
         }
 
+        /// <summary>
+        /// 初始化标准按钮
+        /// </summary>
+        /// <param name="type">按钮类型</param>
+        /// <param name="text">按钮文本</param>
+        /// <param name="size">按钮大小</param>
+        /// <param name="location">按钮位置</param>
         public StandardButton(ButtonType type = ButtonType.Secondary, string text = "", Size? size = null, Point? location = null)
         {
             // 基础样式设置
@@ -178,6 +228,10 @@ namespace WordMan_VSTO
             SetButtonStyle(type);
         }
 
+        /// <summary>
+        /// 设置按钮样式
+        /// </summary>
+        /// <param name="type">按钮类型</param>
         private void SetButtonStyle(ButtonType type)
         {
             // 通用样式
@@ -218,11 +272,14 @@ namespace WordMan_VSTO
             get => _currentUnit;
             set
             {
-                _currentUnit = value;
-                if (_unitLabel != null)
+                if (!string.Equals(_currentUnit, value, StringComparison.OrdinalIgnoreCase))
                 {
-                    _unitLabel.Text = _currentUnit;
-                    UpdatePosition();
+                    _currentUnit = value;
+                    if (_unitLabel != null)
+                    {
+                        _unitLabel.Text = _currentUnit;
+                        UpdatePosition();
+                    }
                 }
             }
         }
@@ -232,7 +289,7 @@ namespace WordMan_VSTO
         /// </summary>
         public decimal GetValueInUnit(string targetUnit)
         {
-            if (string.IsNullOrEmpty(targetUnit) || targetUnit == _currentUnit)
+            if (string.IsNullOrEmpty(targetUnit) || string.Equals(targetUnit, _currentUnit, StringComparison.OrdinalIgnoreCase))
                 return Value;
             
             return (decimal)UnitConverter.UnitConvert((double)Value, _currentUnit, targetUnit);
@@ -243,7 +300,7 @@ namespace WordMan_VSTO
         /// </summary>
         public void SetValueInUnit(decimal value, string sourceUnit)
         {
-            if (string.IsNullOrEmpty(sourceUnit) || sourceUnit == _currentUnit)
+            if (string.IsNullOrEmpty(sourceUnit) || string.Equals(sourceUnit, _currentUnit, StringComparison.OrdinalIgnoreCase))
             {
                 Value = value;
                 return;
@@ -268,18 +325,29 @@ namespace WordMan_VSTO
             SetValueInUnit(value, "厘米");
         }
 
+        /// <summary>
+        /// 初始化标准数值输入框
+        /// </summary>
         public StandardNumericUpDown()
         {
             _currentUnit = "厘米";
             InitializeComponent();
         }
 
+        /// <summary>
+        /// 初始化标准数值输入框
+        /// </summary>
+        /// <param name="wordApp">Word应用程序实例</param>
+        /// <param name="unit">默认单位</param>
         public StandardNumericUpDown(Microsoft.Office.Interop.Word.Application wordApp = null, string unit = "厘米")
         {
             _currentUnit = unit;
             InitializeComponent();
         }
 
+        /// <summary>
+        /// 初始化组件
+        /// </summary>
         private void InitializeComponent()
         {
             // 设置输入框样式
@@ -320,23 +388,27 @@ namespace WordMan_VSTO
         {
             if (_unitLabel != null && this.Width > 0 && this.Height > 0)
             {
-                using (Graphics g = this.CreateGraphics())
+                using (Graphics graphics = this.CreateGraphics())
                 {
-                    SizeF textSize = g.MeasureString(_unitLabel.Text, _unitLabel.Font);
+                    SizeF unitLabelTextSize = graphics.MeasureString(_unitLabel.Text, _unitLabel.Font);
                     int rightMargin = 20; 
-                    int x = this.Width - (int)textSize.Width - rightMargin;
-                    int y = (this.Height - (int)textSize.Height) / 2;
+                    int labelX = this.Width - (int)unitLabelTextSize.Width - rightMargin;
+                    int labelY = (this.Height - (int)unitLabelTextSize.Height) / 2;
                     
                     // 确保标签在控件范围内
-                    x = Math.Max(0, Math.Min(x, this.Width - (int)textSize.Width));
-                    y = Math.Max(0, Math.Min(y, this.Height - (int)textSize.Height));
+                    labelX = Math.Max(0, Math.Min(labelX, this.Width - (int)unitLabelTextSize.Width));
+                    labelY = Math.Max(0, Math.Min(labelY, this.Height - (int)unitLabelTextSize.Height));
                     
-                    _unitLabel.Location = new Point(x, y);
+                    _unitLabel.Location = new Point(labelX, labelY);
                     _unitLabel.BringToFront(); // 确保标签在最前面
                 }
             }
         }
 
+        /// <summary>
+        /// 处理控件大小改变事件
+        /// </summary>
+        /// <param name="e">事件参数</param>
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
@@ -346,6 +418,8 @@ namespace WordMan_VSTO
         /// <summary>
         /// 单位标签点击事件 - 切换单位
         /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void UnitLabel_Click(object sender, EventArgs e)
         {
             // 获取当前单位在数组中的索引
@@ -367,6 +441,8 @@ namespace WordMan_VSTO
         /// <summary>
         /// 鼠标进入标签 - 高亮显示
         /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void UnitLabel_MouseEnter(object sender, EventArgs e)
         {
             if (_unitLabel != null)
@@ -379,6 +455,8 @@ namespace WordMan_VSTO
         /// <summary>
         /// 鼠标离开标签 - 恢复原色
         /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void UnitLabel_MouseLeave(object sender, EventArgs e)
         {
             if (_unitLabel != null)
@@ -389,11 +467,17 @@ namespace WordMan_VSTO
         }
 
         #region ISupportInitialize 实现
+        /// <summary>
+        /// 开始初始化
+        /// </summary>
         public void BeginInit()
         {
             // 设计器初始化开始
         }
 
+        /// <summary>
+        /// 结束初始化
+        /// </summary>
         public void EndInit()
         {
             // 设计器初始化结束，确保单位标签正确初始化
@@ -575,7 +659,7 @@ namespace WordMan_VSTO
             
             for (int i = 0; i < this.Items.Count; i++)
             {
-                if (this.Items[i].ToString() == text)
+                if (string.Equals(this.Items[i].ToString(), text, StringComparison.OrdinalIgnoreCase))
                 {
                     this.SelectedIndex = i;
                     return;
@@ -597,7 +681,7 @@ namespace WordMan_VSTO
         /// </summary>
         public void AddCustomItem(string item)
         {
-            if (!string.IsNullOrEmpty(item) && !this.Items.Contains(item))
+            if (!string.IsNullOrEmpty(item) && !ContainsItem(item))
             {
                 this.Items.Add(item);
             }
@@ -623,7 +707,16 @@ namespace WordMan_VSTO
         /// </summary>
         public bool ContainsItem(string item)
         {
-            return this.Items.Contains(item);
+            if (string.IsNullOrEmpty(item)) return false;
+            
+            foreach (var existingItem in this.Items)
+            {
+                if (string.Equals(existingItem.ToString(), item, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -642,37 +735,50 @@ namespace WordMan_VSTO
     [System.ComponentModel.DesignerCategory("")]
     public class ToggleButton : Button
     {
-        private bool pressed;
+        private bool isPressed;
 
+        /// <summary>
+        /// 获取或设置按钮是否被按下
+        /// </summary>
         public bool Pressed
         {
             get
             {
-                return pressed;
+                return isPressed;
             }
             set
             {
-                if (pressed != value)
+                if (isPressed != value)
                 {
-                    pressed = value;
-                    BackColor = (pressed ? Color.DarkGray : Color.AliceBlue);
+                    isPressed = value;
+                    BackColor = (isPressed ? Color.DarkGray : Color.AliceBlue);
                     OnPressedChanged(EventArgs.Empty);
                 }
             }
         }
 
+        /// <summary>
+        /// 按下状态改变事件
+        /// </summary>
         public event EventHandler PressedChanged;
 
+        /// <summary>
+        /// 初始化切换按钮
+        /// </summary>
         public ToggleButton()
         {
-            pressed = false;
+            isPressed = false;
             BackColor = Color.AliceBlue;
         }
 
+        /// <summary>
+        /// 处理点击事件
+        /// </summary>
+        /// <param name="e">事件参数</param>
         protected override void OnClick(EventArgs e)
         {
-            pressed = !pressed;
-            BackColor = (pressed ? Color.DarkGray : Color.AliceBlue);
+            isPressed = !isPressed;
+            BackColor = (isPressed ? Color.DarkGray : Color.AliceBlue);
             OnPressedChanged(EventArgs.Empty);
             base.OnClick(e);
         }
@@ -832,19 +938,29 @@ namespace WordMan_VSTO
         /// <summary>
         /// 创建对齐方式下拉框
         /// </summary>
+        /// <param name="name">控件名称</param>
+        /// <param name="location">位置</param>
+        /// <param name="defaultIndex">默认选中索引</param>
+        /// <param name="defaultText">默认选中文本</param>
+        /// <returns>标准下拉框</returns>
         public static StandardComboBox CreateAlignmentCombo(string name, Point location, int defaultIndex = 0, string defaultText = null)
         {
-            var alignmentItems = new string[] { "左对齐", "居中", "右对齐", "两端对齐" };
-            return CreateStandardCombo(name, location, alignmentItems, defaultIndex, defaultText);
+            var alignmentOptions = new string[] { "左对齐", "居中对齐", "右对齐", "两端对齐" };
+            return CreateStandardCombo(name, location, alignmentOptions, defaultIndex, defaultText);
         }
 
         /// <summary>
         /// 创建行间距下拉框
         /// </summary>
+        /// <param name="name">控件名称</param>
+        /// <param name="location">位置</param>
+        /// <param name="defaultIndex">默认选中索引</param>
+        /// <param name="defaultText">默认选中文本</param>
+        /// <returns>标准下拉框</returns>
         public static StandardComboBox CreateLineSpacingCombo(string name, Point location, int defaultIndex = 0, string defaultText = null)
         {
-            var lineSpacingItems = new string[] { "单倍行距", "1.5倍行距", "2倍行距", "最小值", "固定值", "多倍行距" };
-            return CreateStandardCombo(name, location, lineSpacingItems, defaultIndex, defaultText);
+            var lineSpacingOptions = new string[] { "单倍行距", "1.5倍行距", "2倍行距", "最小值", "固定值", "多倍行距" };
+            return CreateStandardCombo(name, location, lineSpacingOptions, defaultIndex, defaultText);
         }
 
         /// <summary>
@@ -881,43 +997,51 @@ namespace WordMan_VSTO
         /// <summary>
         /// 批量设置输入框的值（使用Word API转换）
         /// </summary>
+        /// <param name="container">控件容器</param>
+        /// <param name="level">级别</param>
+        /// <param name="numberIndent">编号缩进值</param>
+        /// <param name="textIndent">文本缩进值</param>
+        /// <param name="tabPosition">制表位位置</param>
         public static void SetInputValues(Control container, int level, decimal numberIndent, decimal textIndent, decimal tabPosition)
         {
-            var nudNumberIndent = container.Controls.Find("TxtBoxNumIndent" + level, true).FirstOrDefault() as StandardNumericUpDown;
-            var nudTextIndent = container.Controls.Find("TxtBoxTextIndent" + level, true).FirstOrDefault() as StandardNumericUpDown;
-            var nudTabPosition = container.Controls.Find("TxtBoxTabPosition" + level, true).FirstOrDefault() as StandardNumericUpDown;
+            var numberIndentControl = container.Controls.Find("TxtBoxNumIndent" + level, true).FirstOrDefault() as StandardNumericUpDown;
+            var textIndentControl = container.Controls.Find("TxtBoxTextIndent" + level, true).FirstOrDefault() as StandardNumericUpDown;
+            var tabPositionControl = container.Controls.Find("TxtBoxTabPosition" + level, true).FirstOrDefault() as StandardNumericUpDown;
 
-            if (nudNumberIndent != null) 
+            if (numberIndentControl != null) 
             {
                 // 直接设置Value，因为传入的已经是厘米值
-                nudNumberIndent.Value = numberIndent;
+                numberIndentControl.Value = numberIndent;
             }
-            if (nudTextIndent != null) 
+            if (textIndentControl != null) 
             {
                 // 直接设置Value，因为传入的已经是厘米值
-                nudTextIndent.Value = textIndent;
+                textIndentControl.Value = textIndent;
             }
-            if (nudTabPosition != null) 
+            if (tabPositionControl != null) 
             {
                 // 直接设置Value，因为传入的已经是厘米值
-                nudTabPosition.Value = tabPosition;
+                tabPositionControl.Value = tabPosition;
             }
         }
 
         /// <summary>
         /// 批量获取输入框的值（使用Word API转换）
         /// </summary>
+        /// <param name="container">控件容器</param>
+        /// <param name="level">级别</param>
+        /// <returns>输入框值结构体</returns>
         public static InputValues GetInputValues(Control container, int level)
         {
-            var nudNumberIndent = container.Controls.Find("TxtBoxNumIndent" + level, true).FirstOrDefault() as StandardNumericUpDown;
-            var nudTextIndent = container.Controls.Find("TxtBoxTextIndent" + level, true).FirstOrDefault() as StandardNumericUpDown;
-            var nudTabPosition = container.Controls.Find("TxtBoxTabPosition" + level, true).FirstOrDefault() as StandardNumericUpDown;
+            var numberIndentControl = container.Controls.Find("TxtBoxNumIndent" + level, true).FirstOrDefault() as StandardNumericUpDown;
+            var textIndentControl = container.Controls.Find("TxtBoxTextIndent" + level, true).FirstOrDefault() as StandardNumericUpDown;
+            var tabPositionControl = container.Controls.Find("TxtBoxTabPosition" + level, true).FirstOrDefault() as StandardNumericUpDown;
 
             return new InputValues
             {
-                NumberIndent = nudNumberIndent?.GetValueInCentimeters() ?? 0,
-                TextIndent = nudTextIndent?.GetValueInCentimeters() ?? 0,
-                TabPosition = nudTabPosition?.GetValueInCentimeters() ?? 0
+                NumberIndent = numberIndentControl?.GetValueInCentimeters() ?? 0,
+                TextIndent = textIndentControl?.GetValueInCentimeters() ?? 0,
+                TabPosition = tabPositionControl?.GetValueInCentimeters() ?? 0
             };
         }
 
@@ -966,9 +1090,10 @@ namespace WordMan_VSTO
         /// <summary>
         /// 获取对齐方式项目
         /// </summary>
+        /// <returns>对齐方式选项数组</returns>
         public static string[] GetAlignmentItems()
         {
-            return new string[] { "左对齐", "居中", "右对齐", "两端对齐" };
+            return new string[] { "左对齐", "居中对齐", "右对齐", "两端对齐" };
         }
 
         /// <summary>
@@ -986,14 +1111,16 @@ namespace WordMan_VSTO
         /// <summary>
         /// 批量设置标准下拉框的值
         /// </summary>
+        /// <param name="container">控件容器</param>
+        /// <param name="comboValues">下拉框值字典</param>
         public static void SetStandardComboBoxValues(Control container, Dictionary<string, string> comboValues)
         {
-            foreach (var kvp in comboValues)
+            foreach (var comboValuePair in comboValues)
             {
-                var combo = container.Controls.Find(kvp.Key, true).FirstOrDefault() as StandardComboBox;
+                var combo = container.Controls.Find(comboValuePair.Key, true).FirstOrDefault() as StandardComboBox;
                 if (combo != null)
                 {
-                    combo.SetSelectedItem(kvp.Value);
+                    combo.SetSelectedItem(comboValuePair.Value);
                 }
             }
         }
@@ -1059,11 +1186,13 @@ namespace WordMan_VSTO
         /// <summary>
         /// 批量设置下拉框的启用状态
         /// </summary>
+        /// <param name="container">控件容器</param>
+        /// <param name="enabledStates">启用状态字典</param>
         public static void SetComboBoxesEnabled(Control container, Dictionary<string, bool> enabledStates)
         {
-            foreach (var kvp in enabledStates)
+            foreach (var enabledStatePair in enabledStates)
             {
-                SetComboBoxEnabled(container, kvp.Key, kvp.Value);
+                SetComboBoxEnabled(container, enabledStatePair.Key, enabledStatePair.Value);
             }
         }
 
@@ -1074,14 +1203,16 @@ namespace WordMan_VSTO
         /// <summary>
         /// 批量设置标准文本框的值
         /// </summary>
+        /// <param name="container">控件容器</param>
+        /// <param name="textValues">文本框值字典</param>
         public static void SetStandardTextBoxValues(Control container, Dictionary<string, string> textValues)
         {
-            foreach (var kvp in textValues)
+            foreach (var textValuePair in textValues)
             {
-                var textBox = container.Controls.Find(kvp.Key, true).FirstOrDefault() as StandardTextBox;
+                var textBox = container.Controls.Find(textValuePair.Key, true).FirstOrDefault() as StandardTextBox;
                 if (textBox != null)
                 {
-                    textBox.Text = kvp.Value ?? string.Empty;
+                    textBox.Text = textValuePair.Value ?? string.Empty;
                 }
             }
         }
@@ -1147,11 +1278,13 @@ namespace WordMan_VSTO
         /// <summary>
         /// 批量设置文本框的启用状态
         /// </summary>
+        /// <param name="container">控件容器</param>
+        /// <param name="enabledStates">启用状态字典</param>
         public static void SetTextBoxesEnabled(Control container, Dictionary<string, bool> enabledStates)
         {
-            foreach (var kvp in enabledStates)
+            foreach (var enabledStatePair in enabledStates)
             {
-                SetTextBoxEnabled(container, kvp.Key, kvp.Value);
+                SetTextBoxEnabled(container, enabledStatePair.Key, enabledStatePair.Value);
             }
         }
 

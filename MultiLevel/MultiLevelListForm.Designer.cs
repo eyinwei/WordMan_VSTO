@@ -44,8 +44,6 @@ namespace WordMan_VSTO
             
             // 组框控件
             this.quickSettingsGroupBox = new System.Windows.Forms.GroupBox();
-            this.linkStyleGroupBox = new System.Windows.Forms.GroupBox();
-            this.progressiveIndentGroupBox = new System.Windows.Forms.GroupBox();
             
             // 按钮控件
             this.btnApplySettings = new WordMan_VSTO.StandardButton();
@@ -600,36 +598,6 @@ namespace WordMan_VSTO
             this.levelsContainer.Size = new System.Drawing.Size(960, 0);
             this.levelsContainer.TabIndex = 0;
             // 
-            // linkStyleGroupBox
-            // 
-            this.linkStyleGroupBox.BackColor = System.Drawing.Color.Transparent;
-            this.linkStyleGroupBox.Dock = System.Windows.Forms.DockStyle.Top;
-            this.linkStyleGroupBox.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.linkStyleGroupBox.Font = new System.Drawing.Font("微软雅黑", 10F, System.Drawing.FontStyle.Bold);
-            this.linkStyleGroupBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(73)))), ((int)(((byte)(80)))), ((int)(((byte)(87)))));
-            this.linkStyleGroupBox.Location = new System.Drawing.Point(0, 300);
-            this.linkStyleGroupBox.Name = "linkStyleGroupBox";
-            this.linkStyleGroupBox.Padding = new System.Windows.Forms.Padding(15);
-            this.linkStyleGroupBox.Size = new System.Drawing.Size(370, 100);
-            this.linkStyleGroupBox.TabIndex = 2;
-            this.linkStyleGroupBox.TabStop = false;
-            this.linkStyleGroupBox.Text = "3. 链接样式设置";
-            // 
-            // progressiveIndentGroupBox
-            // 
-            this.progressiveIndentGroupBox.BackColor = System.Drawing.Color.Transparent;
-            this.progressiveIndentGroupBox.Dock = System.Windows.Forms.DockStyle.Top;
-            this.progressiveIndentGroupBox.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.progressiveIndentGroupBox.Font = new System.Drawing.Font("微软雅黑", 10F, System.Drawing.FontStyle.Bold);
-            this.progressiveIndentGroupBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(73)))), ((int)(((byte)(80)))), ((int)(((byte)(87)))));
-            this.progressiveIndentGroupBox.Location = new System.Drawing.Point(0, 100);
-            this.progressiveIndentGroupBox.Name = "progressiveIndentGroupBox";
-            this.progressiveIndentGroupBox.Padding = new System.Windows.Forms.Padding(15);
-            this.progressiveIndentGroupBox.Size = new System.Drawing.Size(370, 100);
-            this.progressiveIndentGroupBox.TabIndex = 1;
-            this.progressiveIndentGroupBox.TabStop = false;
-            this.progressiveIndentGroupBox.Text = "2. 递进缩进设置";
-            // 
             // MultiLevelListForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
@@ -676,10 +644,8 @@ namespace WordMan_VSTO
         private System.Windows.Forms.Panel rightPanel;
         private StandardButton btnApplySettings;
         private System.Windows.Forms.Panel quickSettingsPanel;
-        private System.Windows.Forms.GroupBox linkStyleGroupBox;
         private System.Windows.Forms.CheckBox chkUnlinkTitles;
         private System.Windows.Forms.CheckBox chkLinkTitles;
-        private System.Windows.Forms.GroupBox progressiveIndentGroupBox;
         private System.Windows.Forms.CheckBox chkProgressiveIndent;
         private System.Windows.Forms.GroupBox quickSettingsGroupBox;
         private System.Windows.Forms.CheckBox chkTabPosition;

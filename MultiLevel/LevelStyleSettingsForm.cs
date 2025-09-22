@@ -141,8 +141,47 @@ namespace WordMan_VSTO.MultiLevel
         {
             if (control is StandardComboBox comboBox && comboBox.SelectedIndex != -1) return;
             
-            var text = control.Text.TrimEnd(' ', '磅', '厘', '米', '行');
-            if (float.TryParse(text, out float value))
+            var text = control.Text.Trim();
+            
+            // 处理行距的特殊情况
+            if (control.Name == "Cmb_LineSpacing")
+            {
+                // 如果已经是有效的行距格式，不进行修改
+                if (IsValidLineSpacing(text))
+                {
+                    return;
+                }
+                
+                // 尝试解析倍行距格式
+                if (text.EndsWith("倍行距"))
+                {
+                    var valueText = text.Replace("倍行距", "").Trim();
+                    if (float.TryParse(valueText, out float multipleValue))
+                    {
+                        control.Text = $"{multipleValue:0.0} 倍行距";
+                        return;
+                    }
+                }
+                
+                // 尝试解析磅格式
+                if (text.EndsWith("磅"))
+                {
+                    var valueText = text.Replace("磅", "").Trim();
+                    if (float.TryParse(valueText, out float pointValue))
+                    {
+                        control.Text = $"{pointValue:0.0} 磅";
+                        return;
+                    }
+                }
+                
+                // 默认设置为单倍行距
+                control.Text = "单倍行距";
+                return;
+            }
+            
+            // 其他控件的处理
+            var cleanText = text.TrimEnd(' ', '磅', '厘', '米', '行');
+            if (float.TryParse(cleanText, out float value))
             {
                 control.Text = $"{value:0.0} {unit}";
             }
@@ -152,6 +191,39 @@ namespace WordMan_VSTO.MultiLevel
                 if (control is StandardComboBox cb) cb.SelectedIndex = 0;
                 else control.Text = $"0.0 {unit}";
             }
+        }
+        
+        /// <summary>
+        /// 检查是否为有效的行距格式
+        /// </summary>
+        private bool IsValidLineSpacing(string text)
+        {
+            var validFormats = new[]
+            {
+                "单倍行距", "1.5倍行距", "双倍行距", "多倍行距"
+            };
+            
+            // 检查预定义格式
+            if (validFormats.Contains(text))
+            {
+                return true;
+            }
+            
+            // 检查自定义倍行距格式 (如 "2.2 倍行距")
+            if (text.EndsWith("倍行距"))
+            {
+                var valueText = text.Replace("倍行距", "").Trim();
+                return float.TryParse(valueText, out float value) && value > 0;
+            }
+            
+            // 检查磅格式 (如 "12.0 磅")
+            if (text.EndsWith("磅"))
+            {
+                var valueText = text.Replace("磅", "").Trim();
+                return float.TryParse(valueText, out float value) && value > 0;
+            }
+            
+            return false;
         }
 
         /// <summary>
@@ -164,7 +236,17 @@ namespace WordMan_VSTO.MultiLevel
             if (control is StandardTextBox textBox)
                 return textBox.Text;
             if (control is StandardNumericUpDown numericUpDown)
-                return $"{numericUpDown.GetValueInCentimeters():0.0} 厘米";
+            {
+                // 根据控件名称确定单位
+                if (control.Name == "Txt_LeftIndent" || control.Name == "Txt_RightIndent")
+                {
+                    return $"{numericUpDown.GetValueInUnit("字符"):0.0} 字符";
+                }
+                else
+                {
+                    return $"{numericUpDown.GetValueInCentimeters():0.0} 厘米";
+                }
+            }
             if (control is ToggleButton toggleButton)
                 return toggleButton.Pressed;
             if (control is Button button && button.Name == "Btn_FontColor")
@@ -188,7 +270,11 @@ namespace WordMan_VSTO.MultiLevel
             if (decimal.TryParse(cleanText, out decimal value))
             {
                 // 根据单位设置值
-                if (indentText.Contains("厘米"))
+                if (indentText.Contains("字符"))
+                {
+                    numericUpDown.SetValueInUnit(value, "字符");
+                }
+                else if (indentText.Contains("厘米"))
                 {
                     numericUpDown.SetValueInCentimeters(value);
                 }
@@ -196,18 +282,14 @@ namespace WordMan_VSTO.MultiLevel
                 {
                     numericUpDown.SetValueInUnit(value, "磅");
                 }
-                else if (indentText.Contains("字符"))
-                {
-                    numericUpDown.SetValueInUnit(value, "字符");
-                }
                 else if (indentText.Contains("行"))
                 {
                     numericUpDown.SetValueInUnit(value, "行");
                 }
                 else
                 {
-                    // 默认按厘米处理
-                    numericUpDown.SetValueInCentimeters(value);
+                    // 默认按字符处理（左缩进右缩进）
+                    numericUpDown.SetValueInUnit(value, "字符");
                 }
             }
             else
@@ -410,6 +492,12 @@ namespace WordMan_VSTO.MultiLevel
             Dta_StyleList.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             Dta_StyleList.AutoGenerateColumns = false;
             
+            // 设置默认单元格样式为居中
+            var centerAlignment = new DataGridViewCellStyle
+            {
+                Alignment = DataGridViewContentAlignment.MiddleCenter
+            };
+            
             // 添加列
             Dta_StyleList.Columns.AddRange(new DataGridViewColumn[]
             {
@@ -420,28 +508,32 @@ namespace WordMan_VSTO.MultiLevel
                     Frozen = true,
                     HeaderText = "样式名",
                     ReadOnly = true,
-                    Width = 80
+                    Width = 80,
+                    DefaultCellStyle = centerAlignment
                 },
                 new DataGridViewTextBoxColumn
                 {
                     Name = "Col_ChnFontName",
                     DataPropertyName = "ChnFontName",
                     HeaderText = "中文字体",
-                    Width = 90
+                    Width = 90,
+                    DefaultCellStyle = centerAlignment
                 },
                 new DataGridViewTextBoxColumn
                 {
                     Name = "Col_EngFontName",
                     DataPropertyName = "EngFontName",
                     HeaderText = "西文字体",
-                    Width = 90
+                    Width = 90,
+                    DefaultCellStyle = centerAlignment
                 },
                 new DataGridViewTextBoxColumn
                 {
                     Name = "Col_FontSize",
                     DataPropertyName = "FontSize",
                     HeaderText = "字体大小",
-                    Width = 90
+                    Width = 90,
+                    DefaultCellStyle = centerAlignment
                 },
                 new DataGridViewImageColumn
                 {
@@ -449,7 +541,8 @@ namespace WordMan_VSTO.MultiLevel
                     DataPropertyName = "FontColor",
                     HeaderText = "颜色",
                     ImageLayout = DataGridViewImageCellLayout.Normal,
-                    Width = 50
+                    Width = 50,
+                    DefaultCellStyle = centerAlignment
                 },
                 new DataGridViewCheckBoxColumn
                 {
@@ -458,7 +551,8 @@ namespace WordMan_VSTO.MultiLevel
                     HeaderText = "粗体",
                     FalseValue = false,
                     TrueValue = true,
-                    Width = 50
+                    Width = 50,
+                    DefaultCellStyle = centerAlignment
                 },
                 new DataGridViewCheckBoxColumn
                 {
@@ -467,7 +561,8 @@ namespace WordMan_VSTO.MultiLevel
                     HeaderText = "斜体",
                     FalseValue = false,
                     TrueValue = true,
-                    Width = 50
+                    Width = 50,
+                    DefaultCellStyle = centerAlignment
                 },
                 new DataGridViewCheckBoxColumn
                 {
@@ -476,49 +571,56 @@ namespace WordMan_VSTO.MultiLevel
                     HeaderText = "下划线",
                     FalseValue = false,
                     TrueValue = true,
-                    Width = 60
+                    Width = 60,
+                    DefaultCellStyle = centerAlignment
                 },
                 new DataGridViewTextBoxColumn
                 {
                     Name = "Col_LeftIndent",
                     DataPropertyName = "LeftIndent",
                     HeaderText = "左缩进",
-                    Width = 80
+                    Width = 80,
+                    DefaultCellStyle = centerAlignment
                 },
                 new DataGridViewTextBoxColumn
                 {
                     Name = "Col_RightIndent",
                     DataPropertyName = "RightIndent",
                     HeaderText = "右缩进",
-                    Width = 80
+                    Width = 80,
+                    DefaultCellStyle = centerAlignment
                 },
                 new DataGridViewTextBoxColumn
                 {
                     Name = "Col_LineSpace",
                     DataPropertyName = "LineSpace",
                     HeaderText = "行距",
-                    Width = 80
+                    Width = 80,
+                    DefaultCellStyle = centerAlignment
                 },
                 new DataGridViewTextBoxColumn
                 {
                     Name = "Col_SpaceBefore",
                     DataPropertyName = "SpaceBefore",
-                    HeaderText = "段前行距",
-                    Width = 100
+                    HeaderText = "段前间距",
+                    Width = 100,
+                    DefaultCellStyle = centerAlignment
                 },
                 new DataGridViewTextBoxColumn
                 {
                     Name = "Col_SpaceAfter",
                     DataPropertyName = "SpaceAfter",
-                    HeaderText = "段后行距",
-                    Width = 100
+                    HeaderText = "段后间距",
+                    Width = 100,
+                    DefaultCellStyle = centerAlignment
                 },
                 new DataGridViewTextBoxColumn
                 {
                     Name = "Col_HAlignment",
                     DataPropertyName = "HAlignment",
                     HeaderText = "水平对齐",
-                    Width = 100
+                    Width = 100,
+                    DefaultCellStyle = centerAlignment
                 },
                 new DataGridViewCheckBoxColumn
                 {
@@ -527,7 +629,8 @@ namespace WordMan_VSTO.MultiLevel
                     HeaderText = "段前分页",
                     FalseValue = false,
                     TrueValue = true,
-                    Width = 50
+                    Width = 50,
+                    DefaultCellStyle = centerAlignment
                 }
             });
             

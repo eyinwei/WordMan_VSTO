@@ -73,7 +73,8 @@
             this.高度刷 = this.Factory.CreateRibbonToggleButton();
             this.位图化 = this.Factory.CreateRibbonButton();
             this.全文处理 = this.Factory.CreateRibbonGroup();
-            this.TypesettingButton = this.Factory.CreateRibbonButton();
+            this.排版工具 = this.Factory.CreateRibbonButton();
+            this.多级列表 = this.Factory.CreateRibbonButton();
             this.separator5 = this.Factory.CreateRibbonSeparator();
             this.域名高亮 = this.Factory.CreateRibbonButton();
             this.取消高亮 = this.Factory.CreateRibbonButton();
@@ -277,7 +278,7 @@
             this.表格编号.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
             this.表格编号.Label = "表格编号";
             this.表格编号.Name = "表格编号";
-            this.表格编号.OfficeImageId = "AdpDiagramNameOnly";
+            this.表格编号.OfficeImageId = "TableDesign";
             this.表格编号.ScreenTip = "所在表格上方插入表题";
             this.表格编号.ShowImage = true;
             this.表格编号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.表格编号_Click);
@@ -434,7 +435,8 @@
             // 
             // 全文处理
             // 
-            this.全文处理.Items.Add(this.TypesettingButton);
+            this.全文处理.Items.Add(this.排版工具);
+            this.全文处理.Items.Add(this.多级列表);
             this.全文处理.Items.Add(this.separator5);
             this.全文处理.Items.Add(this.域名高亮);
             this.全文处理.Items.Add(this.取消高亮);
@@ -448,14 +450,23 @@
             this.全文处理.Label = "全文处理";
             this.全文处理.Name = "全文处理";
             // 
-            // TypesettingButton
+            // 排版工具
             // 
-            this.TypesettingButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.TypesettingButton.Label = "排版工具";
-            this.TypesettingButton.Name = "TypesettingButton";
-            this.TypesettingButton.OfficeImageId = "HappyFace";
-            this.TypesettingButton.ShowImage = true;
-            this.TypesettingButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.TypesettingButton_Click);
+            this.排版工具.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.排版工具.Label = "排版工具";
+            this.排版工具.Name = "排版工具";
+            this.排版工具.OfficeImageId = "HappyFace";
+            this.排版工具.ShowImage = true;
+            this.排版工具.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.TypesettingButton_Click);
+            // 
+            // 多级列表
+            // 
+            this.多级列表.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.多级列表.Label = "多级列表";
+            this.多级列表.Name = "多级列表";
+            this.多级列表.OfficeImageId = "Numbering";
+            this.多级列表.ShowImage = true;
+            this.多级列表.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.多级列表_Click);
             // 
             // separator5
             // 
@@ -611,7 +622,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 宽度刷;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 高度刷;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 创建三线表;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton TypesettingButton;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 排版工具;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 位图化;
         internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator5;
         internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator6;
@@ -621,6 +632,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 公开;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 内部;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 移除密级;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 多级列表;
     }
 
     partial class ThisRibbonCollection

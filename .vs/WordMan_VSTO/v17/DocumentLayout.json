@@ -3,16 +3,8 @@
   "WorkspaceRootPath": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|d:\\users\\yw\\documents\\vsto develop\\wordman_vsto\\stylesetting\\stylesettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|solutionrelative:stylesetting\\stylesettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\multilevel\\levelstylesettingsform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|d:\\users\\yw\\documents\\vsto develop\\wordman_vsto\\multilevel\\levelstylesettingsform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|solutionrelative:multilevel\\levelstylesettingsform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\multilevel\\multilevellistform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|solutionrelative:multilevel\\multilevellistform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,40 +14,18 @@
       "DocumentGroups": [
         {
           "DockedHeight": 297,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "MultiLevelListForm.cs [\u8BBE\u8BA1]",
-              "DocumentMoniker": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\MultiLevel\\MultiLevelListForm.cs",
-              "RelativeDocumentMoniker": "MultiLevel\\MultiLevelListForm.cs",
-              "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\MultiLevel\\MultiLevelListForm.cs [\u8BBE\u8BA1]",
-              "RelativeToolTip": "MultiLevel\\MultiLevelListForm.cs [\u8BBE\u8BA1]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-22T04:04:47.222Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "LevelStyleSettingsForm.cs [\u8BBE\u8BA1]",
               "DocumentMoniker": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\MultiLevel\\LevelStyleSettingsForm.cs",
               "RelativeDocumentMoniker": "MultiLevel\\LevelStyleSettingsForm.cs",
               "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\MultiLevel\\LevelStyleSettingsForm.cs [\u8BBE\u8BA1]",
               "RelativeToolTip": "MultiLevel\\LevelStyleSettingsForm.cs [\u8BBE\u8BA1]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-22T04:04:45.139Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "StyleSettings.cs [\u8BBE\u8BA1]",
-              "DocumentMoniker": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\StyleSetting\\StyleSettings.cs",
-              "RelativeDocumentMoniker": "StyleSetting\\StyleSettings.cs",
-              "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\StyleSetting\\StyleSettings.cs [\u8BBE\u8BA1]",
-              "RelativeToolTip": "StyleSetting\\StyleSettings.cs [\u8BBE\u8BA1]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-22T04:03:55.709Z",
+              "WhenOpened": "2025-09-22T13:39:01.374Z",
               "EditorCaption": " [\u8BBE\u8BA1]"
             }
           ]

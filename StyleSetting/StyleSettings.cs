@@ -363,6 +363,9 @@ namespace WordMan_VSTO
             // 初始状态：隐藏首行缩进输入框
             UpdateFirstLineIndentVisibility();
             
+            // 根据选择的标题级别过滤样式
+            FilterStylesByLevel();
+            
             // 启用字体设置和段落设置面板
             Pal_Font.Enabled = true;
             Pal_ParaIndent.Enabled = true;
@@ -373,12 +376,12 @@ namespace WordMan_VSTO
             Styles.Clear();
             Styles.AddRange(new CustomStyle[]
             {
-                new CustomStyle(name: "正文", fontName: null, fontSize: 0f, bold: false, italic: false, underline: false, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false),
-                new CustomStyle(name: "标题 1", fontName: null, fontSize: 14f, bold: true, italic: false, underline: false, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false),
-                new CustomStyle(name: "标题 2", fontName: null, fontSize: 12f, bold: true, italic: false, underline: false, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false),
-                new CustomStyle(name: "标题 3", fontName: null, fontSize: 0f, bold: false, italic: false, underline: false, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false),
-                new CustomStyle(name: "题注", fontName: null, fontSize: 0f, bold: false, italic: false, underline: false, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false),
-                new CustomStyle(name: "表内文字", fontName: null, fontSize: 0f, bold: false, italic: false, underline: false, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false)
+                new CustomStyle(name: "正文", fontName: null, fontSize: 0f, bold: false, italic: false, underline: false, fontColor: Color.Black, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false),
+                new CustomStyle(name: "标题 1", fontName: null, fontSize: 14f, bold: true, italic: false, underline: false, fontColor: Color.Black, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false),
+                new CustomStyle(name: "标题 2", fontName: null, fontSize: 12f, bold: true, italic: false, underline: false, fontColor: Color.Black, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false),
+                new CustomStyle(name: "标题 3", fontName: null, fontSize: 0f, bold: false, italic: false, underline: false, fontColor: Color.Black, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false),
+                new CustomStyle(name: "题注", fontName: null, fontSize: 0f, bold: false, italic: false, underline: false, fontColor: Color.Black, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false),
+                new CustomStyle(name: "表内文字", fontName: null, fontSize: 0f, bold: false, italic: false, underline: false, fontColor: Color.Black, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 0f, firstLineIndentByChar: 0, lineSpacing: 0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false)
             });
 
             foreach (CustomStyle style in Styles)
@@ -398,6 +401,8 @@ namespace WordMan_VSTO
             Cmb_FontSize.SelectedIndexChanged += StyleFontChanged;
             Cmb_ParaAligment.SelectedIndexChanged += StyleFontChanged;
             Cmb_LineSpacing.SelectedIndexChanged += IndentSpacingChanged;
+            Cmb_LineSpacing.TextChanged += Cmb_LineSpacing_TextChanged;
+            Cmb_LineSpacing.Validated += Cmb_LineSpacing_Validated;
             Nud_LeftIndent.ValueChanged += IndentSpacingChanged;
             Nud_FirstLineIndent.ValueChanged += IndentSpacingChanged;
             Nud_FirstLineIndentByChar.ValueChanged += IndentSpacingChanged;
@@ -407,12 +412,15 @@ namespace WordMan_VSTO
             Btn_Bold.PressedChanged += FontStyleChanged;
             Btn_Italic.PressedChanged += FontStyleChanged;
             Btn_UnderLine.PressedChanged += FontStyleChanged;
+            Btn_FontColor.Click += Btn_FontColor_Click;
             // Chk_BeforeBreak.CheckedChanged += FontStyleChanged; // Chk_BeforeBreak控件已移除
             Cmb_SetLevel.SelectedIndexChanged += Cmb_SetLevel_SelectedIndexChanged;
-            Btn_AddStyle.Click += Btn_AddStyle_Click;
-            Btn_DelStyle.Click += Btn_DelStyle_Click;
+            添加.Click += 添加_Click;
+            删除.Click += 删除_Click;
             Btn_ApplySet.Click += Btn_ApplySet_Click;
             Btn_ReadDocumentStyle.Click += Btn_ReadDocumentStyle_Click;
+            this.关闭.Click += 关闭_Click;
+            this.加载.Click += 加载_Click;
         }
 
         #endregion
@@ -462,9 +470,59 @@ namespace WordMan_VSTO
         private void Cmb_SetLevel_SelectedIndexChanged(object sender, EventArgs e)
         {
             // 处理标题级别变化
+            FilterStylesByLevel();
         }
 
-        private void Btn_AddStyle_Click(object sender, EventArgs e)
+        /// <summary>
+        /// 根据选择的标题级别过滤样式列表
+        /// </summary>
+        private void FilterStylesByLevel()
+        {
+            if (Cmb_SetLevel.SelectedIndex < 0) return;
+
+            int selectedLevel = Cmb_SetLevel.SelectedIndex; // 0=无, 1=1级, 2=2级, ...
+            
+            // 清空当前样式列表
+            StyleNames.Clear();
+            
+            foreach (var style in Styles)
+            {
+                bool shouldShow = false;
+                
+                if (selectedLevel == 0) // 显示所有样式
+                {
+                    shouldShow = true;
+                }
+                else if (style.Name.StartsWith("标题"))
+                {
+                    // 提取标题级别
+                    if (style.Name == "标题 1" && selectedLevel == 1) shouldShow = true;
+                    else if (style.Name == "标题 2" && selectedLevel == 2) shouldShow = true;
+                    else if (style.Name == "标题 3" && selectedLevel == 3) shouldShow = true;
+                    else if (style.Name == "标题 4" && selectedLevel == 4) shouldShow = true;
+                    else if (style.Name == "标题 5" && selectedLevel == 5) shouldShow = true;
+                    else if (style.Name == "标题 6" && selectedLevel == 6) shouldShow = true;
+                    else if (style.Name == "标题 7" && selectedLevel == 7) shouldShow = true;
+                    else if (style.Name == "标题 8" && selectedLevel == 8) shouldShow = true;
+                    else if (style.Name == "标题 9" && selectedLevel == 9) shouldShow = true;
+                }
+                else if (selectedLevel <= 3) // 对于1-3级，也显示正文和其他样式
+                {
+                    shouldShow = true;
+                }
+                
+                if (shouldShow)
+                {
+                    StyleNames.Add(style.Name);
+                }
+            }
+            
+            // 刷新列表显示
+            Lst_Styles.DataSource = null;
+            Lst_Styles.DataSource = StyleNames;
+        }
+
+        private void 添加_Click(object sender, EventArgs e)
         {
             string styleName = Txt_AddStyleName.Text.Trim();
             if (string.IsNullOrEmpty(styleName))
@@ -486,7 +544,7 @@ namespace WordMan_VSTO
             Lst_Styles.SelectedItem = styleName;
         }
 
-        private void Btn_DelStyle_Click(object sender, EventArgs e)
+        private void 删除_Click(object sender, EventArgs e)
         {
             if (Lst_Styles.SelectedIndex >= 0)
             {
@@ -527,6 +585,34 @@ namespace WordMan_VSTO
             }
         }
 
+        private void 关闭_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void 加载_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                ReadDocumentStyles();
+                MessageBox.Show("文档样式加载完成", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"加载文档样式时出错：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void Cmb_LineSpacing_TextChanged(object sender, EventArgs e)
+        {
+            UpdateCurrentStyle();
+        }
+
+        private void Cmb_LineSpacing_Validated(object sender, EventArgs e)
+        {
+            ValidateAndFormatText(Cmb_LineSpacing, "磅");
+        }
+
         #endregion
 
         #region 辅助方法
@@ -549,6 +635,7 @@ namespace WordMan_VSTO
             Btn_Bold.Pressed = style.Bold;
             Btn_Italic.Pressed = style.Italic;
             Btn_UnderLine.Pressed = style.Underline;
+            Btn_FontColor.BackColor = style.FontColor;
 
             if (style.ParaAlignment >= 0)
             {
@@ -598,6 +685,7 @@ namespace WordMan_VSTO
             style.Bold = Btn_Bold.Pressed;
             style.Italic = Btn_Italic.Pressed;
             style.Underline = Btn_UnderLine.Pressed;
+            style.FontColor = Btn_FontColor.BackColor;
             style.ParaAlignment = Cmb_ParaAligment.SelectedIndex;
             style.LeftIndent = (float)Nud_LeftIndent.Value;
             style.RightIndent = (float)Nud_RightIndent.Value;
@@ -605,10 +693,26 @@ namespace WordMan_VSTO
             style.FirstLineIndentByChar = (int)Nud_FirstLineIndentByChar.Value;
             
             // 处理行距设置
-            if (Cmb_LineSpacing.SelectedIndex >= 0)
+            if (!string.IsNullOrEmpty(Cmb_LineSpacing.Text))
             {
-                string lineSpacingText = Cmb_LineSpacing.SelectedItem?.ToString();
-                style.LineSpacing = MultiLevelDataManager.ConvertFontSize(lineSpacingText);
+                string lineSpacingText = Cmb_LineSpacing.Text;
+                // 如果文本包含"倍"或"行"，使用MultiLevelDataManager转换
+                if (lineSpacingText.Contains("倍") || lineSpacingText.Contains("行"))
+                {
+                    style.LineSpacing = MultiLevelDataManager.ConvertFontSize(lineSpacingText);
+                }
+                else
+                {
+                    // 直接解析数值（默认磅为单位）
+                    if (float.TryParse(lineSpacingText.Replace("磅", ""), out float value))
+                    {
+                        style.LineSpacing = value;
+                    }
+                    else
+                    {
+                        style.LineSpacing = (float)Nud_LineSpacing.Value;
+                    }
+                }
             }
             else
             {
@@ -627,10 +731,22 @@ namespace WordMan_VSTO
             
             // 处理行距设置
             float lineSpacing = (float)Nud_LineSpacing.Value;
-            if (Cmb_LineSpacing.SelectedIndex >= 0)
+            if (!string.IsNullOrEmpty(Cmb_LineSpacing.Text))
             {
-                string lineSpacingText = Cmb_LineSpacing.SelectedItem?.ToString();
-                lineSpacing = MultiLevelDataManager.ConvertFontSize(lineSpacingText);
+                string lineSpacingText = Cmb_LineSpacing.Text;
+                // 如果文本包含"倍"或"行"，使用MultiLevelDataManager转换
+                if (lineSpacingText.Contains("倍") || lineSpacingText.Contains("行"))
+                {
+                    lineSpacing = MultiLevelDataManager.ConvertFontSize(lineSpacingText);
+                }
+                else
+                {
+                    // 直接解析数值（默认磅为单位）
+                    if (float.TryParse(lineSpacingText.Replace("磅", ""), out float value))
+                    {
+                        lineSpacing = value;
+                    }
+                }
             }
             
             return new CustomStyle(
@@ -640,6 +756,7 @@ namespace WordMan_VSTO
                 bold: Btn_Bold.Pressed,
                 italic: Btn_Italic.Pressed,
                 underline: Btn_UnderLine.Pressed,
+                fontColor: Btn_FontColor.BackColor,
                 paraAlignment: Cmb_ParaAligment.SelectedIndex,
                 leftIndent: (float)Nud_LeftIndent.Value,
                 rightIndent: (float)Nud_RightIndent.Value,
@@ -713,18 +830,57 @@ namespace WordMan_VSTO
         }
 
         private void ReadDocumentStyles()
-            {
-                var app = Globals.ThisAddIn.Application;
-                var doc = app.ActiveDocument;
+        {
+            var app = Globals.ThisAddIn.Application;
+            var doc = app.ActiveDocument;
+
+            // 清空现有样式列表
+            Styles.Clear();
+            StyleNames.Clear();
 
             // 读取文档中的样式
             foreach (Word.Style wordStyle in doc.Styles)
             {
                 if (wordStyle.Type == WdStyleType.wdStyleTypeParagraph)
                 {
-                    // 读取样式属性并更新到列表中
+                    try
+                    {
+                        // 创建自定义样式对象
+                        var customStyle = new CustomStyle(
+                            name: wordStyle.NameLocal,
+                            fontName: wordStyle.Font.Name,
+                            fontSize: wordStyle.Font.Size,
+                            bold: wordStyle.Font.Bold == (int)WdConstants.wdToggle,
+                            italic: wordStyle.Font.Italic == (int)WdConstants.wdToggle,
+                            underline: wordStyle.Font.Underline != WdUnderline.wdUnderlineNone,
+                            fontColor: ColorTranslator.FromOle((int)wordStyle.Font.Color),
+                            paraAlignment: (int)wordStyle.ParagraphFormat.Alignment,
+                            leftIndent: (float)app.PointsToCentimeters(wordStyle.ParagraphFormat.LeftIndent),
+                            rightIndent: (float)app.PointsToCentimeters(wordStyle.ParagraphFormat.RightIndent),
+                            firstLineIndent: (float)app.PointsToCentimeters(wordStyle.ParagraphFormat.FirstLineIndent),
+                            firstLineIndentByChar: 0, // Word API不直接提供字符单位
+                            lineSpacing: wordStyle.ParagraphFormat.LineSpacing,
+                            beforeSpacing: (float)app.PointsToCentimeters(wordStyle.ParagraphFormat.SpaceBefore),
+                            beforeBreak: wordStyle.ParagraphFormat.PageBreakBefore != 0,
+                            afterSpacing: (float)app.PointsToCentimeters(wordStyle.ParagraphFormat.SpaceAfter),
+                            numberStyle: 0,
+                            numberFormat: null,
+                            userDefined: !wordStyle.BuiltIn
+                        );
+
+                        Styles.Add(customStyle);
+                        StyleNames.Add(customStyle.Name);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"读取样式 {wordStyle.NameLocal} 时出错：{ex.Message}");
+                    }
                 }
             }
+
+            // 刷新样式列表显示
+            Lst_Styles.DataSource = null;
+            Lst_Styles.DataSource = StyleNames;
         }
 
         #endregion
@@ -743,13 +899,26 @@ namespace WordMan_VSTO
             {
                 Color = Btn_FontColor.BackColor,
                 AnyColor = true,
-                SolidColorOnly = true
+                SolidColorOnly = true,
+                AllowFullOpen = true,
+                FullOpen = true
             };
 
             if (colorDialog.ShowDialog(this) == DialogResult.OK)
             {
                 Btn_FontColor.BackColor = colorDialog.Color;
-                UpdateCurrentStyle();
+                
+                // 立即更新当前选中的样式
+                if (Lst_Styles.SelectedIndex >= 0)
+                {
+                    string selectedStyle = Lst_Styles.SelectedItem.ToString();
+                    var style = Styles.FirstOrDefault(s => s.Name == selectedStyle);
+                    if (style != null)
+                    {
+                        style.FontColor = colorDialog.Color;
+                        UpdateCurrentStyle();
+                    }
+                }
             }
         }
     }
@@ -767,6 +936,7 @@ namespace WordMan_VSTO
         public bool Bold { get; set; }
         public bool Italic { get; set; }
         public bool Underline { get; set; }
+        public Color FontColor { get; set; }
         public int ParaAlignment { get; set; }
         public float LeftIndent { get; set; }
         public float RightIndent { get; set; }
@@ -780,7 +950,7 @@ namespace WordMan_VSTO
         public string NumberFormat { get; set; }
         public bool UserDefined { get; set; }
 
-        public CustomStyle(string name, string fontName, float fontSize, bool bold, bool italic, bool underline,
+        public CustomStyle(string name, string fontName, float fontSize, bool bold, bool italic, bool underline, Color fontColor,
             int paraAlignment, float leftIndent, float rightIndent, float firstLineIndent, int firstLineIndentByChar, float lineSpacing,
             float beforeSpacing, bool beforeBreak, float afterSpacing, int numberStyle, string numberFormat, bool userDefined)
         {
@@ -790,6 +960,7 @@ namespace WordMan_VSTO
             Bold = bold;
             Italic = italic;
             Underline = underline;
+            FontColor = fontColor;
             ParaAlignment = paraAlignment;
             LeftIndent = leftIndent;
             RightIndent = rightIndent;

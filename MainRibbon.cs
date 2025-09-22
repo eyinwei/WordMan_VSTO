@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Word = Microsoft.Office.Interop.Word;
 using WordMan_VSTO.SplitAndMerge;
+using WordMan_VSTO.MultiLevel;
 
 namespace WordMan_VSTO
 {
@@ -1705,6 +1706,20 @@ namespace WordMan_VSTO
             catch (Exception ex)
             {
                 MessageBox.Show($"文档拆分失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // 多级列表按钮点击事件
+        private void 多级列表_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var multiLevelForm = new MultiLevelListForm();
+                multiLevelForm.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"打开多级列表设置失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

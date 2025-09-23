@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Word = Microsoft.Office.Interop.Word;
 
@@ -16,8 +15,6 @@ namespace WordMan_VSTO
     public class DocumentSplitter
     {
         private readonly Word.Application _wordApplication;
-        private bool _isProcessing = false;
-        private volatile bool _isCancelled = false;
 
         /// <summary>
         /// 初始化文档拆分器
@@ -33,60 +30,40 @@ namespace WordMan_VSTO
         /// </summary>
         public void ShowSplitDialog()
         {
-            if (_isProcessing)
-            {
-                ShowMessage("文档拆分正在进行中，请稍候...", "提示");
-                return;
-            }
 
-            var activeDocument = _wordApplication.ActiveDocument;
-            if (!ValidateDocument(activeDocument)) return;
-
-            var splitForm = new DocumentSplitForm();
-            if (splitForm.ShowDialog() == DialogResult.OK)
+            var openFileDialog = new OpenFileDialog
             {
-                ExecuteSplit(activeDocument, splitForm);
+                Title = "选择要拆分的Word文档",
+                Filter = "Word文档 (*.docx)|*.docx|Word文档 (*.doc)|*.doc|所有文件 (*.*)|*.*",
+                Multiselect = false
+            };
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                var filePath = openFileDialog.FileName;
+                var result = MessageBox.Show("确认进行逐页拆分？", "文档拆分", 
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (result == DialogResult.Yes)
+                {
+                    ExecuteSplit(filePath);
+                }
             }
         }
 
-        /// <summary>
-        /// 验证文档是否可拆分
-        /// </summary>
-        private bool ValidateDocument(Word.Document document)
-        {
-            if (document == null)
-            {
-                ShowMessage("请先打开要拆分的文档。", "提示");
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(document.Path))
-            {
-                ShowMessage("请先保存文档，再进行拆分操作。", "提示");
-                return false;
-            }
-
-            return true;
-        }
 
         /// <summary>
         /// 执行拆分操作
         /// </summary>
-        private void ExecuteSplit(Word.Document document, DocumentSplitForm splitForm)
+        private void ExecuteSplit(string filePath)
         {
-            _isProcessing = true;
-            _isCancelled = false;
+            Word.Document document = null;
             
             try
             {
-                if (splitForm.SplitMode == SplitMode.PageByPage)
-                {
-                    SplitDocumentByPages(document);
-                }
-                else
-                {
-                    SplitByCustomRanges(document, splitForm.PageRanges);
-                }
+                document = _wordApplication.Documents.Open(filePath);
+                ValidateDocumentState(document);
+                
+                SplitDocumentByPages(document);
             }
             catch (Exception ex)
             {
@@ -94,8 +71,7 @@ namespace WordMan_VSTO
             }
             finally
             {
-                _isProcessing = false;
-                _isCancelled = false;
+                SafeCloseDocument(document);
             }
         }
 
@@ -107,70 +83,26 @@ namespace WordMan_VSTO
             MessageBox.Show(message, title, MessageBoxButtons.OK, icon);
         }
 
-        /// <summary>
-        /// 取消当前正在进行的拆分操作
-        /// </summary>
-        public void CancelSplit()
-        {
-            _isCancelled = true;
-        }
 
         /// <summary>
         /// 按页拆分文档
         /// </summary>
         private void SplitDocumentByPages(Word.Document document)
         {
-            ValidateDocumentState(document);
             string outputFolder = PrepareSplitEnvironment(document);
             int totalPages = document.Range().Information[WdInformation.wdNumberOfPagesInDocument];
             string baseFileName = Path.GetFileNameWithoutExtension(document.FullName);
 
-            for (int pageNumber = 1; pageNumber <= totalPages && !_isCancelled; pageNumber++)
+            for (int pageNumber = 1; pageNumber <= totalPages; pageNumber++)
             {
                 SplitSinglePageWithRetry(document, pageNumber, outputFolder, baseFileName);
-                if (pageNumber % 3 == 0) ForceGarbageCollection();
+                if (pageNumber % 3 == 0) { GC.Collect(); GC.WaitForPendingFinalizers(); GC.Collect(); }
             }
 
-            ShowSplitResult(_isCancelled, totalPages, outputFolder);
+            ShowSplitResult(false, totalPages, outputFolder);
         }
 
-        /// <summary>
-        /// 按自定义范围拆分文档
-        /// </summary>
-        private void SplitByCustomRanges(Word.Document document, List<PageRange> pageRanges)
-        {
-            string outputFolder = CreateOutputFolder(document);
-            int processedCount = 0;
-            
-            foreach (var range in pageRanges)
-            {
-                if (_isCancelled) break;
-                
-                SplitPageRange(document, range.StartPage, range.EndPage, outputFolder, 
-                    Path.GetFileNameWithoutExtension(document.FullName));
-                
-                if (++processedCount % 3 == 0) ForceGarbageCollection();
-            }
 
-            ShowSplitResult(_isCancelled, pageRanges.Count, outputFolder);
-        }
-
-        /// <summary>
-        /// 创建输出文件夹
-        /// </summary>
-        private string CreateOutputFolder(Word.Document document)
-        {
-            string baseDirectory = Path.GetDirectoryName(document.FullName);
-            string fileName = Path.GetFileNameWithoutExtension(document.FullName);
-            string outputFolder = Path.Combine(baseDirectory, fileName + "_拆分");
-            
-            if (!Directory.Exists(outputFolder))
-            {
-                Directory.CreateDirectory(outputFolder);
-            }
-            
-            return outputFolder;
-        }
 
         /// <summary>
         /// 显示拆分结果
@@ -281,8 +213,6 @@ namespace WordMan_VSTO
         {
             if (doc == null) throw new Exception("文档对象为空");
             
-            if (!doc.Saved) doc.Save();
-            
             if (doc.ProtectionType != WdProtectionType.wdNoProtection)
                 throw new Exception("文档被保护，无法进行拆分操作");
             
@@ -293,7 +223,7 @@ namespace WordMan_VSTO
         /// <summary>
         /// 带重试机制的拆分单页方法
         /// </summary>
-        private void SplitSinglePageWithRetry(Word.Document document, int pageNumber, string outputFolder, string baseFileName, string rangeName = null)
+        private void SplitSinglePageWithRetry(Word.Document document, int pageNumber, string outputFolder, string baseFileName)
         {
             const int maxRetries = 3;
             Exception lastException = null;
@@ -304,7 +234,7 @@ namespace WordMan_VSTO
                 {
                     if (attempt > 1) System.Threading.Thread.Sleep(500);
                     
-                    SplitPageRange(document, pageNumber, pageNumber, outputFolder, baseFileName, rangeName);
+                    SplitPageRange(document, pageNumber, pageNumber, outputFolder, baseFileName);
                     return;
                 }
                 catch (Exception ex)
@@ -553,7 +483,7 @@ namespace WordMan_VSTO
         /// <summary>
         /// 拆分页面到新文档
         /// </summary>
-        private void SplitPageRange(Word.Document sourceDocument, int startPage, int endPage, string outputFolder, string baseFileName, string rangeName = null)
+        private void SplitPageRange(Word.Document sourceDocument, int startPage, int endPage, string outputFolder, string baseFileName)
         {
             Word.Range pageRange = null;
             Word.Document newDocument = null;
@@ -586,13 +516,11 @@ namespace WordMan_VSTO
                 {
                     CopyPageSetup(sourceDocument, newDocument, startPage);
                 }
-                catch { } // 页面设置失败不影响主要功能
+                catch { }
                 
                 CleanTrailingContent(newDocument);
                 
-                string fileName = !string.IsNullOrEmpty(rangeName) ? 
-                    $"{baseFileName}_{rangeName}.docx" : 
-                    $"{baseFileName}_{rangeDescription}.docx";
+                string fileName = $"{baseFileName}_{rangeDescription}.docx";
                 string outputFilePath = Path.Combine(outputFolder, fileName);
                 
                 newDocument.SaveAs2(FileName: outputFilePath, FileFormat: WdSaveFormat.wdFormatXMLDocument);
@@ -609,43 +537,6 @@ namespace WordMan_VSTO
             }
         }
 
-        /// <summary>
-        /// 强制垃圾回收
-        /// </summary>
-        private void ForceGarbageCollection()
-        {
-            try
-            {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
-            }
-            catch { }
-        }
-    }
-
-    /// <summary>
-    /// 拆分模式枚举
-    /// </summary>
-    public enum SplitMode
-    {
-        PageByPage,     // 逐页拆分
-        CustomRanges    // 自定义范围拆分
-    }
-
-    /// <summary>
-    /// 页码范围类
-    /// </summary>
-    public class PageRange
-    {
-        public int StartPage { get; set; }
-        public int EndPage { get; set; }
-
-        public PageRange(int startPage, int endPage)
-        {
-            StartPage = startPage;
-            EndPage = endPage;
-        }
     }
 }
 

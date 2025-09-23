@@ -3,20 +3,8 @@
   "WorkspaceRootPath": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|d:\\users\\yw\\documents\\vsto develop\\wordman_vsto\\mainribbon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|solutionrelative:mainribbon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|d:\\users\\yw\\documents\\vsto develop\\wordman_vsto\\splitandmerge\\documentsplitter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|solutionrelative:splitandmerge\\documentsplitter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|d:\\users\\yw\\documents\\vsto develop\\wordman_vsto\\splitandmerge\\documentsplitform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|solutionrelative:splitandmerge\\documentsplitform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|d:\\users\\yw\\documents\\vsto develop\\wordman_vsto\\stylesetting\\stylesettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|solutionrelative:stylesetting\\stylesettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,56 +14,19 @@
       "DocumentGroups": [
         {
           "DockedHeight": 297,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "DocumentSplitForm.cs [\u8BBE\u8BA1]",
-              "DocumentMoniker": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\SplitAndMerge\\DocumentSplitForm.cs",
-              "RelativeDocumentMoniker": "SplitAndMerge\\DocumentSplitForm.cs",
-              "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\SplitAndMerge\\DocumentSplitForm.cs [\u8BBE\u8BA1]",
-              "RelativeToolTip": "SplitAndMerge\\DocumentSplitForm.cs [\u8BBE\u8BA1]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-23T02:14:20.998Z",
-              "EditorCaption": " [\u8BBE\u8BA1]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "DocumentSplitter.cs",
               "DocumentMoniker": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\SplitAndMerge\\DocumentSplitter.cs",
               "RelativeDocumentMoniker": "SplitAndMerge\\DocumentSplitter.cs",
               "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\SplitAndMerge\\DocumentSplitter.cs",
               "RelativeToolTip": "SplitAndMerge\\DocumentSplitter.cs",
-              "ViewState": "AgIAAOcBAAAAAAAAAAAUwDICAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAC4AAAAAAAAAAAAYwEIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-23T01:58:25.162Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "MainRibbon.cs [\u8BBE\u8BA1]",
-              "DocumentMoniker": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\MainRibbon.cs",
-              "RelativeDocumentMoniker": "MainRibbon.cs",
-              "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\MainRibbon.cs [\u8BBE\u8BA1]",
-              "RelativeToolTip": "MainRibbon.cs [\u8BBE\u8BA1]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-23T01:48:25.932Z",
-              "EditorCaption": " [\u8BBE\u8BA1]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "StyleSettings.cs",
-              "DocumentMoniker": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\StyleSetting\\StyleSettings.cs",
-              "RelativeDocumentMoniker": "StyleSetting\\StyleSettings.cs",
-              "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\StyleSetting\\StyleSettings.cs",
-              "RelativeToolTip": "StyleSetting\\StyleSettings.cs",
-              "ViewState": "AgIAAGYDAAAAAAAAAAAcwH4DAAAfAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-23T01:46:19.41Z",
               "EditorCaption": ""
             }
           ]

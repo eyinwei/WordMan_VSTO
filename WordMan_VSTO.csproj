@@ -262,9 +262,6 @@
     <EmbeddedResource Include="SplitAndMerge\DocumentMergeForm.resx">
       <DependentUpon>DocumentMergeForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SplitAndMerge\DocumentSplitForm.resx">
-      <DependentUpon>DocumentSplitForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="StyleSetting\StyleSelectionForm.resx">
       <DependentUpon>StyleSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -324,9 +321,6 @@
       <DependentUpon>ThisAddIn.Designer.xml</DependentUpon>
     </Compile>
     <Compile Include="SplitAndMerge\DocumentSplitter.cs" />
-    <Compile Include="SplitAndMerge\DocumentSplitForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="SplitAndMerge\DocumentMerger.cs" />
     <Compile Include="SplitAndMerge\DocumentMergeForm.cs">
       <SubType>Form</SubType>

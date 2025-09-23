@@ -7,7 +7,6 @@ D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.csproj.As
 D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.MultiLevel.LevelStyleSettingsForm.resources
 D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.MultiLevelListForm.resources
 D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.SplitAndMerge.DocumentMergeForm.resources
-D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.DocumentSplitForm.resources
 D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.StyleSettings.resources
 D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.CommonSymbolForm.resources
 D:\Users\YW\Documents\VSTO Develop\WordMan_VSTO\obj\Debug\WordMan_VSTO.Properties.Resources.resources

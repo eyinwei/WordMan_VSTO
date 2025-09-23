@@ -39,22 +39,20 @@ namespace WordMan_VSTO
         private Label label18;
         private StandardNumericUpDown Nud_RightIndent;
         private Label label19;
-        private StandardComboBox Cmb_FirstLineIndentType;
+        private StandardComboBox 首行缩进方式下拉框;
         private StandardButton 添加;
-        private StandardComboBox Cmb_SetLevel;
+        private StandardComboBox 显示标题数下拉框;
         private Label label12;
         private ListBox Lst_Styles;
         private StandardButton Btn_ApplySet;
-        private StandardComboBox Cmb_PreSettings;
+        private StandardComboBox 风格下拉框;
         private Label label16;
         private StandardTextBox Txt_AddStyleName;
         private StandardComboBox Cmb_LineSpacing;
-        private StandardNumericUpDown Nud_LineSpacing;
-        private StandardNumericUpDown Nud_BefreSpacing;
-        private StandardNumericUpDown Nud_AfterSpacing;
+        private StandardComboBox Cmb_BefreSpacing;
+        private StandardComboBox Cmb_AfterSpacing;
         private StandardNumericUpDown Nud_LeftIndent;
         private StandardNumericUpDown Nud_FirstLineIndent;
-        private StandardNumericUpDown Nud_FirstLineIndentByChar;
         private StandardButton 关闭;
 
         #endregion
@@ -81,12 +79,14 @@ namespace WordMan_VSTO
         private void InitializeComponent()
         {
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.导入 = new WordMan_VSTO.StandardButton();
+            this.加载 = new WordMan_VSTO.StandardButton();
             this.关闭 = new WordMan_VSTO.StandardButton();
             this.Txt_AddStyleName = new WordMan_VSTO.StandardTextBox();
             this.Btn_ApplySet = new WordMan_VSTO.StandardButton();
             this.删除 = new WordMan_VSTO.StandardButton();
-            this.Cmb_SetLevel = new WordMan_VSTO.StandardComboBox();
-            this.Cmb_PreSettings = new WordMan_VSTO.StandardComboBox();
+            this.显示标题数下拉框 = new WordMan_VSTO.StandardComboBox();
+            this.风格下拉框 = new WordMan_VSTO.StandardComboBox();
             this.label12 = new System.Windows.Forms.Label();
             this.Pal_Font = new System.Windows.Forms.GroupBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -103,11 +103,10 @@ namespace WordMan_VSTO
             this.Pal_ParaIndent = new System.Windows.Forms.GroupBox();
             this.label9 = new System.Windows.Forms.Label();
             this.Cmb_LineSpacing = new WordMan_VSTO.StandardComboBox();
-            this.Nud_LineSpacing = new WordMan_VSTO.StandardNumericUpDown();
             this.label10 = new System.Windows.Forms.Label();
-            this.Nud_BefreSpacing = new WordMan_VSTO.StandardNumericUpDown();
+            this.Cmb_BefreSpacing = new WordMan_VSTO.StandardComboBox();
             this.label11 = new System.Windows.Forms.Label();
-            this.Nud_AfterSpacing = new WordMan_VSTO.StandardNumericUpDown();
+            this.Cmb_AfterSpacing = new WordMan_VSTO.StandardComboBox();
             this.label15 = new System.Windows.Forms.Label();
             this.Cmb_ParaAligment = new WordMan_VSTO.StandardComboBox();
             this.label6 = new System.Windows.Forms.Label();
@@ -115,40 +114,35 @@ namespace WordMan_VSTO
             this.label18 = new System.Windows.Forms.Label();
             this.Nud_RightIndent = new WordMan_VSTO.StandardNumericUpDown();
             this.label19 = new System.Windows.Forms.Label();
-            this.Cmb_FirstLineIndentType = new WordMan_VSTO.StandardComboBox();
+            this.首行缩进方式下拉框 = new WordMan_VSTO.StandardComboBox();
             this.label7 = new System.Windows.Forms.Label();
             this.Nud_FirstLineIndent = new WordMan_VSTO.StandardNumericUpDown();
-            this.Nud_FirstLineIndentByChar = new WordMan_VSTO.StandardNumericUpDown();
-            this.Btn_ReadDocumentStyle = new WordMan_VSTO.StandardButton();
+            this.导出 = new WordMan_VSTO.StandardButton();
             this.添加 = new WordMan_VSTO.StandardButton();
             this.Lst_Styles = new System.Windows.Forms.ListBox();
-            this.加载 = new WordMan_VSTO.StandardButton();
             this.groupBox3.SuspendLayout();
             this.Pal_Font.SuspendLayout();
             this.Pal_ParaIndent.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.Nud_LineSpacing)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Nud_BefreSpacing)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Nud_AfterSpacing)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Nud_LeftIndent)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Nud_RightIndent)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Nud_FirstLineIndent)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Nud_FirstLineIndentByChar)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.导入);
             this.groupBox3.Controls.Add(this.加载);
             this.groupBox3.Controls.Add(this.关闭);
             this.groupBox3.Controls.Add(this.Txt_AddStyleName);
             this.groupBox3.Controls.Add(this.Btn_ApplySet);
             this.groupBox3.Controls.Add(this.删除);
-            this.groupBox3.Controls.Add(this.Cmb_SetLevel);
-            this.groupBox3.Controls.Add(this.Cmb_PreSettings);
+            this.groupBox3.Controls.Add(this.显示标题数下拉框);
+            this.groupBox3.Controls.Add(this.风格下拉框);
             this.groupBox3.Controls.Add(this.label12);
             this.groupBox3.Controls.Add(this.Pal_Font);
             this.groupBox3.Controls.Add(this.label16);
             this.groupBox3.Controls.Add(this.Pal_ParaIndent);
-            this.groupBox3.Controls.Add(this.Btn_ReadDocumentStyle);
+            this.groupBox3.Controls.Add(this.导出);
             this.groupBox3.Controls.Add(this.添加);
             this.groupBox3.Controls.Add(this.Lst_Styles);
             this.groupBox3.Location = new System.Drawing.Point(0, 0);
@@ -157,6 +151,33 @@ namespace WordMan_VSTO
             this.groupBox3.TabIndex = 6;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "样式设置";
+            // 
+            // 导入
+            // 
+            this.导入.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.导入.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.导入.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
+            this.导入.ForeColor = System.Drawing.Color.Black;
+            this.导入.Location = new System.Drawing.Point(278, 334);
+            this.导入.Name = "导入";
+            this.导入.Size = new System.Drawing.Size(50, 31);
+            this.导入.TabIndex = 40;
+            this.导入.Text = "导入";
+            this.导入.UseVisualStyleBackColor = false;
+            // 
+            // 加载
+            // 
+            this.加载.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.加载.Enabled = false;
+            this.加载.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.加载.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
+            this.加载.ForeColor = System.Drawing.Color.Black;
+            this.加载.Location = new System.Drawing.Point(14, 334);
+            this.加载.Name = "加载";
+            this.加载.Size = new System.Drawing.Size(50, 31);
+            this.加载.TabIndex = 35;
+            this.加载.Text = "加载";
+            this.加载.UseVisualStyleBackColor = false;
             // 
             // 关闭
             // 
@@ -209,14 +230,14 @@ namespace WordMan_VSTO
             this.删除.Text = "删除";
             this.删除.UseVisualStyleBackColor = false;
             // 
-            // Cmb_SetLevel
+            // 显示标题数下拉框
             // 
-            this.Cmb_SetLevel.AllowInput = false;
-            this.Cmb_SetLevel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
-            this.Cmb_SetLevel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.Cmb_SetLevel.Font = new System.Drawing.Font("微软雅黑", 9F);
-            this.Cmb_SetLevel.FormattingEnabled = true;
-            this.Cmb_SetLevel.Items.AddRange(new object[] {
+            this.显示标题数下拉框.AllowInput = false;
+            this.显示标题数下拉框.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.显示标题数下拉框.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.显示标题数下拉框.Font = new System.Drawing.Font("微软雅黑", 9F);
+            this.显示标题数下拉框.FormattingEnabled = true;
+            this.显示标题数下拉框.Items.AddRange(new object[] {
             "无",
             "1",
             "2",
@@ -227,27 +248,27 @@ namespace WordMan_VSTO
             "7",
             "8",
             "9"});
-            this.Cmb_SetLevel.Location = new System.Drawing.Point(535, 274);
-            this.Cmb_SetLevel.Name = "Cmb_SetLevel";
-            this.Cmb_SetLevel.Size = new System.Drawing.Size(120, 25);
-            this.Cmb_SetLevel.TabIndex = 21;
+            this.显示标题数下拉框.Location = new System.Drawing.Point(535, 274);
+            this.显示标题数下拉框.Name = "显示标题数下拉框";
+            this.显示标题数下拉框.Size = new System.Drawing.Size(120, 25);
+            this.显示标题数下拉框.TabIndex = 21;
             // 
-            // Cmb_PreSettings
+            // 风格下拉框
             // 
-            this.Cmb_PreSettings.AllowInput = false;
-            this.Cmb_PreSettings.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
-            this.Cmb_PreSettings.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.Cmb_PreSettings.Font = new System.Drawing.Font("微软雅黑", 9F);
-            this.Cmb_PreSettings.FormattingEnabled = true;
-            this.Cmb_PreSettings.Items.AddRange(new object[] {
+            this.风格下拉框.AllowInput = false;
+            this.风格下拉框.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.风格下拉框.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.风格下拉框.Font = new System.Drawing.Font("微软雅黑", 9F);
+            this.风格下拉框.FormattingEnabled = true;
+            this.风格下拉框.Items.AddRange(new object[] {
             "公文风格",
             "论文风格",
             "报告风格",
             "条文风格"});
-            this.Cmb_PreSettings.Location = new System.Drawing.Point(278, 274);
-            this.Cmb_PreSettings.Name = "Cmb_PreSettings";
-            this.Cmb_PreSettings.Size = new System.Drawing.Size(120, 25);
-            this.Cmb_PreSettings.TabIndex = 8;
+            this.风格下拉框.Location = new System.Drawing.Point(278, 274);
+            this.风格下拉框.Name = "风格下拉框";
+            this.风格下拉框.Size = new System.Drawing.Size(120, 25);
+            this.风格下拉框.TabIndex = 8;
             // 
             // label12
             // 
@@ -400,11 +421,10 @@ namespace WordMan_VSTO
             // 
             this.Pal_ParaIndent.Controls.Add(this.label9);
             this.Pal_ParaIndent.Controls.Add(this.Cmb_LineSpacing);
-            this.Pal_ParaIndent.Controls.Add(this.Nud_LineSpacing);
             this.Pal_ParaIndent.Controls.Add(this.label10);
-            this.Pal_ParaIndent.Controls.Add(this.Nud_BefreSpacing);
+            this.Pal_ParaIndent.Controls.Add(this.Cmb_BefreSpacing);
             this.Pal_ParaIndent.Controls.Add(this.label11);
-            this.Pal_ParaIndent.Controls.Add(this.Nud_AfterSpacing);
+            this.Pal_ParaIndent.Controls.Add(this.Cmb_AfterSpacing);
             this.Pal_ParaIndent.Controls.Add(this.label15);
             this.Pal_ParaIndent.Controls.Add(this.Cmb_ParaAligment);
             this.Pal_ParaIndent.Controls.Add(this.label6);
@@ -412,10 +432,9 @@ namespace WordMan_VSTO
             this.Pal_ParaIndent.Controls.Add(this.label18);
             this.Pal_ParaIndent.Controls.Add(this.Nud_RightIndent);
             this.Pal_ParaIndent.Controls.Add(this.label19);
-            this.Pal_ParaIndent.Controls.Add(this.Cmb_FirstLineIndentType);
+            this.Pal_ParaIndent.Controls.Add(this.首行缩进方式下拉框);
             this.Pal_ParaIndent.Controls.Add(this.label7);
             this.Pal_ParaIndent.Controls.Add(this.Nud_FirstLineIndent);
-            this.Pal_ParaIndent.Controls.Add(this.Nud_FirstLineIndentByChar);
             this.Pal_ParaIndent.Enabled = false;
             this.Pal_ParaIndent.Location = new System.Drawing.Point(182, 120);
             this.Pal_ParaIndent.Name = "Pal_ParaIndent";
@@ -451,31 +470,6 @@ namespace WordMan_VSTO
             this.Cmb_LineSpacing.Size = new System.Drawing.Size(120, 25);
             this.Cmb_LineSpacing.TabIndex = 16;
             // 
-            // Nud_LineSpacing
-            // 
-            this.Nud_LineSpacing.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
-            this.Nud_LineSpacing.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.Nud_LineSpacing.DecimalPlaces = 1;
-            this.Nud_LineSpacing.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            131072});
-            this.Nud_LineSpacing.Location = new System.Drawing.Point(354, 24);
-            this.Nud_LineSpacing.Maximum = new decimal(new int[] {
-            -1,
-            -1,
-            -1,
-            0});
-            this.Nud_LineSpacing.Minimum = new decimal(new int[] {
-            -1,
-            -1,
-            -1,
-            -2147483648});
-            this.Nud_LineSpacing.Name = "Nud_LineSpacing";
-            this.Nud_LineSpacing.Size = new System.Drawing.Size(120, 23);
-            this.Nud_LineSpacing.TabIndex = 16;
-            this.Nud_LineSpacing.Unit = "行";
             // 
             // label10
             // 
@@ -486,31 +480,15 @@ namespace WordMan_VSTO
             this.label10.Text = "段前间距";
             this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // Nud_BefreSpacing
+            // Cmb_BefreSpacing
             // 
-            this.Nud_BefreSpacing.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
-            this.Nud_BefreSpacing.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.Nud_BefreSpacing.DecimalPlaces = 1;
-            this.Nud_BefreSpacing.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            131072});
-            this.Nud_BefreSpacing.Location = new System.Drawing.Point(96, 114);
-            this.Nud_BefreSpacing.Maximum = new decimal(new int[] {
-            -1,
-            -1,
-            -1,
-            0});
-            this.Nud_BefreSpacing.Minimum = new decimal(new int[] {
-            -1,
-            -1,
-            -1,
-            -2147483648});
-            this.Nud_BefreSpacing.Name = "Nud_BefreSpacing";
-            this.Nud_BefreSpacing.Size = new System.Drawing.Size(120, 23);
-            this.Nud_BefreSpacing.TabIndex = 18;
-            this.Nud_BefreSpacing.Unit = "磅";
+            this.Cmb_BefreSpacing.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.Cmb_BefreSpacing.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Cmb_BefreSpacing.FormattingEnabled = true;
+            this.Cmb_BefreSpacing.Location = new System.Drawing.Point(96, 114);
+            this.Cmb_BefreSpacing.Name = "Cmb_BefreSpacing";
+            this.Cmb_BefreSpacing.Size = new System.Drawing.Size(120, 23);
+            this.Cmb_BefreSpacing.TabIndex = 18;
             // 
             // label11
             // 
@@ -521,31 +499,15 @@ namespace WordMan_VSTO
             this.label11.Text = "段后间距";
             this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // Nud_AfterSpacing
+            // Cmb_AfterSpacing
             // 
-            this.Nud_AfterSpacing.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
-            this.Nud_AfterSpacing.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.Nud_AfterSpacing.DecimalPlaces = 1;
-            this.Nud_AfterSpacing.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            131072});
-            this.Nud_AfterSpacing.Location = new System.Drawing.Point(354, 114);
-            this.Nud_AfterSpacing.Maximum = new decimal(new int[] {
-            -1,
-            -1,
-            -1,
-            0});
-            this.Nud_AfterSpacing.Minimum = new decimal(new int[] {
-            -1,
-            -1,
-            -1,
-            -2147483648});
-            this.Nud_AfterSpacing.Name = "Nud_AfterSpacing";
-            this.Nud_AfterSpacing.Size = new System.Drawing.Size(120, 23);
-            this.Nud_AfterSpacing.TabIndex = 21;
-            this.Nud_AfterSpacing.Unit = "磅";
+            this.Cmb_AfterSpacing.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.Cmb_AfterSpacing.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Cmb_AfterSpacing.FormattingEnabled = true;
+            this.Cmb_AfterSpacing.Location = new System.Drawing.Point(354, 114);
+            this.Cmb_AfterSpacing.Name = "Cmb_AfterSpacing";
+            this.Cmb_AfterSpacing.Size = new System.Drawing.Size(120, 23);
+            this.Cmb_AfterSpacing.TabIndex = 21;
             // 
             // label15
             // 
@@ -653,21 +615,21 @@ namespace WordMan_VSTO
             this.label19.Text = "首行缩进方式";
             this.label19.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // Cmb_FirstLineIndentType
+            // 首行缩进方式下拉框
             // 
-            this.Cmb_FirstLineIndentType.AllowInput = false;
-            this.Cmb_FirstLineIndentType.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
-            this.Cmb_FirstLineIndentType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.Cmb_FirstLineIndentType.Font = new System.Drawing.Font("微软雅黑", 9F);
-            this.Cmb_FirstLineIndentType.FormattingEnabled = true;
-            this.Cmb_FirstLineIndentType.Items.AddRange(new object[] {
+            this.首行缩进方式下拉框.AllowInput = false;
+            this.首行缩进方式下拉框.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.首行缩进方式下拉框.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.首行缩进方式下拉框.Font = new System.Drawing.Font("微软雅黑", 9F);
+            this.首行缩进方式下拉框.FormattingEnabled = true;
+            this.首行缩进方式下拉框.Items.AddRange(new object[] {
             "无",
             "悬挂缩进",
             "首行缩进"});
-            this.Cmb_FirstLineIndentType.Location = new System.Drawing.Point(96, 83);
-            this.Cmb_FirstLineIndentType.Name = "Cmb_FirstLineIndentType";
-            this.Cmb_FirstLineIndentType.Size = new System.Drawing.Size(120, 25);
-            this.Cmb_FirstLineIndentType.TabIndex = 13;
+            this.首行缩进方式下拉框.Location = new System.Drawing.Point(96, 83);
+            this.首行缩进方式下拉框.Name = "首行缩进方式下拉框";
+            this.首行缩进方式下拉框.Size = new System.Drawing.Size(120, 25);
+            this.首行缩进方式下拉框.TabIndex = 13;
             // 
             // label7
             // 
@@ -704,44 +666,18 @@ namespace WordMan_VSTO
             this.Nud_FirstLineIndent.TabIndex = 15;
             this.Nud_FirstLineIndent.Unit = "厘米";
             // 
-            // Nud_FirstLineIndentByChar
+            // 导出
             // 
-            this.Nud_FirstLineIndentByChar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
-            this.Nud_FirstLineIndentByChar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.Nud_FirstLineIndentByChar.DecimalPlaces = 1;
-            this.Nud_FirstLineIndentByChar.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            131072});
-            this.Nud_FirstLineIndentByChar.Location = new System.Drawing.Point(96, 113);
-            this.Nud_FirstLineIndentByChar.Maximum = new decimal(new int[] {
-            -1,
-            -1,
-            -1,
-            0});
-            this.Nud_FirstLineIndentByChar.Minimum = new decimal(new int[] {
-            -1,
-            -1,
-            -1,
-            -2147483648});
-            this.Nud_FirstLineIndentByChar.Name = "Nud_FirstLineIndentByChar";
-            this.Nud_FirstLineIndentByChar.Size = new System.Drawing.Size(100, 23);
-            this.Nud_FirstLineIndentByChar.TabIndex = 17;
-            this.Nud_FirstLineIndentByChar.Unit = "字符";
-            // 
-            // Btn_ReadDocumentStyle
-            // 
-            this.Btn_ReadDocumentStyle.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
-            this.Btn_ReadDocumentStyle.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Btn_ReadDocumentStyle.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
-            this.Btn_ReadDocumentStyle.ForeColor = System.Drawing.Color.Black;
-            this.Btn_ReadDocumentStyle.Location = new System.Drawing.Point(278, 334);
-            this.Btn_ReadDocumentStyle.Name = "Btn_ReadDocumentStyle";
-            this.Btn_ReadDocumentStyle.Size = new System.Drawing.Size(120, 31);
-            this.Btn_ReadDocumentStyle.TabIndex = 32;
-            this.Btn_ReadDocumentStyle.Text = "读取文中样式";
-            this.Btn_ReadDocumentStyle.UseVisualStyleBackColor = false;
+            this.导出.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.导出.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.导出.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
+            this.导出.ForeColor = System.Drawing.Color.Black;
+            this.导出.Location = new System.Drawing.Point(348, 334);
+            this.导出.Name = "导出";
+            this.导出.Size = new System.Drawing.Size(50, 31);
+            this.导出.TabIndex = 32;
+            this.导出.Text = "导出";
+            this.导出.UseVisualStyleBackColor = false;
             // 
             // 添加
             // 
@@ -767,20 +703,6 @@ namespace WordMan_VSTO
             this.Lst_Styles.Size = new System.Drawing.Size(158, 276);
             this.Lst_Styles.TabIndex = 0;
             // 
-            // 加载
-            // 
-            this.加载.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
-            this.加载.Enabled = false;
-            this.加载.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.加载.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
-            this.加载.ForeColor = System.Drawing.Color.Black;
-            this.加载.Location = new System.Drawing.Point(14, 334);
-            this.加载.Name = "加载";
-            this.加载.Size = new System.Drawing.Size(50, 31);
-            this.加载.TabIndex = 35;
-            this.加载.Text = "加载";
-            this.加载.UseVisualStyleBackColor = false;
-            // 
             // StyleSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
@@ -798,20 +720,17 @@ namespace WordMan_VSTO
             this.groupBox3.PerformLayout();
             this.Pal_Font.ResumeLayout(false);
             this.Pal_ParaIndent.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.Nud_LineSpacing)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Nud_BefreSpacing)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Nud_AfterSpacing)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.Nud_LeftIndent)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.Nud_RightIndent)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.Nud_FirstLineIndent)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Nud_FirstLineIndentByChar)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private StandardButton Btn_ReadDocumentStyle;
+        private StandardButton 导出;
         private StandardButton 加载;
+        private StandardButton 导入;
     }
 }

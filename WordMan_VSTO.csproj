@@ -227,6 +227,9 @@
     </Compile>
     <Compile Include="StyleSetting\StyleSettingsUIDesigner.cs" />
     <Compile Include="StyleSetting\StyleFileManager.cs" />
+    <Compile Include="StyleSetting\StyleSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="MultiLevel\WordStyleInfo.cs" />
     <Compile Include="ControlsManager.cs" />
     <Compile Include="MultiLevel\MultiLevelListForm.cs">
@@ -261,6 +264,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="SplitAndMerge\DocumentSplitForm.resx">
       <DependentUpon>DocumentSplitForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="StyleSetting\StyleSelectionForm.resx">
+      <DependentUpon>StyleSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="StyleSetting\StyleSettings.resx">
       <DependentUpon>StyleSettings.cs</DependentUpon>

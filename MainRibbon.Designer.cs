@@ -74,6 +74,7 @@
             this.位图化 = this.Factory.CreateRibbonButton();
             this.全文处理 = this.Factory.CreateRibbonGroup();
             this.排版工具 = this.Factory.CreateRibbonButton();
+            this.样式设置 = this.Factory.CreateRibbonButton();
             this.多级列表 = this.Factory.CreateRibbonButton();
             this.separator5 = this.Factory.CreateRibbonSeparator();
             this.域名高亮 = this.Factory.CreateRibbonButton();
@@ -436,6 +437,7 @@
             // 全文处理
             // 
             this.全文处理.Items.Add(this.排版工具);
+            this.全文处理.Items.Add(this.样式设置);
             this.全文处理.Items.Add(this.多级列表);
             this.全文处理.Items.Add(this.separator5);
             this.全文处理.Items.Add(this.域名高亮);
@@ -458,6 +460,15 @@
             this.排版工具.OfficeImageId = "HappyFace";
             this.排版工具.ShowImage = true;
             this.排版工具.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.TypesettingButton_Click);
+            // 
+            // 样式设置
+            // 
+            this.样式设置.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.样式设置.Label = "样式设置";
+            this.样式设置.Name = "样式设置";
+            this.样式设置.OfficeImageId = "CaptionInsert";
+            this.样式设置.ShowImage = true;
+            this.样式设置.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.样式设置_Click);
             // 
             // 多级列表
             // 
@@ -633,6 +644,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 内部;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 移除密级;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 多级列表;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 样式设置;
     }
 
     partial class ThisRibbonCollection

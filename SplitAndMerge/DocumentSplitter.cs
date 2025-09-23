@@ -11,303 +11,187 @@ using Word = Microsoft.Office.Interop.Word;
 namespace WordMan_VSTO
 {
     /// <summary>
-    /// 文档拆分器 - 优化版本
+    /// 文档拆分器 - 提供Word文档按页拆分功能
     /// </summary>
     public class DocumentSplitter
     {
-        private Word.Application app;
-        private bool isProcessing = false;
-        private volatile bool isCancelled = false;
+        private readonly Word.Application _wordApplication;
+        private bool _isProcessing = false;
+        private volatile bool _isCancelled = false;
 
-        public DocumentSplitter(Word.Application application)
+        /// <summary>
+        /// 初始化文档拆分器
+        /// </summary>
+        /// <param name="wordApplication">Word应用程序实例</param>
+        public DocumentSplitter(Word.Application wordApplication)
         {
-            app = application;
+            _wordApplication = wordApplication;
         }
 
         /// <summary>
-        /// 显示文档拆分对话框
+        /// 显示文档拆分对话框并执行拆分操作
         /// </summary>
         public void ShowSplitDialog()
         {
+            if (_isProcessing)
+            {
+                ShowMessage("文档拆分正在进行中，请稍候...", "提示");
+                return;
+            }
+
+            var activeDocument = _wordApplication.ActiveDocument;
+            if (!ValidateDocument(activeDocument)) return;
+
+            var splitForm = new DocumentSplitForm();
+            if (splitForm.ShowDialog() == DialogResult.OK)
+            {
+                ExecuteSplit(activeDocument, splitForm);
+            }
+        }
+
+        /// <summary>
+        /// 验证文档是否可拆分
+        /// </summary>
+        private bool ValidateDocument(Word.Document document)
+        {
+            if (document == null)
+            {
+                ShowMessage("请先打开要拆分的文档。", "提示");
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(document.Path))
+            {
+                ShowMessage("请先保存文档，再进行拆分操作。", "提示");
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 执行拆分操作
+        /// </summary>
+        private void ExecuteSplit(Word.Document document, DocumentSplitForm splitForm)
+        {
+            _isProcessing = true;
+            _isCancelled = false;
+            
             try
             {
-                if (isProcessing)
+                if (splitForm.SplitMode == SplitMode.PageByPage)
                 {
-                    MessageBox.Show("文档拆分正在进行中，请稍候...", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
+                    SplitDocumentByPages(document);
                 }
-
-                var doc = app.ActiveDocument;
-                if (doc == null)
+                else
                 {
-                    MessageBox.Show("请先打开要拆分的文档。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(doc.Path))
-                {
-                    MessageBox.Show("请先保存文档，再进行拆分操作。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-                // 显示拆分选项对话框
-                var splitForm = new DocumentSplitForm();
-                if (splitForm.ShowDialog() == DialogResult.OK)
-                {
-                    isProcessing = true;
-                    isCancelled = false;
-                    try
-                    {
-                        if (splitForm.SplitMode == SplitMode.PageByPage)
-                        {
-                            SplitDocumentByPages(doc, splitForm.ProgressCallback);
-                        }
-                        else
-                        {
-                            SplitByCustomRangesOptimized(doc, splitForm.PageRanges, splitForm.ProgressCallback);
-                        }
-                    }
-                    finally
-                    {
-                        isProcessing = false;
-                        isCancelled = false;
-                    }
+                    SplitByCustomRanges(document, splitForm.PageRanges);
                 }
             }
             catch (Exception ex)
             {
-                isProcessing = false;
-                isCancelled = false;
-                MessageBox.Show($"文档拆分失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowMessage($"文档拆分失败：{ex.Message}", "错误", MessageBoxIcon.Error);
+            }
+            finally
+            {
+                _isProcessing = false;
+                _isCancelled = false;
             }
         }
 
         /// <summary>
-        /// 取消拆分操作
+        /// 显示消息框
+        /// </summary>
+        private void ShowMessage(string message, string title, MessageBoxIcon icon = MessageBoxIcon.Information)
+        {
+            MessageBox.Show(message, title, MessageBoxButtons.OK, icon);
+        }
+
+        /// <summary>
+        /// 取消当前正在进行的拆分操作
         /// </summary>
         public void CancelSplit()
         {
-            isCancelled = true;
+            _isCancelled = true;
         }
 
         /// <summary>
         /// 按页拆分文档
         /// </summary>
-        private void SplitDocumentByPages(Word.Document sourceDoc, Action<int, int, string> progressCallback)
+        private void SplitDocumentByPages(Word.Document document)
         {
-            string splitFolder = null;
-            int totalPages = 0;
-            
-            try
-            {
-                // 准备拆分环境
-                splitFolder = PrepareSplitEnvironment(sourceDoc);
-                totalPages = sourceDoc.Range().Information[WdInformation.wdNumberOfPagesInDocument];
-                
-                progressCallback?.Invoke(0, totalPages, "开始拆分文档...");
+            ValidateDocumentState(document);
+            string outputFolder = PrepareSplitEnvironment(document);
+            int totalPages = document.Range().Information[WdInformation.wdNumberOfPagesInDocument];
+            string baseFileName = Path.GetFileNameWithoutExtension(document.FullName);
 
-                // 逐页拆分
-                for (int i = 1; i <= totalPages && !isCancelled; i++)
-                {
-                    progressCallback?.Invoke(i, totalPages, $"正在拆分第 {i} 页...");
-                    
-                    // 拆分单页
-                    SplitSinglePage(sourceDoc, i, splitFolder, Path.GetFileNameWithoutExtension(sourceDoc.FullName));
-                    
-                    // 定期释放内存
-                    if (i % 3 == 0)
-                    {
-                        ForceGarbageCollection();
-                    }
-                }
-
-                if (isCancelled)
-                {
-                    progressCallback?.Invoke(0, totalPages, "拆分已取消");
-                    MessageBox.Show("文档拆分已取消。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
-                {
-                    progressCallback?.Invoke(totalPages, totalPages, "拆分完成！");
-                    MessageBox.Show($"文档已成功拆分为 {totalPages} 个文件，保存在：{splitFolder}", "拆分完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            }
-            catch (Exception ex)
+            for (int pageNumber = 1; pageNumber <= totalPages && !_isCancelled; pageNumber++)
             {
-                throw new Exception($"按页拆分失败：{ex.Message}");
+                SplitSinglePageWithRetry(document, pageNumber, outputFolder, baseFileName);
+                if (pageNumber % 3 == 0) ForceGarbageCollection();
             }
+
+            ShowSplitResult(_isCancelled, totalPages, outputFolder);
         }
 
         /// <summary>
         /// 按自定义范围拆分文档
         /// </summary>
-        private void SplitByCustomRangesOptimized(Word.Document sourceDoc, List<PageRange> pageRanges, Action<int, int, string> progressCallback)
+        private void SplitByCustomRanges(Word.Document document, List<PageRange> pageRanges)
         {
-            try
-            {
-                string basePath = Path.GetDirectoryName(sourceDoc.FullName);
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(sourceDoc.FullName);
-                string splitFolder = Path.Combine(basePath, fileNameWithoutExt + "_拆分");
-                
-                // 创建拆分文件夹
-                if (!Directory.Exists(splitFolder))
-                {
-                    Directory.CreateDirectory(splitFolder);
-                }
-
-                int totalRanges = pageRanges.Count;
-                progressCallback?.Invoke(0, totalRanges, "开始拆分文档...");
-
-                int fileCount = 0;
-                foreach (var range in pageRanges)
-                {
-                    if (isCancelled) break;
-                    
-                    fileCount++;
-                    string rangeName = range.StartPage == range.EndPage ? 
-                        $"第{range.StartPage}页" : 
-                        $"第{range.StartPage}-{range.EndPage}页";
-                    
-                    progressCallback?.Invoke(fileCount, totalRanges, $"正在拆分 {rangeName}...");
-                    
-                    // 使用简化的拆分方法
-                    SplitPageRangeSimple(sourceDoc, range, splitFolder, fileNameWithoutExt);
-                    
-                    // 强制垃圾回收，释放内存
-                    if (fileCount % 3 == 0)
-                    {
-                        ForceGarbageCollection();
-                    }
-                }
-
-                if (isCancelled)
-                {
-                    progressCallback?.Invoke(0, totalRanges, "拆分已取消");
-                    MessageBox.Show("文档拆分已取消。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
-                {
-                    progressCallback?.Invoke(totalRanges, totalRanges, "拆分完成！");
-                    MessageBox.Show($"文档已成功拆分为 {totalRanges} 个文件，保存在：{splitFolder}", "拆分完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"按自定义范围拆分失败：{ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// 使用VBA方法进行页面拆分 - 参考VBA代码实现
-        /// </summary>
-        private void SplitPageRangeSimple(Word.Document sourceDoc, PageRange range, string splitFolder, string baseFileName)
-        {
-            Word.Document newDoc = null;
-            Word.Range pageRange = null;
-            string rangeName = range.StartPage == range.EndPage ? 
-                $"第{range.StartPage}页" : 
-                $"第{range.StartPage}-{range.EndPage}页";
+            string outputFolder = CreateOutputFolder(document);
+            int processedCount = 0;
             
-            try
+            foreach (var range in pageRanges)
             {
-                System.Diagnostics.Debug.WriteLine($"开始使用VBA方法拆分{rangeName}...");
+                if (_isCancelled) break;
                 
-                // 按照VBA代码的逻辑：逐页拆分
-                for (int pageNum = range.StartPage; pageNum <= range.EndPage; pageNum++)
-                {
-                    System.Diagnostics.Debug.WriteLine($"正在拆分第{pageNum}页...");
-                    
-                    // 定位到页面开始 - 完全按照VBA代码
-                    pageRange = sourceDoc.GoTo(What: WdGoToItem.wdGoToPage, Which: WdGoToDirection.wdGoToAbsolute, Count: pageNum);
-                    if (pageRange == null)
-                    {
-                        throw new Exception($"无法定位到第{pageNum}页");
-                    }
-                    
-                    // 选择页面范围 - 按照VBA代码：oRng.Select
-                    pageRange.Select();
-                    
-                    // 设置页面范围到页面结束 - 按照VBA代码：oRng.SetRange oRng.Start, oRng.Bookmarks("\page").End
-                    try
-                    {
-                        pageRange.SetRange(pageRange.Start, pageRange.Bookmarks["\\page"].End);
-                    }
-                    catch
-                    {
-                        // 如果Bookmarks方法失败，使用简单方法
-                        if (pageNum < sourceDoc.Range().Information[WdInformation.wdNumberOfPagesInDocument])
-                        {
-                            var nextPageRange = sourceDoc.GoTo(What: WdGoToItem.wdGoToPage, Which: WdGoToDirection.wdGoToAbsolute, Count: pageNum + 1);
-                            if (nextPageRange != null)
-                            {
-                                pageRange.SetRange(pageRange.Start, nextPageRange.Start - 1);
-                                ReleaseComObject(nextPageRange);
-                            }
-                        }
-                        else
-                        {
-                            // 最后一页
-                            pageRange.SetRange(pageRange.Start, sourceDoc.Range().End);
-                        }
-                    }
-                    
-                    // 复制页面内容
-                    pageRange.Copy();
-                    System.Diagnostics.Debug.WriteLine($"已复制第{pageNum}页内容");
-                    
-                    // 创建新文档 - 按照VBA代码
-                    newDoc = app.Documents.Add();
-                    if (newDoc == null)
-                    {
-                        throw new Exception("无法创建新文档");
-                    }
-                    
-                    // 粘贴内容 - 按照VBA代码：oDocTemp.Application.Selection.Paste
-                    newDoc.Application.Selection.Paste();
-                    System.Diagnostics.Debug.WriteLine($"已粘贴第{pageNum}页内容到新文档");
-                    
-                    // 保存文档 - 按照VBA代码格式
-                    string pageFileName = range.StartPage == range.EndPage ? 
-                        $"{baseFileName}_{rangeName}.docx" : 
-                        $"{baseFileName}_第{pageNum}页.docx";
-                    string newFileName = Path.Combine(splitFolder, pageFileName);
-                    
-                    newDoc.SaveAs2(FileName: newFileName, FileFormat: WdSaveFormat.wdFormatXMLDocument);
-                    System.Diagnostics.Debug.WriteLine($"文件保存成功：{newFileName}");
-                    
-                    // 关闭文档
-                    newDoc.Close();
-                    newDoc = null;
-                    
-                    // 释放当前页面的Range对象
-                    ReleaseComObject(pageRange);
-                    pageRange = null;
-                }
+                SplitPageRange(document, range.StartPage, range.EndPage, outputFolder, 
+                    Path.GetFileNameWithoutExtension(document.FullName));
+                
+                if (++processedCount % 3 == 0) ForceGarbageCollection();
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"VBA方法拆分{rangeName}失败：{ex.Message}\n堆栈：{ex.StackTrace}");
-                throw new Exception($"拆分第{range.StartPage}-{range.EndPage}页失败：{ex.Message}");
-            }
-            finally
-            {
-                // 确保释放COM对象
-                try
-                {
-                    ReleaseComObject(pageRange);
-                    SafeCloseDocument(newDoc);
-                }
-                catch (Exception releaseEx)
-                {
-                    System.Diagnostics.Debug.WriteLine($"释放COM对象失败：{releaseEx.Message}");
-                }
-            }
+
+            ShowSplitResult(_isCancelled, pageRanges.Count, outputFolder);
         }
 
         /// <summary>
-        /// 使用Selection.GoTo精确定位页面范围
+        /// 创建输出文件夹
         /// </summary>
-        private Word.Range GetPageRangeByGoTo(Word.Document doc, int startPage, int endPage)
+        private string CreateOutputFolder(Word.Document document)
+        {
+            string baseDirectory = Path.GetDirectoryName(document.FullName);
+            string fileName = Path.GetFileNameWithoutExtension(document.FullName);
+            string outputFolder = Path.Combine(baseDirectory, fileName + "_拆分");
+            
+            if (!Directory.Exists(outputFolder))
+            {
+                Directory.CreateDirectory(outputFolder);
+            }
+            
+            return outputFolder;
+        }
+
+        /// <summary>
+        /// 显示拆分结果
+        /// </summary>
+        private void ShowSplitResult(bool isCancelled, int fileCount, string outputFolder)
+        {
+            if (isCancelled)
+            {
+                MessageBox.Show("文档拆分已取消。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show($"文档已成功拆分为 {fileCount} 个文件，保存在：{outputFolder}", "拆分完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+
+        /// <summary>
+        /// 获取指定页的范围
+        /// </summary>
+        private Word.Range GetPageRange(Word.Document document, int startPage, int endPage)
         {
             Word.Range startRange = null;
             Word.Range endRange = null;
@@ -315,234 +199,145 @@ namespace WordMan_VSTO
             
             try
             {
-                // 验证页码范围
-                int totalPages = doc.Range().Information[WdInformation.wdNumberOfPagesInDocument];
+                int totalPages = document.Range().Information[WdInformation.wdNumberOfPagesInDocument];
                 if (startPage < 1 || endPage < 1 || startPage > totalPages || endPage > totalPages)
-                {
-                    throw new Exception($"页码范围无效：第{startPage}-{endPage}页（文档总页数：{totalPages}）");
-                }
+                    throw new Exception($"页码范围无效：第{startPage}-{endPage}页（总页数：{totalPages}）");
                 
                 if (startPage > endPage)
-                {
                     throw new Exception($"起始页不能大于结束页：第{startPage}-{endPage}页");
-                }
-
-                System.Diagnostics.Debug.WriteLine($"使用GoTo定位第{startPage}-{endPage}页...");
                 
-                // 定位到起始页
-                startRange = doc.GoTo(What: WdGoToItem.wdGoToPage, Which: WdGoToDirection.wdGoToAbsolute, Count: startPage);
-                if (startRange == null)
-                {
-                    throw new Exception($"无法定位到第{startPage}页开始位置");
-                }
-                
-                System.Diagnostics.Debug.WriteLine($"起始页定位成功，位置：{startRange.Start}");
-                
-                if (startPage == endPage)
-                {
-                    // 单页：定位到下一页开始，然后回退到当前页结束
-                    if (startPage < totalPages)
-                    {
-                        // 定位到下一页开始
-                        endRange = doc.GoTo(What: WdGoToItem.wdGoToPage, Which: WdGoToDirection.wdGoToAbsolute, Count: startPage + 1);
-                        if (endRange != null)
-                        {
-                            resultRange = doc.Range();
-                            resultRange.SetRange(startRange.Start, Math.Max(startRange.Start, endRange.Start - 1));
-                        }
-                        else
-                        {
-                            // 如果无法定位到下一页，使用文档结尾
-                            resultRange = doc.Range();
-                            resultRange.SetRange(startRange.Start, doc.Range().End);
-                        }
-                    }
-                    else
-                    {
-                        // 最后一页：使用文档结尾
-                        resultRange = doc.Range();
-                        resultRange.SetRange(startRange.Start, doc.Range().End);
-                    }
-                }
-                else
-                {
-                    // 多页：定位到结束页的下一页开始
-                    if (endPage < totalPages)
-                    {
-                        // 定位到结束页的下一页开始
-                        endRange = doc.GoTo(What: WdGoToItem.wdGoToPage, Which: WdGoToDirection.wdGoToAbsolute, Count: endPage + 1);
-                        if (endRange != null)
-                        {
-                            resultRange = doc.Range();
-                            resultRange.SetRange(startRange.Start, Math.Max(startRange.Start, endRange.Start - 1));
-                        }
-                        else
-                        {
-                            // 如果无法定位到下一页，使用文档结尾
-                            resultRange = doc.Range();
-                            resultRange.SetRange(startRange.Start, doc.Range().End);
-                        }
-                    }
-                    else
-                    {
-                        // 结束页是最后一页：使用文档结尾
-                        resultRange = doc.Range();
-                        resultRange.SetRange(startRange.Start, doc.Range().End);
-                    }
-                }
-                
-                // 验证结果范围
-                if (resultRange == null || resultRange.Start >= resultRange.End)
-                {
-                    throw new Exception($"页码范围无效：第{startPage}-{endPage}页，字符范围：{resultRange?.Start}-{resultRange?.End}");
-                }
-                
-                System.Diagnostics.Debug.WriteLine($"GoTo方法成功获取页码范围：第{startPage}-{endPage}页，字符范围：{resultRange.Start}-{resultRange.End}");
-                return resultRange;
-            }
-            catch (Exception ex)
-            {
-                // 释放已创建的COM对象
-                ReleaseComObject(startRange);
-                ReleaseComObject(endRange);
-                ReleaseComObject(resultRange);
-                System.Diagnostics.Debug.WriteLine($"GoTo方法获取页码范围失败：{ex.Message}");
-                throw new Exception($"GoTo方法获取第{startPage}-{endPage}页范围失败：{ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// 获取指定页的范围 - 使用更稳定的方法
-        /// </summary>
-        private Word.Range GetPageRangeOptimized(Word.Document doc, int startPage, int endPage)
-        {
-            try
-            {
-                // 验证页码范围有效性
-                int totalPages = doc.Range().Information[WdInformation.wdNumberOfPagesInDocument];
-                if (startPage < 1 || endPage < 1 || startPage > totalPages || endPage > totalPages)
-                {
-                    throw new Exception($"页码范围无效：第{startPage}-{endPage}页（文档总页数：{totalPages}）");
-                }
-                
-                if (startPage > endPage)
-                {
-                    throw new Exception($"起始页不能大于结束页：第{startPage}-{endPage}页");
-                }
-
-                // 尝试使用字符位置方法
+                // 尝试GoTo方法
                 try
                 {
-                    return GetPageRangeSimple(doc, startPage, endPage);
+                    startRange = document.GoTo(What: WdGoToItem.wdGoToPage, Which: WdGoToDirection.wdGoToAbsolute, Count: startPage);
+                    if (startRange != null)
+                    {
+                        int startPos = startRange.Start;
+                        int endPos = GetPageEndPosition(document, endPage, totalPages);
+                        
+                        resultRange = document.Range();
+                        resultRange.SetRange(startPos, Math.Max(startPos, endPos));
+                        
+                        if (resultRange.Start < resultRange.End) return resultRange;
+                    }
                 }
-                catch (Exception ex)
+                catch { }
+                finally
                 {
-                    System.Diagnostics.Debug.WriteLine($"字符位置方法失败：{ex.Message}，尝试备用方法");
-                    // 如果字符位置方法失败，使用备用方法
-                    return GetPageRangeFallback(doc, startPage, endPage);
+                    ReleaseComObject(startRange);
+                    ReleaseComObject(endRange);
                 }
+                
+                // 备用方法：字符位置估算
+                return GetPageRangeByCharacterPosition(document, startPage, endPage, totalPages);
             }
             catch (Exception ex)
             {
+                ReleaseComObject(resultRange);
                 throw new Exception($"获取第{startPage}-{endPage}页范围失败：{ex.Message}");
             }
         }
 
         /// <summary>
-        /// 备用页码范围获取方法 - 使用整个文档
+        /// 获取页面结束位置
         /// </summary>
-        private Word.Range GetPageRangeFallback(Word.Document doc, int startPage, int endPage)
+        private int GetPageEndPosition(Word.Document document, int endPage, int totalPages)
         {
-            try
+            if (endPage < totalPages)
             {
-                System.Diagnostics.Debug.WriteLine($"使用备用方法获取第{startPage}-{endPage}页范围");
-                
-                // 获取整个文档范围
-                var fullRange = doc.Range();
-                
-                // 如果请求的是整个文档，直接返回
-                if (startPage == 1 && endPage >= doc.Range().Information[WdInformation.wdNumberOfPagesInDocument])
+                var nextPageRange = document.GoTo(What: WdGoToItem.wdGoToPage, Which: WdGoToDirection.wdGoToAbsolute, Count: endPage + 1);
+                if (nextPageRange != null)
                 {
-                    return fullRange;
+                    int endPos = nextPageRange.Start - 1;
+                    ReleaseComObject(nextPageRange);
+                    return endPos;
                 }
-                
-                // 否则返回文档的前半部分作为示例
-                var resultRange = doc.Range();
-                resultRange.SetRange(0, fullRange.End / 2);
-                
-                System.Diagnostics.Debug.WriteLine($"备用方法返回范围：{resultRange.Start}-{resultRange.End}");
-                return resultRange;
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"备用方法也失败：{ex.Message}");
-                throw new Exception($"备用方法获取页码范围失败：{ex.Message}");
-            }
+            return document.Range().End;
         }
 
         /// <summary>
-        /// 使用字符位置获取页码范围 - 更稳定的方法
+        /// 使用字符位置估算获取页面范围
         /// </summary>
-        private Word.Range GetPageRangeSimple(Word.Document doc, int startPage, int endPage)
+        private Word.Range GetPageRangeByCharacterPosition(Word.Document document, int startPage, int endPage, int totalPages)
         {
-            try
-            {
-                // 获取文档总页数和字符数
-                int totalPages = doc.Range().Information[WdInformation.wdNumberOfPagesInDocument];
-                int totalCharacters = doc.Range().End;
-                
-                System.Diagnostics.Debug.WriteLine($"文档总页数：{totalPages}，总字符数：{totalCharacters}");
-                
-                // 使用更保守的字符位置计算
-                int charsPerPage = Math.Max(1, totalCharacters / totalPages);
-                
-                // 计算起始和结束字符位置，添加缓冲区
-                int startChar = Math.Max(0, (startPage - 1) * charsPerPage);
-                int endChar = Math.Min(totalCharacters, endPage * charsPerPage);
-                
-                // 确保范围有效且不为空
-                if (startChar >= endChar)
-                {
-                    startChar = Math.Max(0, endChar - 50); // 至少50个字符
-                }
-                
-                // 确保结束位置不超过文档长度
-                if (endChar > totalCharacters)
-                {
-                    endChar = totalCharacters;
-                }
-                
-                // 创建范围
-                var resultRange = doc.Range();
-                resultRange.SetRange(startChar, endChar);
-                
-                // 验证范围有效性
-                if (resultRange.Start >= resultRange.End)
-                {
-                    throw new Exception($"页码范围无效：第{startPage}-{endPage}页，字符范围：{resultRange.Start}-{resultRange.End}");
-                }
-                
-                System.Diagnostics.Debug.WriteLine($"页码范围：第{startPage}-{endPage}页，字符范围：{resultRange.Start}-{resultRange.End}");
-                return resultRange;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"获取页码范围失败：{ex.Message}");
-                throw new Exception($"获取页码范围失败：{ex.Message}");
-            }
+            int totalCharacters = document.Range().End;
+            int charactersPerPage = Math.Max(1, totalCharacters / totalPages);
+            
+            int startPos = Math.Max(0, (startPage - 1) * charactersPerPage);
+            int endPos = Math.Min(totalCharacters, endPage * charactersPerPage);
+            
+            if (startPos >= endPos) startPos = Math.Max(0, endPos - 50);
+            
+            var range = document.Range();
+            range.SetRange(startPos, endPos);
+            return range;
         }
+
+        /// <summary>
+        /// 验证文档状态
+        /// </summary>
+        private void ValidateDocumentState(Word.Document doc)
+        {
+            if (doc == null) throw new Exception("文档对象为空");
+            
+            if (!doc.Saved) doc.Save();
+            
+            if (doc.ProtectionType != WdProtectionType.wdNoProtection)
+                throw new Exception("文档被保护，无法进行拆分操作");
+            
+            int totalPages = doc.Range().Information[WdInformation.wdNumberOfPagesInDocument];
+            if (totalPages <= 0) throw new Exception("文档没有有效页面");
+        }
+
+        /// <summary>
+        /// 带重试机制的拆分单页方法
+        /// </summary>
+        private void SplitSinglePageWithRetry(Word.Document document, int pageNumber, string outputFolder, string baseFileName, string rangeName = null)
+        {
+            const int maxRetries = 3;
+            Exception lastException = null;
+            
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
+            {
+                try
+                {
+                    if (attempt > 1) System.Threading.Thread.Sleep(500);
+                    
+                    SplitPageRange(document, pageNumber, pageNumber, outputFolder, baseFileName, rangeName);
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    lastException = ex;
+                    if (attempt < maxRetries)
+                    {
+                        try
+                        {
+                            _wordApplication.ScreenUpdating = false;
+                            _wordApplication.ScreenUpdating = true;
+                        }
+                        catch { }
+                    }
+                }
+            }
+            
+            throw new Exception($"拆分第{pageNumber}页失败（已重试{maxRetries}次）：{lastException?.Message}");
+        }
+
 
         /// <summary>
         /// 复制页面设置
         /// </summary>
-        private void CopyPageSetup(Word.Document sourceDoc, Word.Document targetDoc)
+        private void CopyPageSetup(Word.Document sourceDoc, Word.Document targetDoc, int pageNum = 1)
         {
             try
             {
-                var sourcePageSetup = sourceDoc.Sections[1].PageSetup;
-                var targetPageSetup = targetDoc.Sections[1].PageSetup;
+                var sourceSection = GetPageSection(sourceDoc, pageNum) ?? sourceDoc.Sections[1];
+                var targetSection = targetDoc.Sections[1];
+                var sourcePageSetup = sourceSection.PageSetup;
+                var targetPageSetup = targetSection.PageSetup;
                 
-                // 复制页面设置
                 targetPageSetup.TopMargin = sourcePageSetup.TopMargin;
                 targetPageSetup.BottomMargin = sourcePageSetup.BottomMargin;
                 targetPageSetup.LeftMargin = sourcePageSetup.LeftMargin;
@@ -553,12 +348,107 @@ namespace WordMan_VSTO
                 targetPageSetup.PageHeight = sourcePageSetup.PageHeight;
                 targetPageSetup.Orientation = sourcePageSetup.Orientation;
                 targetPageSetup.PaperSize = sourcePageSetup.PaperSize;
+                targetPageSetup.Gutter = sourcePageSetup.Gutter;
+                targetPageSetup.MirrorMargins = sourcePageSetup.MirrorMargins;
+                targetPageSetup.TwoPagesOnOne = sourcePageSetup.TwoPagesOnOne;
+                targetPageSetup.BookFoldPrinting = sourcePageSetup.BookFoldPrinting;
+                targetPageSetup.BookFoldRevPrinting = sourcePageSetup.BookFoldRevPrinting;
+                
+                CopyHeadersAndFooters(sourceSection, targetSection);
             }
-            catch (Exception ex)
+            catch { }
+        }
+
+        /// <summary>
+        /// 获取指定页面所属的节
+        /// </summary>
+        private Word.Section GetPageSection(Word.Document doc, int pageNum)
+        {
+            try
             {
-                System.Diagnostics.Debug.WriteLine($"复制页面设置失败：{ex.Message}");
+                var pageRange = doc.GoTo(What: WdGoToItem.wdGoToPage, Which: WdGoToDirection.wdGoToAbsolute, Count: pageNum);
+                if (pageRange == null) return null;
+                
+                var section = pageRange.Sections[1];
+                ReleaseComObject(pageRange);
+                return section;
+            }
+            catch
+            {
+                return null;
             }
         }
+
+        /// <summary>
+        /// 复制页眉页脚
+        /// </summary>
+        private void CopyHeadersAndFooters(Word.Section sourceSection, Word.Section targetSection)
+        {
+            try
+            {
+                var sourceHeader = sourceSection.Headers[WdHeaderFooterIndex.wdHeaderFooterPrimary];
+                var targetHeader = targetSection.Headers[WdHeaderFooterIndex.wdHeaderFooterPrimary];
+                if (sourceHeader.Range.Text.Trim().Length > 0)
+                {
+                    sourceHeader.Range.Copy();
+                    targetHeader.Range.Paste();
+                }
+                
+                var sourceFooter = sourceSection.Footers[WdHeaderFooterIndex.wdHeaderFooterPrimary];
+                var targetFooter = targetSection.Footers[WdHeaderFooterIndex.wdHeaderFooterPrimary];
+                if (sourceFooter.Range.Text.Trim().Length > 0)
+                {
+                    sourceFooter.Range.Copy();
+                    targetFooter.Range.Paste();
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// 清理文档末尾的空白内容
+        /// </summary>
+        private void CleanTrailingContent(Word.Document doc)
+        {
+            try
+            {
+                var docRange = doc.Range();
+                if (docRange.End <= 1) return;
+                
+                var endRange = doc.Range();
+                endRange.SetRange(Math.Max(0, docRange.End - 100), docRange.End);
+                
+                string trailingText = endRange.Text;
+                bool hasOnlyWhitespace = trailingText.Trim().Length == 0 || 
+                                       trailingText.All(c => char.IsWhiteSpace(c) || c == '\r' || c == '\n' || c == '\f');
+                
+                if (hasOnlyWhitespace)
+                {
+                    int lastNonWhitespace = -1;
+                    for (int i = docRange.End - 1; i >= 0; i--)
+                    {
+                        var charRange = doc.Range(i, i + 1);
+                        if (!string.IsNullOrWhiteSpace(charRange.Text) && charRange.Text != "\r" && charRange.Text != "\n")
+                        {
+                            lastNonWhitespace = i + 1;
+                            break;
+                        }
+                        ReleaseComObject(charRange);
+                    }
+                    
+                    if (lastNonWhitespace > 0 && lastNonWhitespace < docRange.End)
+                    {
+                        var deleteRange = doc.Range(lastNonWhitespace, docRange.End);
+                        deleteRange.Delete();
+                        ReleaseComObject(deleteRange);
+                    }
+                }
+                
+                ReleaseComObject(endRange);
+            }
+            catch { }
+        }
+
 
         /// <summary>
         /// 安全释放COM对象
@@ -572,10 +462,7 @@ namespace WordMan_VSTO
                     Marshal.ReleaseComObject(comObject);
                 }
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"释放COM对象失败：{ex.Message}");
-            }
+            catch { }
             finally
             {
                 comObject = null;
@@ -595,10 +482,7 @@ namespace WordMan_VSTO
                     ReleaseComObject(doc);
                 }
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"关闭文档失败：{ex.Message}");
-            }
+            catch { }
         }
 
         /// <summary>
@@ -606,42 +490,25 @@ namespace WordMan_VSTO
         /// </summary>
         private string PrepareSplitEnvironment(Word.Document sourceDoc)
         {
-            try
+            string basePath = Path.GetDirectoryName(sourceDoc.FullName);
+            string fileName = Path.GetFileNameWithoutExtension(sourceDoc.FullName);
+            string splitFolder = Path.Combine(basePath, fileName + "_拆分");
+            
+            if (string.IsNullOrEmpty(basePath) || !Directory.Exists(basePath))
+                throw new Exception("源文档路径无效，无法创建拆分文件夹");
+            
+            if (!IsPathWritable(basePath))
+                throw new Exception("目标路径不可写，请检查权限设置");
+            
+            if (!Directory.Exists(splitFolder))
             {
-                string basePath = Path.GetDirectoryName(sourceDoc.FullName);
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(sourceDoc.FullName);
-                string splitFolder = Path.Combine(basePath, fileNameWithoutExt + "_拆分");
-                
-                // 检查基础路径是否有效
-                if (string.IsNullOrEmpty(basePath) || !Directory.Exists(basePath))
-                {
-                    throw new Exception("源文档路径无效，无法创建拆分文件夹");
-                }
-                
-                // 检查目标路径是否可写
-                if (!IsPathWritable(basePath))
-                {
-                    throw new Exception("目标路径不可写，请检查权限设置");
-                }
-                
-                // 创建拆分文件夹
-                if (!Directory.Exists(splitFolder))
-                {
-                    Directory.CreateDirectory(splitFolder);
-                }
-                
-                // 验证文件夹创建成功
-                if (!Directory.Exists(splitFolder))
-                {
-                    throw new Exception("无法创建拆分文件夹，请检查权限设置");
-                }
-                
-                return splitFolder;
+                Directory.CreateDirectory(splitFolder);
             }
-            catch (Exception ex)
-            {
-                throw new Exception($"准备拆分环境失败：{ex.Message}");
-            }
+            
+            if (!Directory.Exists(splitFolder))
+                throw new Exception("无法创建拆分文件夹，请检查权限设置");
+            
+            return splitFolder;
         }
 
         /// <summary>
@@ -663,169 +530,82 @@ namespace WordMan_VSTO
         }
 
         /// <summary>
-        /// 拆分单页
+        /// 设置页面方向
         /// </summary>
-        private void SplitSinglePage(Word.Document sourceDoc, int pageNumber, string splitFolder, string baseFileName)
+        private void SetPageOrientation(Word.Document sourceDocument, Word.Document targetDocument, int pageNumber)
         {
-            Word.Range pageRange = null;
-            Word.Document newDoc = null;
-            Word.Range newRange = null;
-            
             try
             {
-                // 获取页面范围
-                pageRange = GetPageRangeOptimized(sourceDoc, pageNumber, pageNumber);
-                if (pageRange == null) 
-                {
-                    throw new Exception($"第{pageNumber}页内容为空或无法获取");
-                }
-
-                // 复制页面内容
-                pageRange.Copy();
+                var sourceSection = GetPageSection(sourceDocument, pageNumber) ?? sourceDocument.Sections[1];
+                var sourcePageSetup = sourceSection.PageSetup;
+                var targetPageSetup = targetDocument.Sections[1].PageSetup;
                 
-                // 创建新文档
-                newDoc = app.Documents.Add();
-                if (newDoc == null)
-                {
-                    throw new Exception("无法创建新文档");
-                }
+                targetPageSetup.Orientation = sourcePageSetup.Orientation;
+                targetPageSetup.PageWidth = sourcePageSetup.PageWidth;
+                targetPageSetup.PageHeight = sourcePageSetup.PageHeight;
+                targetPageSetup.PaperSize = sourcePageSetup.PaperSize;
                 
-                // 使用Range.Paste替代Selection.Paste
-                newRange = newDoc.Range();
-                newRange.Paste();
-                
-                // 复制页面设置
-                CopyPageSetup(sourceDoc, newDoc);
-                
-                // 保存文档
-                string newFileName = Path.Combine(splitFolder, $"{baseFileName}_{pageNumber}.docx");
-                newDoc.SaveAs2(FileName: newFileName, FileFormat: WdSaveFormat.wdFormatXMLDocument);
+                targetDocument.Range().Font.Reset();
             }
-            catch (Exception ex)
-            {
-                throw new Exception($"拆分第{pageNumber}页失败：{ex.Message}");
-            }
-            finally
-            {
-                // 确保释放COM对象
-                ReleaseComObject(pageRange);
-                ReleaseComObject(newRange);
-                SafeCloseDocument(newDoc);
-            }
+            catch { }
         }
 
         /// <summary>
-        /// 拆分页码范围
+        /// 拆分页面到新文档
         /// </summary>
-        private void SplitPageRange(Word.Document sourceDoc, PageRange range, string splitFolder, string baseFileName)
+        private void SplitPageRange(Word.Document sourceDocument, int startPage, int endPage, string outputFolder, string baseFileName, string rangeName = null)
         {
             Word.Range pageRange = null;
-            Word.Document newDoc = null;
-            Word.Range newRange = null;
-            string rangeName = range.StartPage == range.EndPage ? 
-                $"第{range.StartPage}页" : 
-                $"第{range.StartPage}-{range.EndPage}页";
+            Word.Document newDocument = null;
+            Word.Selection selection = null;
             
             try
             {
-                System.Diagnostics.Debug.WriteLine($"开始拆分{rangeName}...");
+                if (sourceDocument == null) throw new Exception("源文档为空");
+                if (startPage < 1 || endPage < 1 || startPage > endPage)
+                    throw new Exception($"页码范围无效：第{startPage}-{endPage}页");
                 
-                // 获取页码范围
-                pageRange = GetPageRangeOptimized(sourceDoc, range.StartPage, range.EndPage);
-                if (pageRange == null) 
-                {
-                    throw new Exception($"{rangeName}内容为空或无法获取");
-                }
+                string rangeDescription = startPage == endPage ? $"第{startPage}页" : $"第{startPage}-{endPage}页";
+                
+                pageRange = GetPageRange(sourceDocument, startPage, endPage);
+                if (pageRange == null || pageRange.Start >= pageRange.End)
+                    throw new Exception($"{rangeDescription}内容为空或无效");
 
-                // 验证范围内容
-                if (pageRange.Start >= pageRange.End)
-                {
-                    throw new Exception($"{rangeName}范围无效：{pageRange.Start}-{pageRange.End}");
-                }
-
-                // 复制页面内容
+                pageRange.Copy();
+                
+                newDocument = _wordApplication.Documents.Add();
+                if (newDocument == null) throw new Exception("无法创建新文档");
+                
+                SetPageOrientation(sourceDocument, newDocument, startPage);
+                
+                selection = newDocument.Application.Selection;
+                if (selection == null) throw new Exception("无法获取选择对象");
+                selection.Paste();
+                
                 try
                 {
-                    pageRange.Copy();
-                    System.Diagnostics.Debug.WriteLine($"已复制{rangeName}内容，字符数：{pageRange.End - pageRange.Start}");
+                    CopyPageSetup(sourceDocument, newDocument, startPage);
                 }
-                catch (Exception copyEx)
-                {
-                    throw new Exception($"复制{rangeName}内容失败：{copyEx.Message}");
-                }
+                catch { } // 页面设置失败不影响主要功能
                 
-                // 创建新文档
-                try
-                {
-                    newDoc = app.Documents.Add();
-                    if (newDoc == null)
-                    {
-                        throw new Exception("无法创建新文档");
-                    }
-                    System.Diagnostics.Debug.WriteLine("新文档创建成功");
-                }
-                catch (Exception docEx)
-                {
-                    throw new Exception($"创建新文档失败：{docEx.Message}");
-                }
+                CleanTrailingContent(newDocument);
                 
-                // 使用Range.Paste替代Selection.Paste，避免依赖选区状态
-                try
-                {
-                    newRange = newDoc.Range();
-                    newRange.Paste();
-                    System.Diagnostics.Debug.WriteLine($"已粘贴内容到新文档");
-                }
-                catch (Exception pasteEx)
-                {
-                    throw new Exception($"粘贴内容失败：{pasteEx.Message}");
-                }
+                string fileName = !string.IsNullOrEmpty(rangeName) ? 
+                    $"{baseFileName}_{rangeName}.docx" : 
+                    $"{baseFileName}_{rangeDescription}.docx";
+                string outputFilePath = Path.Combine(outputFolder, fileName);
                 
-                // 复制页面设置（保持原有格式）
-                try
-                {
-                    CopyPageSetup(sourceDoc, newDoc);
-                    System.Diagnostics.Debug.WriteLine("页面设置复制完成");
-                }
-                catch (Exception setupEx)
-                {
-                    System.Diagnostics.Debug.WriteLine($"复制页面设置失败：{setupEx.Message}");
-                    // 页面设置失败不影响主要功能
-                }
-                
-                // 生成文件名
-                string newFileName = Path.Combine(splitFolder, $"{baseFileName}_{rangeName}.docx");
-                System.Diagnostics.Debug.WriteLine($"准备保存文件：{newFileName}");
-                
-                // 明确指定格式为docx（兼容Word 2007+）
-                try
-                {
-                    newDoc.SaveAs2(FileName: newFileName, FileFormat: WdSaveFormat.wdFormatXMLDocument);
-                    System.Diagnostics.Debug.WriteLine($"文件保存成功：{newFileName}");
-                }
-                catch (Exception saveEx)
-                {
-                    throw new Exception($"保存文件失败：{saveEx.Message}");
-                }
+                newDocument.SaveAs2(FileName: outputFilePath, FileFormat: WdSaveFormat.wdFormatXMLDocument);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"拆分{rangeName}失败：{ex.Message}\n堆栈：{ex.StackTrace}");
-                throw new Exception($"拆分第{range.StartPage}-{range.EndPage}页失败：{ex.Message}");
+                throw new Exception($"拆分第{startPage}-{endPage}页失败：{ex.Message}");
             }
             finally
             {
-                // 确保释放COM对象
-                try
-                {
-                    ReleaseComObject(pageRange);
-                    ReleaseComObject(newRange);
-                    SafeCloseDocument(newDoc);
-                }
-                catch (Exception releaseEx)
-                {
-                    System.Diagnostics.Debug.WriteLine($"释放COM对象失败：{releaseEx.Message}");
-                }
+                ReleaseComObject(selection);
+                ReleaseComObject(pageRange);
+                SafeCloseDocument(newDocument);
             }
         }
 
@@ -840,10 +620,7 @@ namespace WordMan_VSTO
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"垃圾回收失败：{ex.Message}");
-            }
+            catch { }
         }
     }
 
@@ -871,3 +648,4 @@ namespace WordMan_VSTO
         }
     }
 }
+

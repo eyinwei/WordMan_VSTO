@@ -1,36 +1,12 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|d:\\users\\yw\\documents\\vsto develop\\wordman_vsto\\splitandmerge\\documentsplitter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|solutionrelative:splitandmerge\\documentsplitter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 1,
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
-        {
-          "DockedHeight": 297,
-          "SelectedChildIndex": 0,
-          "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "DocumentSplitter.cs",
-              "DocumentMoniker": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\SplitAndMerge\\DocumentSplitter.cs",
-              "RelativeDocumentMoniker": "SplitAndMerge\\DocumentSplitter.cs",
-              "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\SplitAndMerge\\DocumentSplitter.cs",
-              "RelativeToolTip": "SplitAndMerge\\DocumentSplitter.cs",
-              "ViewState": "AgIAAC4AAAAAAAAAAAAYwEIAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-23T01:58:25.162Z",
-              "EditorCaption": ""
-            }
-          ]
-        },
         {
           "DockedHeight": 103,
           "SelectedChildIndex": -1,

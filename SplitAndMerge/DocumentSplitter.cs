@@ -67,7 +67,7 @@ namespace WordMan_VSTO
             }
             catch (Exception ex)
             {
-                ShowMessage($"文档拆分失败：{ex.Message}", "错误", MessageBoxIcon.Error);
+                MessageBox.Show($"文档拆分失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -75,13 +75,6 @@ namespace WordMan_VSTO
             }
         }
 
-        /// <summary>
-        /// 显示消息框
-        /// </summary>
-        private void ShowMessage(string message, string title, MessageBoxIcon icon = MessageBoxIcon.Information)
-        {
-            MessageBox.Show(message, title, MessageBoxButtons.OK, icon);
-        }
 
 
         /// <summary>
@@ -99,7 +92,7 @@ namespace WordMan_VSTO
                 if (pageNumber % 3 == 0) { GC.Collect(); GC.WaitForPendingFinalizers(); GC.Collect(); }
             }
 
-            ShowSplitResult(false, totalPages, outputFolder);
+            ShowSplitResult(totalPages, outputFolder);
         }
 
 
@@ -107,16 +100,9 @@ namespace WordMan_VSTO
         /// <summary>
         /// 显示拆分结果
         /// </summary>
-        private void ShowSplitResult(bool isCancelled, int fileCount, string outputFolder)
+        private void ShowSplitResult(int fileCount, string outputFolder)
         {
-            if (isCancelled)
-            {
-                MessageBox.Show("文档拆分已取消。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            else
-            {
-                MessageBox.Show($"文档已成功拆分为 {fileCount} 个文件，保存在：{outputFolder}", "拆分完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+            MessageBox.Show($"文档已成功拆分为 {fileCount} 个文件，保存在：{outputFolder}", "拆分完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
 
@@ -126,47 +112,35 @@ namespace WordMan_VSTO
         private Word.Range GetPageRange(Word.Document document, int startPage, int endPage)
         {
             Word.Range startRange = null;
-            Word.Range endRange = null;
             Word.Range resultRange = null;
             
             try
             {
                 int totalPages = document.Range().Information[WdInformation.wdNumberOfPagesInDocument];
-                if (startPage < 1 || endPage < 1 || startPage > totalPages || endPage > totalPages)
-                    throw new Exception($"页码范围无效：第{startPage}-{endPage}页（总页数：{totalPages}）");
+                ValidateDocumentState(document, startPage, endPage);
                 
-                if (startPage > endPage)
-                    throw new Exception($"起始页不能大于结束页：第{startPage}-{endPage}页");
+                startRange = document.GoTo(What: WdGoToItem.wdGoToPage, Which: WdGoToDirection.wdGoToAbsolute, Count: startPage);
+                if (startRange == null) throw new Exception("无法定位起始页");
                 
-                // 尝试GoTo方法
-                try
-                {
-                    startRange = document.GoTo(What: WdGoToItem.wdGoToPage, Which: WdGoToDirection.wdGoToAbsolute, Count: startPage);
-                    if (startRange != null)
-                    {
-                        int startPos = startRange.Start;
-                        int endPos = GetPageEndPosition(document, endPage, totalPages);
-                        
-                        resultRange = document.Range();
-                        resultRange.SetRange(startPos, Math.Max(startPos, endPos));
-                        
-                        if (resultRange.Start < resultRange.End) return resultRange;
-                    }
-                }
-                catch { }
-                finally
-                {
-                    ReleaseComObject(startRange);
-                    ReleaseComObject(endRange);
-                }
+                int startPos = startRange.Start;
+                int endPos = GetPageEndPosition(document, endPage, totalPages);
                 
-                // 备用方法：字符位置估算
-                return GetPageRangeByCharacterPosition(document, startPage, endPage, totalPages);
+                resultRange = document.Range();
+                resultRange.SetRange(startPos, Math.Max(startPos, endPos));
+                
+                if (resultRange.Start >= resultRange.End) 
+                    throw new Exception($"第{startPage}-{endPage}页内容为空或无效");
+                
+                return resultRange;
             }
             catch (Exception ex)
             {
                 ReleaseComObject(resultRange);
                 throw new Exception($"获取第{startPage}-{endPage}页范围失败：{ex.Message}");
+            }
+            finally
+            {
+                ReleaseComObject(startRange);
             }
         }
 
@@ -188,28 +162,11 @@ namespace WordMan_VSTO
             return document.Range().End;
         }
 
-        /// <summary>
-        /// 使用字符位置估算获取页面范围
-        /// </summary>
-        private Word.Range GetPageRangeByCharacterPosition(Word.Document document, int startPage, int endPage, int totalPages)
-        {
-            int totalCharacters = document.Range().End;
-            int charactersPerPage = Math.Max(1, totalCharacters / totalPages);
-            
-            int startPos = Math.Max(0, (startPage - 1) * charactersPerPage);
-            int endPos = Math.Min(totalCharacters, endPage * charactersPerPage);
-            
-            if (startPos >= endPos) startPos = Math.Max(0, endPos - 50);
-            
-            var range = document.Range();
-            range.SetRange(startPos, endPos);
-            return range;
-        }
 
         /// <summary>
-        /// 验证文档状态
+        /// 验证文档状态和页码范围
         /// </summary>
-        private void ValidateDocumentState(Word.Document doc)
+        private void ValidateDocumentState(Word.Document doc, int startPage = 1, int endPage = 1)
         {
             if (doc == null) throw new Exception("文档对象为空");
             
@@ -218,6 +175,12 @@ namespace WordMan_VSTO
             
             int totalPages = doc.Range().Information[WdInformation.wdNumberOfPagesInDocument];
             if (totalPages <= 0) throw new Exception("文档没有有效页面");
+            
+            if (startPage < 1 || endPage < 1 || startPage > totalPages || endPage > totalPages)
+                throw new Exception($"页码范围无效：第{startPage}-{endPage}页（总页数：{totalPages}）");
+            
+            if (startPage > endPage)
+                throw new Exception($"起始页不能大于结束页：第{startPage}-{endPage}页");
         }
 
         /// <summary>
@@ -257,7 +220,7 @@ namespace WordMan_VSTO
 
 
         /// <summary>
-        /// 复制页面设置
+        /// 复制页面设置和页眉页脚
         /// </summary>
         private void CopyPageSetup(Word.Document sourceDoc, Word.Document targetDoc, int pageNum = 1)
         {
@@ -268,6 +231,7 @@ namespace WordMan_VSTO
                 var sourcePageSetup = sourceSection.PageSetup;
                 var targetPageSetup = targetSection.PageSetup;
                 
+                // 复制页面设置
                 targetPageSetup.TopMargin = sourcePageSetup.TopMargin;
                 targetPageSetup.BottomMargin = sourcePageSetup.BottomMargin;
                 targetPageSetup.LeftMargin = sourcePageSetup.LeftMargin;
@@ -284,7 +248,11 @@ namespace WordMan_VSTO
                 targetPageSetup.BookFoldPrinting = sourcePageSetup.BookFoldPrinting;
                 targetPageSetup.BookFoldRevPrinting = sourcePageSetup.BookFoldRevPrinting;
                 
+                // 复制页眉页脚
                 CopyHeadersAndFooters(sourceSection, targetSection);
+                
+                // 重置字体设置
+                targetDoc.Range().Font.Reset();
             }
             catch { }
         }
@@ -459,26 +427,6 @@ namespace WordMan_VSTO
             }
         }
 
-        /// <summary>
-        /// 设置页面方向
-        /// </summary>
-        private void SetPageOrientation(Word.Document sourceDocument, Word.Document targetDocument, int pageNumber)
-        {
-            try
-            {
-                var sourceSection = GetPageSection(sourceDocument, pageNumber) ?? sourceDocument.Sections[1];
-                var sourcePageSetup = sourceSection.PageSetup;
-                var targetPageSetup = targetDocument.Sections[1].PageSetup;
-                
-                targetPageSetup.Orientation = sourcePageSetup.Orientation;
-                targetPageSetup.PageWidth = sourcePageSetup.PageWidth;
-                targetPageSetup.PageHeight = sourcePageSetup.PageHeight;
-                targetPageSetup.PaperSize = sourcePageSetup.PaperSize;
-                
-                targetDocument.Range().Font.Reset();
-            }
-            catch { }
-        }
 
         /// <summary>
         /// 拆分页面到新文档
@@ -492,8 +440,6 @@ namespace WordMan_VSTO
             try
             {
                 if (sourceDocument == null) throw new Exception("源文档为空");
-                if (startPage < 1 || endPage < 1 || startPage > endPage)
-                    throw new Exception($"页码范围无效：第{startPage}-{endPage}页");
                 
                 string rangeDescription = startPage == endPage ? $"第{startPage}页" : $"第{startPage}-{endPage}页";
                 
@@ -506,18 +452,11 @@ namespace WordMan_VSTO
                 newDocument = _wordApplication.Documents.Add();
                 if (newDocument == null) throw new Exception("无法创建新文档");
                 
-                SetPageOrientation(sourceDocument, newDocument, startPage);
-                
                 selection = newDocument.Application.Selection;
                 if (selection == null) throw new Exception("无法获取选择对象");
                 selection.Paste();
                 
-                try
-                {
-                    CopyPageSetup(sourceDocument, newDocument, startPage);
-                }
-                catch { }
-                
+                CopyPageSetup(sourceDocument, newDocument, startPage);
                 CleanTrailingContent(newDocument);
                 
                 string fileName = $"{baseFileName}_{rangeDescription}.docx";

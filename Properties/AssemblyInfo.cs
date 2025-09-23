@@ -6,11 +6,11 @@ using System.Security;
 // 有关程序集的一般信息由以下
 // 控制。更改这些特性值可修改
 // 与程序集关联的信息。
-[assembly: AssemblyTitle("WordMan_VSTO")]
+[assembly: AssemblyTitle("WordMan")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Organization")]
-[assembly: AssemblyProduct("WordMan_VSTO")]
+[assembly: AssemblyProduct("WordMan")]
 [assembly: AssemblyCopyright("Copyright © Organization 2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 
-namespace WordMan_VSTO
+namespace WordMan
 {
     public partial class GreekLetterForm : Form
     {

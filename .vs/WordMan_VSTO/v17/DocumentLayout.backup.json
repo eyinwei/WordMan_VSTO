@@ -7,7 +7,7 @@
       "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|solutionrelative:stylesetting\\stylesettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|d:\\users\\yw\\documents\\vsto develop\\wordman_vsto\\stylesetting\\stylesettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\stylesetting\\stylesettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan_VSTO.csproj|solutionrelative:stylesetting\\stylesettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     }
   ],
@@ -36,7 +36,7 @@
               "RelativeDocumentMoniker": "StyleSetting\\StyleSettings.cs",
               "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\StyleSetting\\StyleSettings.cs",
               "RelativeToolTip": "StyleSetting\\StyleSettings.cs",
-              "ViewState": "AgIAAD4IAAAAAAAAAAAcwFgIAAAFAAAAAAAAAA==",
+              "ViewState": "AgIAAJYHAAAAAAAAAAAswDsIAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-23T17:45:13.46Z",
               "EditorCaption": ""
@@ -50,8 +50,7 @@
               "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\StyleSetting\\StyleSettings.cs [\u8BBE\u8BA1]",
               "RelativeToolTip": "StyleSetting\\StyleSettings.cs [\u8BBE\u8BA1]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-23T14:50:55.904Z",
-              "EditorCaption": " [\u8BBE\u8BA1]"
+              "WhenOpened": "2025-09-23T14:50:55.904Z"
             }
           ]
         }

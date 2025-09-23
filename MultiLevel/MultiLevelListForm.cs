@@ -9,10 +9,10 @@ using Microsoft.Office.Interop.Word;
 using Font = System.Drawing.Font;
 using Point = System.Drawing.Point;
 using Color = System.Drawing.Color;
-using WordMan_VSTO;
-using WordMan_VSTO.MultiLevel;
+using WordMan;
+using WordMan.MultiLevel;
 
-namespace WordMan_VSTO
+namespace WordMan
 {
 
     public partial class MultiLevelListForm : Form
@@ -999,7 +999,7 @@ namespace WordMan_VSTO
         /// </summary>
         private void OpenLevelStyleSettingsForm()
         {
-            var levelStyleSettingsForm = new WordMan_VSTO.MultiLevel.LevelStyleSettingsForm(currentLevels);
+            var levelStyleSettingsForm = new WordMan.MultiLevel.LevelStyleSettingsForm(currentLevels);
             
             // 如果有现有的样式设置，传递给窗体
             if (levelStyleSettings != null && levelStyleSettings.Count > 0)

@@ -1,4 +1,4 @@
-namespace WordMan_VSTO.MultiLevel
+namespace WordMan.MultiLevel
 {
     partial class LevelStyleSettingsForm
     {
@@ -30,8 +30,8 @@ namespace WordMan_VSTO.MultiLevel
         {
             this.Dta_StyleList = new System.Windows.Forms.DataGridView();
             this.Grp_SetSelectedStyle = new System.Windows.Forms.GroupBox();
-            this.Txt_RightIndent = new WordMan_VSTO.StandardNumericUpDown();
-            this.Cmb_SpaceAfter = new WordMan_VSTO.StandardComboBox();
+            this.Txt_RightIndent = new WordMan.StandardNumericUpDown();
+            this.Cmb_SpaceAfter = new WordMan.StandardComboBox();
             this.label14 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
@@ -47,17 +47,17 @@ namespace WordMan_VSTO.MultiLevel
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.Btn_FontColor = new System.Windows.Forms.Button();
-            this.Txt_LeftIndent = new WordMan_VSTO.StandardNumericUpDown();
-            this.Btn_BreakBefore = new WordMan_VSTO.ToggleButton();
-            this.Cmb_Alignment = new WordMan_VSTO.StandardComboBox();
-            this.Cmb_SpaceBefore = new WordMan_VSTO.StandardComboBox();
-            this.Cmb_FontSize = new WordMan_VSTO.StandardComboBox();
-            this.Cmb_LineSpacing = new WordMan_VSTO.StandardComboBox();
-            this.Cmb_EngFontName = new WordMan_VSTO.StandardComboBox();
-            this.Cmb_ChnFontName = new WordMan_VSTO.StandardComboBox();
-            this.Btn_Underline = new WordMan_VSTO.ToggleButton();
-            this.Btn_Italic = new WordMan_VSTO.ToggleButton();
-            this.Btn_Bold = new WordMan_VSTO.ToggleButton();
+            this.Txt_LeftIndent = new WordMan.StandardNumericUpDown();
+            this.Btn_BreakBefore = new WordMan.ToggleButton();
+            this.Cmb_Alignment = new WordMan.StandardComboBox();
+            this.Cmb_SpaceBefore = new WordMan.StandardComboBox();
+            this.Cmb_FontSize = new WordMan.StandardComboBox();
+            this.Cmb_LineSpacing = new WordMan.StandardComboBox();
+            this.Cmb_EngFontName = new WordMan.StandardComboBox();
+            this.Cmb_ChnFontName = new WordMan.StandardComboBox();
+            this.Btn_Underline = new WordMan.ToggleButton();
+            this.Btn_Italic = new WordMan.ToggleButton();
+            this.Btn_Bold = new WordMan.ToggleButton();
             this.Btn_SetStyles = new System.Windows.Forms.Button();
             this.Btn_Cancel = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.Dta_StyleList)).BeginInit();
@@ -425,8 +425,8 @@ namespace WordMan_VSTO.MultiLevel
 
         private System.Windows.Forms.DataGridView Dta_StyleList;
         private System.Windows.Forms.GroupBox Grp_SetSelectedStyle;
-        private WordMan_VSTO.StandardNumericUpDown Txt_RightIndent;
-        private WordMan_VSTO.StandardComboBox Cmb_SpaceAfter;
+        private WordMan.StandardNumericUpDown Txt_RightIndent;
+        private WordMan.StandardComboBox Cmb_SpaceAfter;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label12;
@@ -442,17 +442,17 @@ namespace WordMan_VSTO.MultiLevel
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button Btn_FontColor;
-        private WordMan_VSTO.StandardNumericUpDown Txt_LeftIndent;
-        private WordMan_VSTO.ToggleButton Btn_BreakBefore;
-        private WordMan_VSTO.StandardComboBox Cmb_Alignment;
-        private WordMan_VSTO.StandardComboBox Cmb_SpaceBefore;
-        private WordMan_VSTO.StandardComboBox Cmb_FontSize;
-        private WordMan_VSTO.StandardComboBox Cmb_LineSpacing;
-        private WordMan_VSTO.StandardComboBox Cmb_EngFontName;
-        private WordMan_VSTO.StandardComboBox Cmb_ChnFontName;
-        private WordMan_VSTO.ToggleButton Btn_Underline;
-        private WordMan_VSTO.ToggleButton Btn_Italic;
-        private WordMan_VSTO.ToggleButton Btn_Bold;
+        private WordMan.StandardNumericUpDown Txt_LeftIndent;
+        private WordMan.ToggleButton Btn_BreakBefore;
+        private WordMan.StandardComboBox Cmb_Alignment;
+        private WordMan.StandardComboBox Cmb_SpaceBefore;
+        private WordMan.StandardComboBox Cmb_FontSize;
+        private WordMan.StandardComboBox Cmb_LineSpacing;
+        private WordMan.StandardComboBox Cmb_EngFontName;
+        private WordMan.StandardComboBox Cmb_ChnFontName;
+        private WordMan.ToggleButton Btn_Underline;
+        private WordMan.ToggleButton Btn_Italic;
+        private WordMan.ToggleButton Btn_Bold;
         private System.Windows.Forms.Button Btn_SetStyles;
         private System.Windows.Forms.Button Btn_Cancel;
     }

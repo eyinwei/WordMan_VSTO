@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using Word = Microsoft.Office.Interop.Word;
 using Color = System.Drawing.Color;
 
-namespace WordMan_VSTO
+namespace WordMan
 {
     /// <summary>
     /// 样式设置窗口UI设计器

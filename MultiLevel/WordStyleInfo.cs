@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using Microsoft.Office.Interop.Word;
 using Microsoft.Office.Core;
 
-namespace WordMan_VSTO.MultiLevel
+namespace WordMan.MultiLevel
 {
     public class WordStyleInfo
     {

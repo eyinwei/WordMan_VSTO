@@ -7,7 +7,7 @@ using Microsoft.Office.Interop.Word;
 using Point = System.Drawing.Point;
 using Size = System.Drawing.Size;
 
-namespace WordMan_VSTO
+namespace WordMan
 {
     /// <summary>
     /// 样式选择窗体

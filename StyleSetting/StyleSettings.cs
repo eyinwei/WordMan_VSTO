@@ -7,15 +7,15 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using Microsoft.Office.Interop.Word;
-using WordMan_VSTO;
-using WordMan_VSTO.MultiLevel;
+using WordMan;
+using WordMan.MultiLevel;
 using Color = System.Drawing.Color;
 using Point = System.Drawing.Point;
 using Font = System.Drawing.Font;
 using CheckBox = System.Windows.Forms.CheckBox;
 using Word = Microsoft.Office.Interop.Word;
 
-namespace WordMan_VSTO
+namespace WordMan
 {
     /// <summary>
     /// 样式设置窗体 - 按照WordFormatHelper的StyleSetGuider设计
@@ -25,14 +25,6 @@ namespace WordMan_VSTO
         #region 私有字段
 
         // 使用 MultiLevelDataManager 的字号相关方法，避免重复定义
-
-        private readonly List<WdPaperSize> PaperSize = new List<WdPaperSize>(4)
-        {
-            WdPaperSize.wdPaperA3,
-            WdPaperSize.wdPaperA4,
-            WdPaperSize.wdPaperA5,
-            WdPaperSize.wdPaperB5
-        };
 
         private BindingList<string> StyleNames;
         private readonly List<CustomStyle> Styles = new List<CustomStyle>(17);
@@ -45,7 +37,6 @@ namespace WordMan_VSTO
 
         #region 私有方法
 
-        // IsChineseFont 方法已移除 - 现在直接使用 MultiLevelDataManager.GetSystemFonts() 统一获取系统字体
 
         /// <summary>
         /// 通用下拉框初始化方法
@@ -855,7 +846,7 @@ namespace WordMan_VSTO
                     {
                         Styles.Remove(style);
                         StyleNames.Remove(selectedStyle);
-                        ClearControls();
+                        ResetControlsToDefault();
 
                         // 刷新样式列表显示
                         Lst_Styles.DataSource = null;
@@ -1268,7 +1259,6 @@ namespace WordMan_VSTO
                     string afterSpacingText = style.AfterSpacing.ToString("0.0 磅");
                     SetComboBoxSelection(Cmb_AfterSpacing, afterSpacingText, WordStyleInfo.SpaceAfterValues);
                 }
-                // Chk_BeforeBreak.Checked = style.BeforeBreak; // Chk_BeforeBreak控件已移除
             }
             finally
             {
@@ -1337,7 +1327,6 @@ namespace WordMan_VSTO
             // 从控件读取段落间距值，直接使用磅单位
             style.BeforeSpacing = ConvertSpacingToPoints(Cmb_BefreSpacing.Text);
             style.AfterSpacing = ConvertSpacingToPoints(Cmb_AfterSpacing.Text);
-            // style.BeforeBreak = Chk_BeforeBreak.Checked; // Chk_BeforeBreak控件已移除
         }
 
         private CustomStyle CreateStyleFromControls(string name)
@@ -1365,9 +1354,9 @@ namespace WordMan_VSTO
                 leftIndent: (float)Nud_LeftIndent.GetValueInCentimeters(),
                 rightIndent: (float)Nud_RightIndent.GetValueInCentimeters(),
                 firstLineIndent: 首行缩进方式下拉框.SelectedIndex == 0 ? 0f : (float)Nud_FirstLineIndent.GetValueInCentimeters(),
-                firstLineIndentByChar: 0, // 使用默认值0，因为Nud_FirstLineIndentByChar控件已移除
+                firstLineIndentByChar: 0,
                 lineSpacing: lineSpacing,
-                beforeBreak: false, // Chk_BeforeBreak控件已移除，使用默认值false
+                beforeBreak: false,
                 beforeSpacing: ConvertSpacingToPoints(Cmb_BefreSpacing.Text),
                 afterSpacing: ConvertSpacingToPoints(Cmb_AfterSpacing.Text),
                 numberStyle: 0,
@@ -1378,37 +1367,16 @@ namespace WordMan_VSTO
 
         private void UpdateStyleInfo(CustomStyle style)
         {
-            string info = $"样式名称：{style.Name}\n" +
-                         $"字体：{style.FontName ?? "默认"}\n" +
-                         $"大小：{style.FontSize}磅\n" +
-                         $"格式：{(style.Bold ? "粗体 " : "")}{(style.Italic ? "斜体 " : "")}{(style.Underline ? "下划线" : "")}\n" +
-                         $"对齐：{GetAlignmentText(style.ParaAlignment)}\n" +
-                         $"缩进：左{style.LeftIndent:F1}厘米，首行{style.FirstLineIndent:F1}厘米\n" +
-                         $"行距：{ConvertLineSpacingToString(style.LineSpacing)}\n" +
-                         $"段前：{style.BeforeSpacing:F1}磅，段后：{style.AfterSpacing:F1}磅";
-
-            // 在调试输出中显示样式信息
+            // 调试输出样式信息
             System.Diagnostics.Debug.WriteLine($"=== 样式信息更新 ===");
-            System.Diagnostics.Debug.WriteLine(info);
+            System.Diagnostics.Debug.WriteLine($"样式名称：{style.Name}");
+            System.Diagnostics.Debug.WriteLine($"字体：{style.FontName ?? "默认"}，大小：{style.FontSize}磅");
+            System.Diagnostics.Debug.WriteLine($"格式：{(style.Bold ? "粗体 " : "")}{(style.Italic ? "斜体 " : "")}{(style.Underline ? "下划线" : "")}");
+            System.Diagnostics.Debug.WriteLine($"对齐：{GetAlignmentText(style.ParaAlignment)}");
+            System.Diagnostics.Debug.WriteLine($"缩进：左{style.LeftIndent:F1}厘米，首行{style.FirstLineIndent:F1}厘米");
+            System.Diagnostics.Debug.WriteLine($"行距：{ConvertLineSpacingToString(style.LineSpacing)}");
+            System.Diagnostics.Debug.WriteLine($"段前：{style.BeforeSpacing:F1}磅，段后：{style.AfterSpacing:F1}磅");
             System.Diagnostics.Debug.WriteLine($"==================");
-        }
-
-
-        private void ClearControls()
-        {
-            Cmb_ChnFontName.SelectedIndex = -1;
-            Cmb_EngFontName.SelectedIndex = -1;
-            Cmb_FontSize.SelectedIndex = -1;
-            Btn_Bold.Pressed = false;
-            Btn_Italic.Pressed = false;
-            Btn_UnderLine.Pressed = false;
-            Cmb_ParaAligment.SelectedIndex = -1;
-            Nud_LeftIndent.Value = 0;
-            Nud_FirstLineIndent.Value = 0;
-            SetComboBoxSelection(Cmb_BefreSpacing, "0.0 磅", WordStyleInfo.SpaceBeforeValues);
-            SetComboBoxSelection(Cmb_AfterSpacing, "0.0 磅", WordStyleInfo.SpaceAfterValues);
-            // Chk_BeforeBreak.Checked = false; // Chk_BeforeBreak控件已移除
-            // Lab_StyleInfo控件已移除，样式信息显示功能暂时禁用
         }
 
         /// <summary>

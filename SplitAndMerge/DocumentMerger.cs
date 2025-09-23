@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Office.Interop.Word;
 
-namespace WordMan_VSTO.SplitAndMerge
+namespace WordMan.SplitAndMerge
 {
     public class DocumentMerger
     {

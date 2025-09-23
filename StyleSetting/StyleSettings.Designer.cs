@@ -2,10 +2,10 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using WordMan_VSTO;
-using WordMan_VSTO.MultiLevel;
+using WordMan;
+using WordMan.MultiLevel;
 
-namespace WordMan_VSTO
+namespace WordMan
 {
     partial class StyleSettings
     {
@@ -95,32 +95,32 @@ namespace WordMan_VSTO
             this.label19 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.Lst_Styles = new System.Windows.Forms.ListBox();
-            this.导入 = new WordMan_VSTO.StandardButton();
-            this.加载 = new WordMan_VSTO.StandardButton();
-            this.关闭 = new WordMan_VSTO.StandardButton();
-            this.Txt_AddStyleName = new WordMan_VSTO.StandardTextBox();
-            this.Btn_ApplySet = new WordMan_VSTO.StandardButton();
-            this.删除 = new WordMan_VSTO.StandardButton();
-            this.显示标题数下拉框 = new WordMan_VSTO.StandardComboBox();
-            this.风格下拉框 = new WordMan_VSTO.StandardComboBox();
-            this.Cmb_ChnFontName = new WordMan_VSTO.StandardComboBox();
-            this.Cmb_EngFontName = new WordMan_VSTO.StandardComboBox();
-            this.Cmb_FontSize = new WordMan_VSTO.StandardComboBox();
-            this.Btn_FontColor = new WordMan_VSTO.StandardButton();
-            this.Btn_Bold = new WordMan_VSTO.ToggleButton();
-            this.Btn_Italic = new WordMan_VSTO.ToggleButton();
-            this.Btn_UnderLine = new WordMan_VSTO.ToggleButton();
-            this.Cmb_LineSpacing = new WordMan_VSTO.StandardComboBox();
-            this.Cmb_BefreSpacing = new WordMan_VSTO.StandardComboBox();
-            this.Cmb_AfterSpacing = new WordMan_VSTO.StandardComboBox();
-            this.Cmb_ParaAligment = new WordMan_VSTO.StandardComboBox();
-            this.Nud_LeftIndent = new WordMan_VSTO.StandardNumericUpDown();
-            this.Nud_RightIndent = new WordMan_VSTO.StandardNumericUpDown();
-            this.首行缩进方式下拉框 = new WordMan_VSTO.StandardComboBox();
-            this.Nud_FirstLineIndent = new WordMan_VSTO.StandardNumericUpDown();
-            this.导出 = new WordMan_VSTO.StandardButton();
-            this.添加 = new WordMan_VSTO.StandardButton();
-            this.读取文档样式 = new WordMan_VSTO.StandardButton();
+            this.导入 = new WordMan.StandardButton();
+            this.加载 = new WordMan.StandardButton();
+            this.关闭 = new WordMan.StandardButton();
+            this.Txt_AddStyleName = new WordMan.StandardTextBox();
+            this.Btn_ApplySet = new WordMan.StandardButton();
+            this.删除 = new WordMan.StandardButton();
+            this.显示标题数下拉框 = new WordMan.StandardComboBox();
+            this.风格下拉框 = new WordMan.StandardComboBox();
+            this.Cmb_ChnFontName = new WordMan.StandardComboBox();
+            this.Cmb_EngFontName = new WordMan.StandardComboBox();
+            this.Cmb_FontSize = new WordMan.StandardComboBox();
+            this.Btn_FontColor = new WordMan.StandardButton();
+            this.Btn_Bold = new WordMan.ToggleButton();
+            this.Btn_Italic = new WordMan.ToggleButton();
+            this.Btn_UnderLine = new WordMan.ToggleButton();
+            this.Cmb_LineSpacing = new WordMan.StandardComboBox();
+            this.Cmb_BefreSpacing = new WordMan.StandardComboBox();
+            this.Cmb_AfterSpacing = new WordMan.StandardComboBox();
+            this.Cmb_ParaAligment = new WordMan.StandardComboBox();
+            this.Nud_LeftIndent = new WordMan.StandardNumericUpDown();
+            this.Nud_RightIndent = new WordMan.StandardNumericUpDown();
+            this.首行缩进方式下拉框 = new WordMan.StandardComboBox();
+            this.Nud_FirstLineIndent = new WordMan.StandardNumericUpDown();
+            this.导出 = new WordMan.StandardButton();
+            this.添加 = new WordMan.StandardButton();
+            this.读取文档样式 = new WordMan.StandardButton();
             this.groupBox3.SuspendLayout();
             this.Pal_Font.SuspendLayout();
             this.Pal_ParaIndent.SuspendLayout();

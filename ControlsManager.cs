@@ -8,7 +8,7 @@ using Point = System.Drawing.Point;
 using Font = System.Drawing.Font;
 using Color = System.Drawing.Color;
 
-namespace WordMan_VSTO
+namespace WordMan
 {
     #region 数据结构定义
 

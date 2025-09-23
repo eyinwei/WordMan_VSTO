@@ -4,10 +4,10 @@ using System.Linq;
 using System.Drawing;
 using System.Windows.Forms;
 using Microsoft.Office.Interop.Word;
-using WordMan_VSTO.MultiLevel;
+using WordMan.MultiLevel;
 using Color = System.Drawing.Color;
 
-namespace WordMan_VSTO
+namespace WordMan
 {
     /// <summary>
     /// 样式预设管理器 - 管理各种风格预设样式

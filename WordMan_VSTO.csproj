@@ -227,6 +227,7 @@
     </Compile>
     <Compile Include="StyleSetting\StyleSettingsUIDesigner.cs" />
     <Compile Include="StyleSetting\StyleFileManager.cs" />
+    <Compile Include="StyleSetting\StylePresetManager.cs" />
     <Compile Include="StyleSetting\StyleSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>

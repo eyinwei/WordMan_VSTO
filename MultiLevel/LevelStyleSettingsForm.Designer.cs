@@ -400,7 +400,7 @@ namespace WordMan_VSTO.MultiLevel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.BackColor = System.Drawing.Color.AliceBlue;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(233)))), ((int)(((byte)(247)))));
             this.ClientSize = new System.Drawing.Size(1200, 520);
             this.Controls.Add(this.Btn_Cancel);
             this.Controls.Add(this.Btn_SetStyles);

@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using Microsoft.Office.Interop.Word;
 using Microsoft.Office.Core;
 
-namespace WordMan_VSTO.MultiLevel
+namespace WordMan.MultiLevel
 {
     public class WordStyleInfo
     {
@@ -62,7 +62,7 @@ namespace WordMan_VSTO.MultiLevel
 
         public static readonly string[] HAlignments = new string[5] { "左对齐", "中对齐", "右对齐", "两端对齐", "分散对齐" };
 
-        public static readonly string[] LineSpacings = new string[4] { "单倍行距", "1.5倍行距", "双倍行距", "多倍行距" };
+        public static readonly string[] LineSpacings = new string[5] { "单倍行距", "1.2倍行距", "1.25倍行距", "1.5倍行距", "双倍行距" };
 
         public static readonly string[] SpaceBeforeValues = new string[6] { "0.0 磅", "6.0 磅", "12.0 磅", "18.0 磅", "24.0 磅", "36.0 磅" };
 
@@ -175,7 +175,12 @@ namespace WordMan_VSTO.MultiLevel
                 case WdLineSpacing.wdLineSpaceMultiple:
                     // 保存具体的倍数值
                     float multipleValue = MultiLevelDataManager.PointsToLines(style.ParagraphFormat.LineSpacing);
-                    LineSpace = $"{multipleValue:0.0} 倍行距";
+                    if (Math.Abs(multipleValue - 1.2f) < 0.01f)
+                        LineSpace = "1.2倍行距";
+                    else if (Math.Abs(multipleValue - 1.25f) < 0.01f)
+                        LineSpace = "1.25倍行距";
+                    else
+                        LineSpace = $"{multipleValue:0.0} 倍行距";
                     break;
                 case WdLineSpacing.wdLineSpaceExactly:
                     // 固定行距，保存磅值
@@ -540,6 +545,16 @@ namespace WordMan_VSTO.MultiLevel
                 if (LineSpace == "单倍行距")
                 {
                     paragraphFormat.LineSpacingRule = WdLineSpacing.wdLineSpaceSingle;
+                }
+                else if (LineSpace == "1.2倍行距")
+                {
+                    paragraphFormat.LineSpacingRule = WdLineSpacing.wdLineSpaceMultiple;
+                    paragraphFormat.LineSpacing = MultiLevelDataManager.LinesToPoints(1.2f);
+                }
+                else if (LineSpace == "1.25倍行距")
+                {
+                    paragraphFormat.LineSpacingRule = WdLineSpacing.wdLineSpaceMultiple;
+                    paragraphFormat.LineSpacing = MultiLevelDataManager.LinesToPoints(1.25f);
                 }
                 else if (LineSpace == "1.5倍行距")
                 {

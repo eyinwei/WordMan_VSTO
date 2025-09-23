@@ -2,9 +2,9 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using WordMan_VSTO;
+using WordMan;
 
-namespace WordMan_VSTO
+namespace WordMan
 {
     partial class MultiLevelListForm
     {
@@ -46,13 +46,13 @@ namespace WordMan_VSTO
             this.quickSettingsGroupBox = new System.Windows.Forms.GroupBox();
             
             // 按钮控件
-            this.btnApplySettings = new WordMan_VSTO.StandardButton();
-            this.btnSetMultiLevelList = new WordMan_VSTO.StandardButton();
-            this.btnClose = new WordMan_VSTO.StandardButton();
-            this.btnImport = new WordMan_VSTO.StandardButton();
-            this.btnExport = new WordMan_VSTO.StandardButton();
-            this.btnLoadCurrentList = new WordMan_VSTO.StandardButton();
-            this.btnSetLevelStyle = new WordMan_VSTO.StandardButton();
+            this.btnApplySettings = new WordMan.StandardButton();
+            this.btnSetMultiLevelList = new WordMan.StandardButton();
+            this.btnClose = new WordMan.StandardButton();
+            this.btnImport = new WordMan.StandardButton();
+            this.btnExport = new WordMan.StandardButton();
+            this.btnLoadCurrentList = new WordMan.StandardButton();
+            this.btnSetLevelStyle = new WordMan.StandardButton();
             
             // 标签控件
             this.lblLinkStyleSection = new System.Windows.Forms.Label();
@@ -71,14 +71,14 @@ namespace WordMan_VSTO
             this.chkProgressiveIndent = new System.Windows.Forms.CheckBox();
             
             // 下拉框控件
-            this.cmbLevelCount = new WordMan_VSTO.StandardComboBox();
+            this.cmbLevelCount = new WordMan.StandardComboBox();
             
             // 数值输入框控件
-            this.nudNumberIndent = new WordMan_VSTO.StandardNumericUpDown(null, "厘米");
-            this.nudFirstLevelIndent = new WordMan_VSTO.StandardNumericUpDown(null, "厘米");
-            this.nudIncrementIndent = new WordMan_VSTO.StandardNumericUpDown(null, "厘米");
-            this.nudTextIndent = new WordMan_VSTO.StandardNumericUpDown(null, "厘米");
-            this.nudTabPosition = new WordMan_VSTO.StandardNumericUpDown(null, "厘米");
+            this.nudNumberIndent = new WordMan.StandardNumericUpDown(null, "厘米");
+            this.nudFirstLevelIndent = new WordMan.StandardNumericUpDown(null, "厘米");
+            this.nudIncrementIndent = new WordMan.StandardNumericUpDown(null, "厘米");
+            this.nudTextIndent = new WordMan.StandardNumericUpDown(null, "厘米");
+            this.nudTabPosition = new WordMan.StandardNumericUpDown(null, "厘米");
             this.mainPanel.SuspendLayout();
             this.rightPanel.SuspendLayout();
             this.quickSettingsPanel.SuspendLayout();

@@ -1,4 +1,4 @@
-﻿namespace WordMan_VSTO
+﻿namespace WordMan
 {
     partial class TypesettingTaskPane
     {

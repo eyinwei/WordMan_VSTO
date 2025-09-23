@@ -12,7 +12,7 @@ using Point = System.Drawing.Point;
 using Font = System.Drawing.Font;
 using Color = System.Drawing.Color;
 
-namespace WordMan_VSTO
+namespace WordMan
 {
     #region 数据结构定义
 
@@ -110,7 +110,7 @@ namespace WordMan_VSTO
                 return 0f;
 
             // 使用统一的UnitConverter进行转换
-            return (float)WordMan_VSTO.UnitConverter.UnitConvert(value, fromUnit, toUnit);
+            return (float)WordMan.UnitConverter.UnitConvert(value, fromUnit, toUnit);
         }
 
         /// <summary>

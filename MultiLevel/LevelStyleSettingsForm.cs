@@ -11,7 +11,7 @@ using Font = System.Drawing.Font;
 using Point = System.Drawing.Point;
 using Color = System.Drawing.Color;
 
-namespace WordMan_VSTO.MultiLevel
+namespace WordMan.MultiLevel
 {
     public partial class LevelStyleSettingsForm : Form
     {

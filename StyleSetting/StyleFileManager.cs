@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 using System.Windows.Forms;
 using Microsoft.Office.Interop.Word;
 
-namespace WordMan_VSTO
+namespace WordMan
 {
     /// <summary>
     /// 样式文件管理器

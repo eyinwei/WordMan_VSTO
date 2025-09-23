@@ -9,10 +9,10 @@ using Microsoft.VisualBasic;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Word = Microsoft.Office.Interop.Word;
-using WordMan_VSTO.SplitAndMerge;
-using WordMan_VSTO.MultiLevel;
+using WordMan.SplitAndMerge;
+using WordMan.MultiLevel;
 
-namespace WordMan_VSTO
+namespace WordMan
 {
     public partial class MainRibbon : Microsoft.Office.Tools.Ribbon.RibbonBase
     {
@@ -752,7 +752,7 @@ namespace WordMan_VSTO
 
         private void 版本_Click(object sender, RibbonControlEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/eyinwei/WordMan_VSTO");
+            System.Diagnostics.Process.Start("https://github.com/eyinwei/WordMan");
         }
 
         enum PictureNumberStyle

@@ -7,7 +7,7 @@ using Word = Microsoft.Office.Interop.Word;
 using Office = Microsoft.Office.Core;
 using Microsoft.Office.Tools.Word;
 
-namespace WordMan_VSTO
+namespace WordMan
 {
     public partial class ThisAddIn
     {

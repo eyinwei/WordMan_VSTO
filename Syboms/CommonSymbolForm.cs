@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using Word = Microsoft.Office.Interop.Word;
 
-namespace WordMan_VSTO
+namespace WordMan
 {
     public partial class CommonSymbolForm : Form
     {

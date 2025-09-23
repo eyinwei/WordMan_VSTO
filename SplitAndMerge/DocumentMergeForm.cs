@@ -4,9 +4,9 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using WordMan_VSTO;
+using WordMan;
 
-namespace WordMan_VSTO.SplitAndMerge
+namespace WordMan.SplitAndMerge
 {
     public partial class DocumentMergeForm : Form
     {

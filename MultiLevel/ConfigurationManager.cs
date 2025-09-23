@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace WordMan_VSTO
+namespace WordMan
 {
     /// <summary>
     /// 配置管理器 - 专门处理配置文件的加载、保存和数据处理

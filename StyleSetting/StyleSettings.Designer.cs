@@ -2,10 +2,10 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using WordMan_VSTO;
-using WordMan_VSTO.MultiLevel;
+using WordMan;
+using WordMan.MultiLevel;
 
-namespace WordMan_VSTO
+namespace WordMan
 {
     partial class StyleSettings
     {
@@ -79,47 +79,48 @@ namespace WordMan_VSTO
         private void InitializeComponent()
         {
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.导入 = new WordMan_VSTO.StandardButton();
-            this.加载 = new WordMan_VSTO.StandardButton();
-            this.关闭 = new WordMan_VSTO.StandardButton();
-            this.Txt_AddStyleName = new WordMan_VSTO.StandardTextBox();
-            this.Btn_ApplySet = new WordMan_VSTO.StandardButton();
-            this.删除 = new WordMan_VSTO.StandardButton();
-            this.显示标题数下拉框 = new WordMan_VSTO.StandardComboBox();
-            this.风格下拉框 = new WordMan_VSTO.StandardComboBox();
             this.label12 = new System.Windows.Forms.Label();
             this.Pal_Font = new System.Windows.Forms.GroupBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.Cmb_ChnFontName = new WordMan_VSTO.StandardComboBox();
             this.label17 = new System.Windows.Forms.Label();
-            this.Cmb_EngFontName = new WordMan_VSTO.StandardComboBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.Cmb_FontSize = new WordMan_VSTO.StandardComboBox();
-            this.Btn_FontColor = new WordMan_VSTO.StandardButton();
-            this.Btn_Bold = new WordMan_VSTO.ToggleButton();
-            this.Btn_Italic = new WordMan_VSTO.ToggleButton();
-            this.Btn_UnderLine = new WordMan_VSTO.ToggleButton();
             this.label16 = new System.Windows.Forms.Label();
             this.Pal_ParaIndent = new System.Windows.Forms.GroupBox();
             this.label9 = new System.Windows.Forms.Label();
-            this.Cmb_LineSpacing = new WordMan_VSTO.StandardComboBox();
             this.label10 = new System.Windows.Forms.Label();
-            this.Cmb_BefreSpacing = new WordMan_VSTO.StandardComboBox();
             this.label11 = new System.Windows.Forms.Label();
-            this.Cmb_AfterSpacing = new WordMan_VSTO.StandardComboBox();
             this.label15 = new System.Windows.Forms.Label();
-            this.Cmb_ParaAligment = new WordMan_VSTO.StandardComboBox();
             this.label6 = new System.Windows.Forms.Label();
-            this.Nud_LeftIndent = new WordMan_VSTO.StandardNumericUpDown();
             this.label18 = new System.Windows.Forms.Label();
-            this.Nud_RightIndent = new WordMan_VSTO.StandardNumericUpDown();
             this.label19 = new System.Windows.Forms.Label();
-            this.首行缩进方式下拉框 = new WordMan_VSTO.StandardComboBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.Nud_FirstLineIndent = new WordMan_VSTO.StandardNumericUpDown();
-            this.导出 = new WordMan_VSTO.StandardButton();
-            this.添加 = new WordMan_VSTO.StandardButton();
             this.Lst_Styles = new System.Windows.Forms.ListBox();
+            this.导入 = new WordMan.StandardButton();
+            this.加载 = new WordMan.StandardButton();
+            this.关闭 = new WordMan.StandardButton();
+            this.Txt_AddStyleName = new WordMan.StandardTextBox();
+            this.Btn_ApplySet = new WordMan.StandardButton();
+            this.删除 = new WordMan.StandardButton();
+            this.显示标题数下拉框 = new WordMan.StandardComboBox();
+            this.风格下拉框 = new WordMan.StandardComboBox();
+            this.Cmb_ChnFontName = new WordMan.StandardComboBox();
+            this.Cmb_EngFontName = new WordMan.StandardComboBox();
+            this.Cmb_FontSize = new WordMan.StandardComboBox();
+            this.Btn_FontColor = new WordMan.StandardButton();
+            this.Btn_Bold = new WordMan.ToggleButton();
+            this.Btn_Italic = new WordMan.ToggleButton();
+            this.Btn_UnderLine = new WordMan.ToggleButton();
+            this.Cmb_LineSpacing = new WordMan.StandardComboBox();
+            this.Cmb_BefreSpacing = new WordMan.StandardComboBox();
+            this.Cmb_AfterSpacing = new WordMan.StandardComboBox();
+            this.Cmb_ParaAligment = new WordMan.StandardComboBox();
+            this.Nud_LeftIndent = new WordMan.StandardNumericUpDown();
+            this.Nud_RightIndent = new WordMan.StandardNumericUpDown();
+            this.首行缩进方式下拉框 = new WordMan.StandardComboBox();
+            this.Nud_FirstLineIndent = new WordMan.StandardNumericUpDown();
+            this.导出 = new WordMan.StandardButton();
+            this.添加 = new WordMan.StandardButton();
+            this.读取文档样式 = new WordMan.StandardButton();
             this.groupBox3.SuspendLayout();
             this.Pal_Font.SuspendLayout();
             this.Pal_ParaIndent.SuspendLayout();
@@ -130,6 +131,7 @@ namespace WordMan_VSTO
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.读取文档样式);
             this.groupBox3.Controls.Add(this.导入);
             this.groupBox3.Controls.Add(this.加载);
             this.groupBox3.Controls.Add(this.关闭);
@@ -151,6 +153,180 @@ namespace WordMan_VSTO
             this.groupBox3.TabIndex = 6;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "样式设置";
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(470, 278);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(68, 17);
+            this.label12.TabIndex = 20;
+            this.label12.Text = "显示标题数";
+            // 
+            // Pal_Font
+            // 
+            this.Pal_Font.Controls.Add(this.label3);
+            this.Pal_Font.Controls.Add(this.Cmb_ChnFontName);
+            this.Pal_Font.Controls.Add(this.label17);
+            this.Pal_Font.Controls.Add(this.Cmb_EngFontName);
+            this.Pal_Font.Controls.Add(this.label4);
+            this.Pal_Font.Controls.Add(this.Cmb_FontSize);
+            this.Pal_Font.Controls.Add(this.Btn_FontColor);
+            this.Pal_Font.Controls.Add(this.Btn_Bold);
+            this.Pal_Font.Controls.Add(this.Btn_Italic);
+            this.Pal_Font.Controls.Add(this.Btn_UnderLine);
+            this.Pal_Font.Enabled = false;
+            this.Pal_Font.Location = new System.Drawing.Point(182, 17);
+            this.Pal_Font.Name = "Pal_Font";
+            this.Pal_Font.Size = new System.Drawing.Size(486, 100);
+            this.Pal_Font.TabIndex = 7;
+            this.Pal_Font.TabStop = false;
+            this.Pal_Font.Text = "字体设置";
+            // 
+            // label3
+            // 
+            this.label3.Location = new System.Drawing.Point(10, 20);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(60, 28);
+            this.label3.TabIndex = 1;
+            this.label3.Text = "中文字体";
+            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label17
+            // 
+            this.label17.Location = new System.Drawing.Point(288, 20);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(60, 28);
+            this.label17.TabIndex = 2;
+            this.label17.Text = "西文字体";
+            this.label17.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label4
+            // 
+            this.label4.Location = new System.Drawing.Point(10, 55);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(60, 28);
+            this.label4.TabIndex = 4;
+            this.label4.Text = "字体大小";
+            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(192, 278);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(56, 17);
+            this.label16.TabIndex = 9;
+            this.label16.Text = "预设风格";
+            this.label16.Click += new System.EventHandler(this.label16_Click);
+            // 
+            // Pal_ParaIndent
+            // 
+            this.Pal_ParaIndent.Controls.Add(this.label9);
+            this.Pal_ParaIndent.Controls.Add(this.Cmb_LineSpacing);
+            this.Pal_ParaIndent.Controls.Add(this.label10);
+            this.Pal_ParaIndent.Controls.Add(this.Cmb_BefreSpacing);
+            this.Pal_ParaIndent.Controls.Add(this.label11);
+            this.Pal_ParaIndent.Controls.Add(this.Cmb_AfterSpacing);
+            this.Pal_ParaIndent.Controls.Add(this.label15);
+            this.Pal_ParaIndent.Controls.Add(this.Cmb_ParaAligment);
+            this.Pal_ParaIndent.Controls.Add(this.label6);
+            this.Pal_ParaIndent.Controls.Add(this.Nud_LeftIndent);
+            this.Pal_ParaIndent.Controls.Add(this.label18);
+            this.Pal_ParaIndent.Controls.Add(this.Nud_RightIndent);
+            this.Pal_ParaIndent.Controls.Add(this.label19);
+            this.Pal_ParaIndent.Controls.Add(this.首行缩进方式下拉框);
+            this.Pal_ParaIndent.Controls.Add(this.label7);
+            this.Pal_ParaIndent.Controls.Add(this.Nud_FirstLineIndent);
+            this.Pal_ParaIndent.Enabled = false;
+            this.Pal_ParaIndent.Location = new System.Drawing.Point(182, 120);
+            this.Pal_ParaIndent.Name = "Pal_ParaIndent";
+            this.Pal_ParaIndent.Size = new System.Drawing.Size(486, 144);
+            this.Pal_ParaIndent.TabIndex = 7;
+            this.Pal_ParaIndent.TabStop = false;
+            this.Pal_ParaIndent.Text = "段落设置";
+            // 
+            // label9
+            // 
+            this.label9.Location = new System.Drawing.Point(288, 20);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(65, 30);
+            this.label9.TabIndex = 15;
+            this.label9.Text = "段落行距";
+            this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label10
+            // 
+            this.label10.Location = new System.Drawing.Point(10, 110);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(65, 30);
+            this.label10.TabIndex = 17;
+            this.label10.Text = "段前间距";
+            this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label11
+            // 
+            this.label11.Location = new System.Drawing.Point(288, 110);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(65, 30);
+            this.label11.TabIndex = 19;
+            this.label11.Text = "段后间距";
+            this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label15
+            // 
+            this.label15.Location = new System.Drawing.Point(10, 20);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(80, 30);
+            this.label15.TabIndex = 14;
+            this.label15.Text = "段落对齐";
+            this.label15.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label6
+            // 
+            this.label6.Location = new System.Drawing.Point(10, 50);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(60, 30);
+            this.label6.TabIndex = 8;
+            this.label6.Text = "左缩进";
+            this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label18
+            // 
+            this.label18.Location = new System.Drawing.Point(288, 50);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(50, 30);
+            this.label18.TabIndex = 10;
+            this.label18.Text = "右缩进";
+            this.label18.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label19
+            // 
+            this.label19.Location = new System.Drawing.Point(10, 80);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(80, 30);
+            this.label19.TabIndex = 12;
+            this.label19.Text = "首行缩进方式";
+            this.label19.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label7
+            // 
+            this.label7.Location = new System.Drawing.Point(288, 80);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(65, 30);
+            this.label7.TabIndex = 14;
+            this.label7.Text = "首行缩进";
+            this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // Lst_Styles
+            // 
+            this.Lst_Styles.FormattingEnabled = true;
+            this.Lst_Styles.ItemHeight = 17;
+            this.Lst_Styles.Location = new System.Drawing.Point(14, 23);
+            this.Lst_Styles.Name = "Lst_Styles";
+            this.Lst_Styles.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.Lst_Styles.Size = new System.Drawing.Size(158, 276);
+            this.Lst_Styles.TabIndex = 0;
             // 
             // 导入
             // 
@@ -270,44 +446,6 @@ namespace WordMan_VSTO
             this.风格下拉框.Size = new System.Drawing.Size(120, 25);
             this.风格下拉框.TabIndex = 8;
             // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(470, 278);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(68, 17);
-            this.label12.TabIndex = 20;
-            this.label12.Text = "显示标题数";
-            // 
-            // Pal_Font
-            // 
-            this.Pal_Font.Controls.Add(this.label3);
-            this.Pal_Font.Controls.Add(this.Cmb_ChnFontName);
-            this.Pal_Font.Controls.Add(this.label17);
-            this.Pal_Font.Controls.Add(this.Cmb_EngFontName);
-            this.Pal_Font.Controls.Add(this.label4);
-            this.Pal_Font.Controls.Add(this.Cmb_FontSize);
-            this.Pal_Font.Controls.Add(this.Btn_FontColor);
-            this.Pal_Font.Controls.Add(this.Btn_Bold);
-            this.Pal_Font.Controls.Add(this.Btn_Italic);
-            this.Pal_Font.Controls.Add(this.Btn_UnderLine);
-            this.Pal_Font.Enabled = false;
-            this.Pal_Font.Location = new System.Drawing.Point(182, 17);
-            this.Pal_Font.Name = "Pal_Font";
-            this.Pal_Font.Size = new System.Drawing.Size(486, 100);
-            this.Pal_Font.TabIndex = 7;
-            this.Pal_Font.TabStop = false;
-            this.Pal_Font.Text = "字体设置";
-            // 
-            // label3
-            // 
-            this.label3.Location = new System.Drawing.Point(10, 20);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(60, 28);
-            this.label3.TabIndex = 1;
-            this.label3.Text = "中文字体";
-            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
             // Cmb_ChnFontName
             // 
             this.Cmb_ChnFontName.AllowInput = false;
@@ -320,15 +458,6 @@ namespace WordMan_VSTO
             this.Cmb_ChnFontName.Size = new System.Drawing.Size(120, 25);
             this.Cmb_ChnFontName.TabIndex = 2;
             // 
-            // label17
-            // 
-            this.label17.Location = new System.Drawing.Point(288, 20);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(60, 28);
-            this.label17.TabIndex = 2;
-            this.label17.Text = "西文字体";
-            this.label17.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
             // Cmb_EngFontName
             // 
             this.Cmb_EngFontName.AllowInput = false;
@@ -340,15 +469,6 @@ namespace WordMan_VSTO
             this.Cmb_EngFontName.Name = "Cmb_EngFontName";
             this.Cmb_EngFontName.Size = new System.Drawing.Size(120, 25);
             this.Cmb_EngFontName.TabIndex = 3;
-            // 
-            // label4
-            // 
-            this.label4.Location = new System.Drawing.Point(10, 55);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(60, 28);
-            this.label4.TabIndex = 4;
-            this.label4.Text = "字体大小";
-            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // Cmb_FontSize
             // 
@@ -407,51 +527,6 @@ namespace WordMan_VSTO
             this.Btn_UnderLine.Text = "下划线";
             this.Btn_UnderLine.UseVisualStyleBackColor = false;
             // 
-            // label16
-            // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(192, 278);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(56, 17);
-            this.label16.TabIndex = 9;
-            this.label16.Text = "预设风格";
-            this.label16.Click += new System.EventHandler(this.label16_Click);
-            // 
-            // Pal_ParaIndent
-            // 
-            this.Pal_ParaIndent.Controls.Add(this.label9);
-            this.Pal_ParaIndent.Controls.Add(this.Cmb_LineSpacing);
-            this.Pal_ParaIndent.Controls.Add(this.label10);
-            this.Pal_ParaIndent.Controls.Add(this.Cmb_BefreSpacing);
-            this.Pal_ParaIndent.Controls.Add(this.label11);
-            this.Pal_ParaIndent.Controls.Add(this.Cmb_AfterSpacing);
-            this.Pal_ParaIndent.Controls.Add(this.label15);
-            this.Pal_ParaIndent.Controls.Add(this.Cmb_ParaAligment);
-            this.Pal_ParaIndent.Controls.Add(this.label6);
-            this.Pal_ParaIndent.Controls.Add(this.Nud_LeftIndent);
-            this.Pal_ParaIndent.Controls.Add(this.label18);
-            this.Pal_ParaIndent.Controls.Add(this.Nud_RightIndent);
-            this.Pal_ParaIndent.Controls.Add(this.label19);
-            this.Pal_ParaIndent.Controls.Add(this.首行缩进方式下拉框);
-            this.Pal_ParaIndent.Controls.Add(this.label7);
-            this.Pal_ParaIndent.Controls.Add(this.Nud_FirstLineIndent);
-            this.Pal_ParaIndent.Enabled = false;
-            this.Pal_ParaIndent.Location = new System.Drawing.Point(182, 120);
-            this.Pal_ParaIndent.Name = "Pal_ParaIndent";
-            this.Pal_ParaIndent.Size = new System.Drawing.Size(486, 144);
-            this.Pal_ParaIndent.TabIndex = 7;
-            this.Pal_ParaIndent.TabStop = false;
-            this.Pal_ParaIndent.Text = "段落设置";
-            // 
-            // label9
-            // 
-            this.label9.Location = new System.Drawing.Point(288, 20);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(65, 30);
-            this.label9.TabIndex = 15;
-            this.label9.Text = "段落行距";
-            this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
             // Cmb_LineSpacing
             // 
             this.Cmb_LineSpacing.AllowInput = true;
@@ -470,53 +545,33 @@ namespace WordMan_VSTO
             this.Cmb_LineSpacing.Size = new System.Drawing.Size(120, 25);
             this.Cmb_LineSpacing.TabIndex = 16;
             // 
-            // 
-            // label10
-            // 
-            this.label10.Location = new System.Drawing.Point(10, 110);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(65, 30);
-            this.label10.TabIndex = 17;
-            this.label10.Text = "段前间距";
-            this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
             // Cmb_BefreSpacing
             // 
+            this.Cmb_BefreSpacing.AllowInput = true;
+            this.Cmb_BefreSpacing.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.Cmb_BefreSpacing.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.Cmb_BefreSpacing.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
-            this.Cmb_BefreSpacing.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Cmb_BefreSpacing.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDown;
+            this.Cmb_BefreSpacing.Font = new System.Drawing.Font("微软雅黑", 9F);
             this.Cmb_BefreSpacing.FormattingEnabled = true;
             this.Cmb_BefreSpacing.Location = new System.Drawing.Point(96, 114);
             this.Cmb_BefreSpacing.Name = "Cmb_BefreSpacing";
-            this.Cmb_BefreSpacing.Size = new System.Drawing.Size(120, 23);
+            this.Cmb_BefreSpacing.Size = new System.Drawing.Size(120, 25);
             this.Cmb_BefreSpacing.TabIndex = 18;
-            // 
-            // label11
-            // 
-            this.label11.Location = new System.Drawing.Point(288, 110);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(65, 30);
-            this.label11.TabIndex = 19;
-            this.label11.Text = "段后间距";
-            this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // Cmb_AfterSpacing
             // 
+            this.Cmb_AfterSpacing.AllowInput = true;
+            this.Cmb_AfterSpacing.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.Cmb_AfterSpacing.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.Cmb_AfterSpacing.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
-            this.Cmb_AfterSpacing.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Cmb_AfterSpacing.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDown;
+            this.Cmb_AfterSpacing.Font = new System.Drawing.Font("微软雅黑", 9F);
             this.Cmb_AfterSpacing.FormattingEnabled = true;
             this.Cmb_AfterSpacing.Location = new System.Drawing.Point(354, 114);
             this.Cmb_AfterSpacing.Name = "Cmb_AfterSpacing";
-            this.Cmb_AfterSpacing.Size = new System.Drawing.Size(120, 23);
+            this.Cmb_AfterSpacing.Size = new System.Drawing.Size(120, 25);
             this.Cmb_AfterSpacing.TabIndex = 21;
-            // 
-            // label15
-            // 
-            this.label15.Location = new System.Drawing.Point(10, 20);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(80, 30);
-            this.label15.TabIndex = 14;
-            this.label15.Text = "段落对齐";
-            this.label15.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // Cmb_ParaAligment
             // 
@@ -535,15 +590,6 @@ namespace WordMan_VSTO
             this.Cmb_ParaAligment.Name = "Cmb_ParaAligment";
             this.Cmb_ParaAligment.Size = new System.Drawing.Size(120, 25);
             this.Cmb_ParaAligment.TabIndex = 15;
-            // 
-            // label6
-            // 
-            this.label6.Location = new System.Drawing.Point(10, 50);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(60, 30);
-            this.label6.TabIndex = 8;
-            this.label6.Text = "左缩进";
-            this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // Nud_LeftIndent
             // 
@@ -571,15 +617,6 @@ namespace WordMan_VSTO
             this.Nud_LeftIndent.TabIndex = 9;
             this.Nud_LeftIndent.Unit = "厘米";
             // 
-            // label18
-            // 
-            this.label18.Location = new System.Drawing.Point(288, 50);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(50, 30);
-            this.label18.TabIndex = 10;
-            this.label18.Text = "右缩进";
-            this.label18.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
             // Nud_RightIndent
             // 
             this.Nud_RightIndent.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
@@ -606,15 +643,6 @@ namespace WordMan_VSTO
             this.Nud_RightIndent.TabIndex = 11;
             this.Nud_RightIndent.Unit = "厘米";
             // 
-            // label19
-            // 
-            this.label19.Location = new System.Drawing.Point(10, 80);
-            this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(80, 30);
-            this.label19.TabIndex = 12;
-            this.label19.Text = "首行缩进方式";
-            this.label19.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
             // 首行缩进方式下拉框
             // 
             this.首行缩进方式下拉框.AllowInput = false;
@@ -630,15 +658,6 @@ namespace WordMan_VSTO
             this.首行缩进方式下拉框.Name = "首行缩进方式下拉框";
             this.首行缩进方式下拉框.Size = new System.Drawing.Size(120, 25);
             this.首行缩进方式下拉框.TabIndex = 13;
-            // 
-            // label7
-            // 
-            this.label7.Location = new System.Drawing.Point(288, 80);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(65, 30);
-            this.label7.TabIndex = 14;
-            this.label7.Text = "首行缩进";
-            this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // Nud_FirstLineIndent
             // 
@@ -693,22 +712,25 @@ namespace WordMan_VSTO
             this.添加.Text = "添加";
             this.添加.UseVisualStyleBackColor = false;
             // 
-            // Lst_Styles
+            // 读取文档样式
             // 
-            this.Lst_Styles.FormattingEnabled = true;
-            this.Lst_Styles.ItemHeight = 17;
-            this.Lst_Styles.Location = new System.Drawing.Point(14, 23);
-            this.Lst_Styles.Name = "Lst_Styles";
-            this.Lst_Styles.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.Lst_Styles.Size = new System.Drawing.Size(158, 276);
-            this.Lst_Styles.TabIndex = 0;
+            this.读取文档样式.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.读取文档样式.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.读取文档样式.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
+            this.读取文档样式.ForeColor = System.Drawing.Color.Black;
+            this.读取文档样式.Location = new System.Drawing.Point(180, 334);
+            this.读取文档样式.Name = "读取文档样式";
+            this.读取文档样式.Size = new System.Drawing.Size(90, 31);
+            this.读取文档样式.TabIndex = 41;
+            this.读取文档样式.Text = "读取文档样式";
+            this.读取文档样式.UseVisualStyleBackColor = false;
             // 
             // StyleSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.BackColor = System.Drawing.Color.AliceBlue;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(233)))), ((int)(((byte)(247)))));
             this.ClientSize = new System.Drawing.Size(678, 374);
             this.Controls.Add(this.groupBox3);
             this.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -732,5 +754,6 @@ namespace WordMan_VSTO
         private StandardButton 导出;
         private StandardButton 加载;
         private StandardButton 导入;
+        private StandardButton 读取文档样式;
     }
 }

@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Word = Microsoft.Office.Interop.Word;
 
-namespace WordMan_VSTO
+namespace WordMan
 {
     /// <summary>
     /// 文档拆分器 - 提供Word文档按页拆分功能

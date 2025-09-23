@@ -1682,7 +1682,7 @@ namespace WordMan_VSTO
         }
 
         // 文档样式设置按钮点击事件
-        private void button1_Click(object sender, RibbonControlEventArgs e)
+        private void 样式设置_Click(object sender, RibbonControlEventArgs e)
         {
             try
             {
@@ -1728,7 +1728,7 @@ namespace WordMan_VSTO
         {
             try
             {
-                var merger = new DocumentMerger(Globals.ThisAddIn.Application);
+                var merger = new DocumentMerger((Microsoft.Office.Interop.Word.Application)Globals.ThisAddIn.Application);
                 merger.ShowMergeDialog();
             }
             catch (Exception ex)

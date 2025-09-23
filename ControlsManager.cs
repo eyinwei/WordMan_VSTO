@@ -470,7 +470,7 @@ namespace WordMan_VSTO
         /// <summary>
         /// 开始初始化
         /// </summary>
-        public void BeginInit()
+        public new void BeginInit()
         {
             // 设计器初始化开始
         }
@@ -478,7 +478,7 @@ namespace WordMan_VSTO
         /// <summary>
         /// 结束初始化
         /// </summary>
-        public void EndInit()
+        public new void EndInit()
         {
             // 设计器初始化结束，确保单位标签正确初始化
             if (_unitLabel == null)

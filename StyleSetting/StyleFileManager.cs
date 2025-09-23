@@ -181,53 +181,5 @@ namespace WordMan_VSTO
             }
         }
 
-        /// <summary>
-        /// 导出当前文档样式到文件
-        /// </summary>
-        /// <param name="app">Word应用程序对象</param>
-        /// <param name="filePath">文件路径</param>
-        public static void ExportDocumentStyles(Microsoft.Office.Interop.Word.Application app, string filePath)
-        {
-            try
-            {
-                var doc = app.ActiveDocument;
-                var styleSettings = new Dictionary<string, Hashtable>();
-                
-                // 获取所有样式
-                var styleNames = new[] { "标题 1", "标题 2", "标题 3", "标题 4", "标题 5", "标题 6", "正文", "题注", "表内文字" };
-                
-                foreach (var styleName in styleNames)
-                {
-                    try
-                    {
-                        var style = doc.Styles[styleName];
-                        var settings = new Hashtable();
-                        
-                        // 读取样式属性
-                        settings["cnFont"] = style.Font.Name;
-                        settings["enFont"] = style.Font.NameAscii;
-                        settings["fontSize"] = style.Font.Size;
-                        settings["isBold"] = style.Font.Bold == 1;
-                        settings["alignment"] = style.ParagraphFormat.Alignment;
-                        settings["spaceBefore"] = app.PointsToCentimeters(style.ParagraphFormat.SpaceBefore);
-                        settings["spaceAfter"] = app.PointsToCentimeters(style.ParagraphFormat.SpaceAfter);
-                        settings["lineSpacing"] = style.ParagraphFormat.LineSpacing;
-                        
-                        styleSettings[styleName] = settings;
-                    }
-                    catch
-                    {
-                        // 样式不存在时跳过
-                        continue;
-                    }
-                }
-                
-                SaveStyleSettings(styleSettings, filePath);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"导出文档样式失败：{ex.Message}", ex);
-            }
-        }
     }
 }

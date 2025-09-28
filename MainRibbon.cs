@@ -172,7 +172,7 @@ namespace WordMan
                     OptimizeFor: Microsoft.Office.Interop.Word.WdExportOptimizeFor.wdExportOptimizeForPrint,
                     Range: Microsoft.Office.Interop.Word.WdExportRange.wdExportAllDocument,
                     Item: Microsoft.Office.Interop.Word.WdExportItem.wdExportDocumentContent,
-                    CreateBookmarks: Microsoft.Office.Interop.Word.WdExportCreateBookmarks.wdExportCreateWordBookmarks,
+                    CreateBookmarks: Microsoft.Office.Interop.Word.WdExportCreateBookmarks.wdExportCreateHeadingBookmarks,
                     DocStructureTags: true,
                     BitmapMissingFonts: true,
                     UseISO19005_1: false

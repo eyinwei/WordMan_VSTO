@@ -501,7 +501,7 @@
             // 
             // 版本
             // 
-            this.版本.Label = "版本V2.0";
+            this.版本.Label = "版本V2.1";
             this.版本.Name = "版本";
             this.版本.OfficeImageId = "SaveToOfficeLiveTask";
             this.版本.ShowImage = true;

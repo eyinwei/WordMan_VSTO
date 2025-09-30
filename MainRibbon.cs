@@ -212,83 +212,111 @@ namespace WordMan
         }
         private void 英中标点互转_Click(object sender, RibbonControlEventArgs e, bool englishToChinese)
         {
-            var app = Globals.ThisAddIn.Application;
-            var sel = app.Selection;
-            Word.Range rng;
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                var rng = app.Selection.Range.Start != app.Selection.Range.End 
+                    ? app.Selection.Range 
+                    : app.Selection.Paragraphs[1].Range;
 
-            if (sel != null && sel.Range != null &&
-                !string.IsNullOrWhiteSpace(sel.Range.Text) &&
-                sel.Range.Start != sel.Range.End)
-            {
-                rng = sel.Range;
-            }
-            else if (sel != null && sel.Paragraphs != null && sel.Paragraphs.Count > 0)
-            {
-                rng = sel.Paragraphs[1].Range;
-            }
-            else
-            {
-                MessageBox.Show("未检测到可操作的文本或段落。");
-                return;
-            }
-
-            var en2cn = new Dictionary<string, string>
-            {
-                {";", "；"}, {":", "："}, {",", "，"}, {".", "。"}, {"?", "？"}, {"!", "！"},
-                {"(", "（"}, {")", "）"}, {"[", "【"}, {"]", "】"}, {"<", "《"}, {">", "》"}
-            };
-            var cn2en = new Dictionary<string, string>
-            {
-                {"；", ";"}, {"：", ":"}, {"，", ","}, {"。", "."}, {"？", "?"}, {"！", "!"},
-                {"（", "("}, {"）", ")"}, {"【", "["}, {"】", "]"}, {"《", "<"}, {"》", ">"},
-                {"“", "\""}, {"”", "\""}, {"‘", "'"}, {"’", "'"}, {"　", " "},
-                 // 补充常见全角符号
-                {"／", "/"}, {"＂", "\""}, {"＇", "'"}, {"＆", "&"}, {"＃", "#"},
-                {"％", "%"}, {"＊", "*"}, {"＋", "+"}, {"－", "-"}, {"＝", "="},
-                {"＠", "@"}, {"＄", "$"}, {"＾", "^"}, {"＿", "_"}, {"｀", "`"},
-                {"｜", "|"}, {"＼", "\\"}, {"～", "~"},
-                {"µ", "μ"},    // 微符号（U+00B5）→ 希腊小写mu（U+03BC）
-                {"Ω", "Ω"},    // 欧姆符号（U+2126）→ 希腊大写Omega（U+03A9）
-                {"℧", "Ʊ"},    // 倒欧姆符号（U+2127）→ 拉丁大写Ʊ（近似），如需其他可自定义
-                {"∑", "Σ"},    // 求和符号（U+2211）→ 希腊大写Sigma（U+03A3）
-                {"∆", "Δ"},    // 增量符号（U+2206）→ 希腊大写Delta（U+0394）
-                {"∏", "Π"}    // 连乘符号（U+220F）→ 希腊大写Pi（U+03A0）
-            };
-
-            var dict = englishToChinese ? en2cn : cn2en;
-
-            foreach (var pair in dict)
-            {
-                rng.Find.ClearFormatting();
-                rng.Find.Text = pair.Key;
-                rng.Find.Replacement.ClearFormatting();
-                rng.Find.Replacement.Text = pair.Value;
-                rng.Find.Execute(Replace: Word.WdReplace.wdReplaceAll);
-            }
-
-            // 只在英标转中标时做成对引号替换
-            if (englishToChinese)
-            {
-                void ReplacePairQuotes(Range range, string from, string left, string right)
+                if (string.IsNullOrWhiteSpace(rng.Text))
                 {
-                    bool isLeft = true;
-                    Range search = range.Duplicate;
-                    search.Find.ClearFormatting();
-                    search.Find.Text = from;
-                    search.Find.Forward = true;
-                    search.Find.Wrap = Word.WdFindWrap.wdFindStop;
-                    while (search.Find.Execute())
+                    MessageBox.Show("未检测到可操作的文本或段落。");
+                    return;
+                }
+
+                app.ScreenUpdating = false;
+
+                // 标点符号映射
+                var dict = englishToChinese ? new Dictionary<string, string>
+                {
+                    {";", "；"}, {":", "："}, {",", "，"}, {".", "。"}, {"?", "？"}, {"!", "！"},
+                    {"(", "（"}, {")", "）"}, {"[", "【"}, {"]", "】"}, {"<", "《"}, {">", "》"}
+                } : new Dictionary<string, string>
+                {
+                    {"；", ";"}, {"：", ":"}, {"，", ","}, {"。", "."}, {"？", "?"}, {"！", "!"},
+                    {"（", "("}, {"）", ")"}, {"【", "["}, {"】", "]"}, {"《", "<"}, {"》", ">"},
+                    {"　", " "}, {"＂", "\""}, {"＇", "'"}, {"＆", "&"}, {"＃", "#"},
+                    {"％", "%"}, {"＊", "*"}, {"＋", "+"}, {"－", "-"}, {"＝", "="},
+                    {"＠", "@"}, {"＄", "$"}, {"＾", "^"}, {"＿", "_"}, {"｀", "`"},
+                    {"｜", "|"}, {"＼", "\\"}, {"～", "~"}
+                };
+
+                // 使用Word查找替换保持格式
+                foreach (var pair in dict)
+                {
+                    try
                     {
-                        Range hit = app.ActiveDocument.Range(search.Start, search.Start + from.Length);
-                        hit.Text = isLeft ? left : right;
-                        isLeft = !isLeft;
-                        search.SetRange(hit.End, range.End);
-                        search.Find.Text = from;
+                        rng.Find.ClearFormatting();
+                        rng.Find.Text = pair.Key;
+                        rng.Find.Replacement.ClearFormatting();
+                        rng.Find.Replacement.Text = pair.Value;
+                        rng.Find.MatchWildcards = false;
+                        rng.Find.Execute(Replace: Word.WdReplace.wdReplaceAll);
+                    }
+                    catch
+                    {
+                        // 忽略单个符号替换失败，继续处理其他符号
+                        continue;
                     }
                 }
 
-                ReplacePairQuotes(rng, "\"", "“", "”");
-                ReplacePairQuotes(rng, "'", "‘", "’");
+                // 英标转中标时处理成对引号
+                if (englishToChinese)
+                {
+                    try
+                    {
+                        // 保存原始范围
+                        int startPos = rng.Start;
+                        int endPos = rng.End;
+                        
+                        // 处理双引号 - 逐个替换
+                        bool isLeft = true;
+                        var searchRange = app.ActiveDocument.Range(startPos, endPos);
+                        searchRange.Find.ClearFormatting();
+                        searchRange.Find.Text = "\"";
+                        searchRange.Find.Forward = true;
+                        searchRange.Find.Wrap = Word.WdFindWrap.wdFindStop;
+                        
+                        while (searchRange.Find.Execute())
+                        {
+                            var hitRange = app.ActiveDocument.Range(searchRange.Start, searchRange.Start + 1);
+                            hitRange.Text = isLeft ? "\u201c" : "\u201d";
+                            isLeft = !isLeft;
+                            // 更新搜索范围，从当前位置继续
+                            searchRange.SetRange(hitRange.End, endPos);
+                        }
+                        
+                        // 处理单引号 - 逐个替换
+                        isLeft = true;
+                        searchRange = app.ActiveDocument.Range(startPos, endPos);
+                        searchRange.Find.ClearFormatting();
+                        searchRange.Find.Text = "'";
+                        searchRange.Find.Forward = true;
+                        searchRange.Find.Wrap = Word.WdFindWrap.wdFindStop;
+                        
+                        while (searchRange.Find.Execute())
+                        {
+                            var hitRange = app.ActiveDocument.Range(searchRange.Start, searchRange.Start + 1);
+                            hitRange.Text = isLeft ? "\u2018" : "\u2019";
+                            isLeft = !isLeft;
+                            // 更新搜索范围，从当前位置继续
+                            searchRange.SetRange(hitRange.End, endPos);
+                        }
+                    }
+                    catch
+                    {
+                        // 忽略引号替换失败
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"转换失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                Globals.ThisAddIn.Application.ScreenUpdating = true;
             }
         }
             
@@ -752,7 +780,7 @@ namespace WordMan
 
         private void 版本_Click(object sender, RibbonControlEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/eyinwei/WordMan");
+            System.Diagnostics.Process.Start("https://github.com/eyinwei/WordMan_VSTO");
         }
 
         enum PictureNumberStyle
@@ -1740,6 +1768,7 @@ namespace WordMan
 
     }
 }
+
 
 
 

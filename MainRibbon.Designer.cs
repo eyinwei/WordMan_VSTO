@@ -128,7 +128,7 @@
             // 
             this.去除断行.Label = "去除断行";
             this.去除断行.Name = "去除断行";
-            this.去除断行.OfficeImageId = "InsertParagraphHtmlTag";
+            this.去除断行.OfficeImageId = "Delete";
             this.去除断行.ScreenTip = "去除多余空行";
             this.去除断行.ShowImage = true;
             this.去除断行.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.去除断行_Click);
@@ -137,7 +137,7 @@
             // 
             this.去除空格.Label = "去除空格";
             this.去除空格.Name = "去除空格";
-            this.去除空格.OfficeImageId = "ContextMenuContactCardOverflowDropdown";
+            this.去除空格.OfficeImageId = "Delete";
             this.去除空格.ScreenTip = "去除多余空格";
             this.去除空格.ShowImage = true;
             this.去除空格.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.去除空格_Click);
@@ -146,7 +146,7 @@
             // 
             this.去除空行.Label = "去除空行";
             this.去除空行.Name = "去除空行";
-            this.去除空行.OfficeImageId = "ObjectNudgeUp";
+            this.去除空行.OfficeImageId = "Delete";
             this.去除空行.ScreenTip = "去除段落之间的空行";
             this.去除空行.ShowImage = true;
             this.去除空行.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.去除空行_Click);
@@ -173,7 +173,7 @@
             // 
             this.自动加空格.Label = "自动加空格";
             this.自动加空格.Name = "自动加空格";
-            this.自动加空格.OfficeImageId = "GroupShapeSheetFormulaTracing";
+            this.自动加空格.OfficeImageId = "TextAlignLeft";
             this.自动加空格.ScreenTip = "数字和单位间加入空格";
             this.自动加空格.ShowImage = true;
             this.自动加空格.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.自动加空格_Click);
@@ -187,7 +187,7 @@
             this.去除缩进.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
             this.去除缩进.Label = "去除缩进";
             this.去除缩进.Name = "去除缩进";
-            this.去除缩进.OfficeImageId = "WordOutdent";
+            this.去除缩进.OfficeImageId = "TextAlignLeft";
             this.去除缩进.ShowImage = true;
             this.去除缩进.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.去除缩进_Click);
             // 
@@ -196,7 +196,7 @@
             this.缩进2字符.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
             this.缩进2字符.Label = "缩进2字符";
             this.缩进2字符.Name = "缩进2字符";
-            this.缩进2字符.OfficeImageId = "WordIndent";
+            this.缩进2字符.OfficeImageId = "TextAlignRight";
             this.缩进2字符.ShowImage = true;
             this.缩进2字符.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.缩进2字符_Click);
             // 
@@ -249,7 +249,7 @@
             // 
             this.设为三线表.Label = "设为三线表";
             this.设为三线表.Name = "设为三线表";
-            this.设为三线表.OfficeImageId = "TableCellAlignMiddleCenter";
+            this.设为三线表.OfficeImageId = "TableProperties";
             this.设为三线表.ScreenTip = "设为三线表";
             this.设为三线表.ShowImage = true;
             this.设为三线表.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.设为三线表_Click);
@@ -333,7 +333,7 @@
             this.公式样式1.Checked = true;
             this.公式样式1.Label = "（ 1 ）";
             this.公式样式1.Name = "公式样式1";
-            this.公式样式1.OfficeImageId = "LinkBarCustom";
+            this.公式样式1.OfficeImageId = "Numbering";
             this.公式样式1.ShowImage = true;
             this.公式样式1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.公式样式1_Click);
             // 
@@ -341,7 +341,7 @@
             // 
             this.公式样式2.Label = "（1-1）";
             this.公式样式2.Name = "公式样式2";
-            this.公式样式2.OfficeImageId = "LinkBarCustom";
+            this.公式样式2.OfficeImageId = "Numbering";
             this.公式样式2.ScreenTip = "第一个数字来源于一级标题编号";
             this.公式样式2.ShowImage = true;
             this.公式样式2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.公式样式2_Click);
@@ -350,7 +350,7 @@
             // 
             this.公式样式3.Label = "（1.1）";
             this.公式样式3.Name = "公式样式3";
-            this.公式样式3.OfficeImageId = "LinkBarCustom";
+            this.公式样式3.OfficeImageId = "Numbering";
             this.公式样式3.ScreenTip = "第一个数字来源于一级标题编号";
             this.公式样式3.ShowImage = true;
             this.公式样式3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.公式样式3_Click);
@@ -414,7 +414,7 @@
             // 
             this.宽度刷.Label = "宽度刷";
             this.宽度刷.Name = "宽度刷";
-            this.宽度刷.OfficeImageId = "WordPicture";
+            this.宽度刷.OfficeImageId = "FormatPainter";
             this.宽度刷.ShowImage = true;
             this.宽度刷.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.宽度刷_Click);
             // 
@@ -422,7 +422,7 @@
             // 
             this.高度刷.Label = "高度刷";
             this.高度刷.Name = "高度刷";
-            this.高度刷.OfficeImageId = "XDInsertPictureControl";
+            this.高度刷.OfficeImageId = "FormatPainter";
             this.高度刷.ShowImage = true;
             this.高度刷.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.高度刷_Click);
             // 
@@ -430,7 +430,7 @@
             // 
             this.位图化.Label = "位图化";
             this.位图化.Name = "位图化";
-            this.位图化.OfficeImageId = "PasteAsPictureMenu";
+            this.位图化.OfficeImageId = "PasteAsPicture";
             this.位图化.ShowImage = true;
             this.位图化.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.位图化_Click);
             // 
@@ -457,7 +457,7 @@
             this.排版工具.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
             this.排版工具.Label = "排版工具";
             this.排版工具.Name = "排版工具";
-            this.排版工具.OfficeImageId = "HappyFace";
+            this.排版工具.OfficeImageId = "FormatPainter";
             this.排版工具.ShowImage = true;
             this.排版工具.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.TypesettingButton_Click);
             // 
@@ -487,7 +487,7 @@
             // 
             this.域名高亮.Label = "域名高亮";
             this.域名高亮.Name = "域名高亮";
-            this.域名高亮.OfficeImageId = "GroupSchemes";
+            this.域名高亮.OfficeImageId = "TextHighlightColorPicker";
             this.域名高亮.ShowImage = true;
             this.域名高亮.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.域名高亮_Click);
             // 
@@ -503,7 +503,7 @@
             // 
             this.版本.Label = "版本V2.1";
             this.版本.Name = "版本";
-            this.版本.OfficeImageId = "SaveToOfficeLiveTask";
+            this.版本.OfficeImageId = "Info";
             this.版本.ShowImage = true;
             this.版本.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.版本_Click);
             // 
@@ -521,7 +521,7 @@
             this.另存PDF.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
             this.另存PDF.Label = "另存PDF";
             this.另存PDF.Name = "另存PDF";
-            this.另存PDF.OfficeImageId = "MsnLogo";
+            this.另存PDF.OfficeImageId = "FileSaveAs";
             this.另存PDF.ShowImage = true;
             this.另存PDF.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.另存PDF_Click);
             // 

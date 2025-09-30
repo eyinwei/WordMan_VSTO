@@ -422,10 +422,13 @@ namespace WordMan
             sel.EndKey(Word.WdUnits.wdLine, Word.WdMovementType.wdMove);
             sel.TypeText("\t");
 
+            // 在第二个制表位后插入样式分隔符，用于分离公式和编号
+            // 这样交叉引用时只会引用公式编号部分，不会包括公式内容
+            sel.InsertStyleSeparator();
 
-            // 3. 在尾Tab后插入括号和编号
+            // 3. 在样式分隔符后插入括号和编号
 
-            // 获取尾Tab后的Range
+            // 获取样式分隔符后的Range
             Word.Range insertRange = para.Range.Duplicate;
             insertRange.Start = insertRange.End - 1;
             insertRange.End = insertRange.End - 1;
@@ -471,6 +474,9 @@ namespace WordMan
             }
 
             insertRange.InsertAfter(rightBracket);
+            
+            // 将光标移动到该行末尾
+            sel.EndKey(Word.WdUnits.wdLine, Word.WdMovementType.wdMove);
         }
         private void 创建三线表_Click(object sender, RibbonControlEventArgs e)
         {

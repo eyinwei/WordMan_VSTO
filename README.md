@@ -20,19 +20,21 @@ WordMan 是一个功能强大的 Microsoft Word VSTO 插件，专为学术写作
 
 ### 📊 表格处理工具
 - **三线表** - 快速创建和设置标准三线表格式
-- **表格编号** - 自动为表格添加题注，支持多种编号样式
+- **表格编号** - 自动为表格添加题注，支持多种编号样式（表1、表1-1、表1.1）
 - **插入N行/列** - 批量插入指定数量的表格行或列
 - **宽度刷/高度刷** - 快速复制和应用图片/表格的尺寸
 
 ### 📈 图表与编号
-- **图片编号** - 自动为图片添加题注，支持章节编号
-- **公式编号** - 智能公式编号，支持多种编号格式
-- **交叉引用高亮** - 高亮显示文档中的交叉引用和文献引用
+- **图片编号** - 自动为图片添加题注，支持多种编号样式（图1、图1-1、图1.1）
+- **公式编号** - 智能公式编号，使用表格布局实现居中显示和右对齐编号
+- **表格编号** - 自动为表格添加题注，支持多种编号样式（表1、表1-1、表1.1）
+- **交叉引用高亮** - 智能识别并高亮显示文档中的交叉引用和文献引用
 
 ### 🎨 样式与排版
 - **样式设置** - 全面的文档样式管理，支持样式预设和自定义
-- **多级列表** - 强大的多级列表创建和管理工具
+- **多级列表** - 强大的多级列表创建和管理工具，支持9级标题设置
 - **排版工具** - 专业的排版任务窗格，集成常用排版功能
+- **控件管理** - 智能的控件管理系统，支持单位转换和数值计算
 
 ### 📄 文档管理
 - **文档拆分** - 按页拆分Word文档
@@ -75,6 +77,7 @@ WordMan 是一个功能强大的 Microsoft Word VSTO 插件，专为学术写作
 - **VSTO架构** - 基于Visual Studio Tools for Office
 - **模块化设计** - 功能模块独立，便于维护和扩展
 - **Word API优先** - 充分利用Word原生API，确保稳定性和兼容性
+- **表格布局** - 公式编号采用表格布局，实现精确的居中显示和右对齐
 
 ### 代码规范
 - 遵循VSTO开发标准
@@ -82,6 +85,7 @@ WordMan 是一个功能强大的 Microsoft Word VSTO 插件，专为学术写作
 - 避免不必要的抽象
 - 保持代码简洁直接
 - 明确命名空间引用
+- 方法职责单一，便于维护
 
 ## 📦 安装说明
 
@@ -97,6 +101,24 @@ WordMan 是一个功能强大的 Microsoft Word VSTO 插件，专为学术写作
 4. 重启Microsoft Word
 5. 在Word功能区中查看"WordMan"选项卡
 
+## ✨ 最新特性
+
+### 公式编号优化
+- **表格布局** - 采用三列表格实现公式居中显示和编号右对齐
+- **格式保持** - 完美保持公式的原有格式（字体、颜色、数学公式等）
+- **多种样式** - 支持（1）、（1-1）、（1.1）三种编号格式
+- **智能处理** - 自动处理段落标记，避免多余空白行
+
+### 交叉引用增强
+- **智能识别** - 自动识别REF、HYPERLINK和EndNote文献引用
+- **颜色区分** - 图（蓝色）、表（绿色）、公式（红色）、其他（紫色）
+- **一键操作** - 支持一键高亮和取消高亮
+
+### 控件管理优化
+- **单位转换** - 支持厘米、磅、字符、行等多种单位转换
+- **数值计算** - 提供精确的数值计算功能
+- **智能控件** - 自动创建和管理输入控件
+
 ## 🎯 使用场景
 
 ### 学术写作
@@ -104,6 +126,7 @@ WordMan 是一个功能强大的 Microsoft Word VSTO 插件，专为学术写作
 - 图表编号自动化
 - 参考文献管理
 - 多级标题设置
+- 公式编号管理
 
 ### 办公文档
 - 文档格式统一
@@ -123,21 +146,37 @@ WordMan 是一个功能强大的 Microsoft Word VSTO 插件，专为学术写作
 ```
 WordMan_VSTO/
 ├── ThisAddIn.cs              # VSTO插件入口
-├── MainRibbon.cs             # 功能区界面
+├── MainRibbon.cs             # 功能区界面和核心功能
+├── ControlsManager.cs        # 控件管理系统
 ├── MultiLevel/               # 多级列表功能
+│   ├── MultiLevelListForm.cs
+│   ├── LevelStyleSettingsForm.cs
+│   ├── MultiLevelDataManager.cs
+│   └── WordStyleInfo.cs
 ├── StyleSetting/             # 样式设置模块
+│   ├── StyleSettings.cs
+│   ├── StyleFileManager.cs
+│   └── StylePresetManager.cs
 ├── SplitAndMerge/            # 文档拆分合并
+│   ├── DocumentSplitter.cs
+│   ├── DocumentMerger.cs
+│   └── DocumentMergeForm.cs
 ├── Syboms/                   # 符号工具
-└── TypesettingTaskPane.cs    # 排版任务窗格
+│   ├── GreekLetterForm.cs
+│   └── CommonSymbolForm.cs
+├── TypesettingTaskPane.cs    # 排版任务窗格
+└── 功能介绍/                 # 功能展示图片
 ```
 
 ### 核心模块
-- **MainRibbon** - 主功能区界面和事件处理
-- **MultiLevelListForm** - 多级列表创建和管理
-- **StyleSettings** - 文档样式设置和管理
-- **DocumentSplitter/Merger** - 文档拆分合并功能
-- **GreekLetterForm** - 希腊字母输入工具
-- **CommonSymbolForm** - 常用符号输入工具
+- **MainRibbon** - 主功能区界面和事件处理，集成所有核心功能
+- **MultiLevelListForm** - 多级列表创建和管理，支持9级标题设置
+- **StyleSettings** - 文档样式设置和管理，支持样式预设和自定义
+- **DocumentSplitter/Merger** - 文档拆分合并功能，支持批量处理
+- **GreekLetterForm** - 希腊字母输入工具，支持大小写转换
+- **CommonSymbolForm** - 常用符号输入工具，分类整理科学符号
+- **ControlsManager** - 控件管理系统，提供单位转换和数值计算
+- **TypesettingTaskPane** - 排版任务窗格，集成常用排版功能
 
 ## 📄 许可证
 

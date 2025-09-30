@@ -399,84 +399,103 @@ namespace WordMan
             var sel = app.Selection;
             Word.Paragraph para = sel.Paragraphs[1];
 
-            // 1. 在该行Home插入一个居中制表位，在End插入一个居右制表位
+            // 保存当前光标位置
+            int originalStart = sel.Start;
+            int originalEnd = sel.End;
+
+            try
+            {
+                // 1. 选择段落内容（不包含段落标记）并剪切
+                Word.Range contentRange = para.Range.Duplicate;
+                contentRange.End = contentRange.End - 1; // 排除段落标记
+                contentRange.Cut();
+
+                // 2. 删除当前段落
+                para.Range.Delete();
+
+                // 3. 创建并配置表格
+                Word.Table table = CreateFormulaTable(sel, app);
+                
+                // 4. 粘贴公式内容到第二列
+                table.Cell(1, 2).Range.Paste();
+
+                // 5. 插入公式编号到第三列
+                InsertFormulaNumber(table, sel);
+
+                // 6. 将光标移动到表格第二列
+                table.Cell(1, 2).Range.Select();
+            }
+            catch (Exception ex)
+            {
+                // 如果出错，恢复原始选择
+                sel.SetRange(originalStart, originalEnd);
+                MessageBox.Show($"公式编号插入失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private Word.Table CreateFormulaTable(Word.Selection sel, Word.Application app)
+        {
+            // 插入一行三列的表格
+            Word.Table table = sel.Tables.Add(sel.Range, 1, 3);
+            
+            // 设置表格属性为无边框
+            table.Borders.Enable = 0;
+
+            // 计算并设置列宽
             float pageWidth = sel.PageSetup.PageWidth - sel.PageSetup.LeftMargin - sel.PageSetup.RightMargin;
-            float centerPos = pageWidth / 2.0f;
-            float rightPos = pageWidth;
-            para.TabStops.ClearAll();
-            para.TabStops.Add(app.CentimetersToPoints(centerPos / 28.35f),
-                              Word.WdTabAlignment.wdAlignTabCenter,
-                              Word.WdTabLeader.wdTabLeaderSpaces);
-            para.TabStops.Add(app.CentimetersToPoints(rightPos / 28.35f),
-                              Word.WdTabAlignment.wdAlignTabRight,
-                              Word.WdTabLeader.wdTabLeaderSpaces);
+            float[] columnWidths = { pageWidth * 0.15f, pageWidth * 0.7f, pageWidth * 0.15f }; // 左15%, 中70%, 右15%
+            
+            for (int i = 0; i < 3; i++)
+            {
+                table.Columns[i + 1].Width = app.CentimetersToPoints(columnWidths[i] / 28.35f);
+            }
 
-            // 2. 段首插入Tab（连续两次HomeKey）
-            sel.SetRange(para.Range.Start, para.Range.Start);
-            sel.HomeKey(Word.WdUnits.wdLine, Word.WdMovementType.wdMove);
-            sel.HomeKey(Word.WdUnits.wdLine, Word.WdMovementType.wdMove);
-            sel.TypeText("\t");
+            // 设置单元格对齐方式
+            Word.WdParagraphAlignment[] alignments = 
+            {
+                Word.WdParagraphAlignment.wdAlignParagraphLeft,   // 第一列：左对齐
+                Word.WdParagraphAlignment.wdAlignParagraphCenter, // 第二列：居中
+                Word.WdParagraphAlignment.wdAlignParagraphRight   // 第三列：右对齐
+            };
 
-            // 段尾插入Tab（连续两次EndKey）
-            sel.EndKey(Word.WdUnits.wdLine, Word.WdMovementType.wdMove);
-            sel.EndKey(Word.WdUnits.wdLine, Word.WdMovementType.wdMove);
-            sel.TypeText("\t");
+            for (int i = 0; i < 3; i++)
+            {
+                table.Cell(1, i + 1).Range.ParagraphFormat.Alignment = alignments[i];
+            }
 
-            // 在第二个制表位后插入样式分隔符，用于分离公式和编号
-            // 这样交叉引用时只会引用公式编号部分，不会包括公式内容
-            sel.InsertStyleSeparator();
+            return table;
+        }
 
-            // 3. 在样式分隔符后插入括号和编号
+        private void InsertFormulaNumber(Word.Table table, Word.Selection sel)
+        {
+            const string leftBracket = "(";
+            const string rightBracket = ")";
+            const string seqName = "公式";
 
-            // 获取样式分隔符后的Range
-            Word.Range insertRange = para.Range.Duplicate;
-            insertRange.Start = insertRange.End - 1;
-            insertRange.End = insertRange.End - 1;
-
-            // 括号风格
-            string leftBracket = "(";
-            string rightBracket = ")";
-            string seqName = "公式";
-
-            insertRange.InsertAfter(leftBracket);
-            insertRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
+            // 移动到第三列
+            table.Cell(1, 3).Range.Select();
+            sel.TypeText(leftBracket);
 
             switch (CurrentStyle)
             {
                 case FormulaNumberStyle.Parenthesis1:
-                    // 公式（1） ==> 1 由 SEQ 公式 得到
-                    var seqField = insertRange.Fields.Add(insertRange, Word.WdFieldType.wdFieldSequence, seqName, false);
-                    // 确保移动到域的结束位置之后
-                    insertRange.Move(Word.WdUnits.wdCharacter, seqField.Result.Characters.Count);
+                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldSequence, seqName, false);
                     break;
 
                 case FormulaNumberStyle.Parenthesis1_1:
-                    var srField2 = insertRange.Fields.Add(insertRange, Word.WdFieldType.wdFieldStyleRef, "1 \\s", false);
-                    insertRange.Move(Word.WdUnits.wdCharacter, srField2.Result.Characters.Count);
-
-                    insertRange.InsertAfter("-");
-                    insertRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
-
-                    var seqField2 = insertRange.Fields.Add(insertRange, Word.WdFieldType.wdFieldSequence, seqName + "\\s 1", false);
-                    insertRange.Move(Word.WdUnits.wdCharacter, seqField2.Result.Characters.Count);
+                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldStyleRef, "1 \\s", false);
+                    sel.TypeText("-");
+                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldSequence, seqName + "\\s 1", false);
                     break;
 
                 case FormulaNumberStyle.Parenthesis1_1dot:
-                    var srField3 = insertRange.Fields.Add(insertRange, Word.WdFieldType.wdFieldStyleRef, "1 \\s", false);
-                    insertRange.Move(Word.WdUnits.wdCharacter, srField3.Result.Characters.Count);
-
-                    insertRange.InsertAfter(".");
-                    insertRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
-
-                    var seqField3 = insertRange.Fields.Add(insertRange, Word.WdFieldType.wdFieldSequence, seqName + "\\s 1", false);
-                    insertRange.Move(Word.WdUnits.wdCharacter, seqField3.Result.Characters.Count);
+                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldStyleRef, "1 \\s", false);
+                    sel.TypeText(".");
+                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldSequence, seqName + "\\s 1", false);
                     break;
             }
 
-            insertRange.InsertAfter(rightBracket);
-            
-            // 将光标移动到该行末尾
-            sel.EndKey(Word.WdUnits.wdLine, Word.WdMovementType.wdMove);
+            sel.TypeText(rightBracket);
         }
         private void 创建三线表_Click(object sender, RibbonControlEventArgs e)
         {

@@ -79,12 +79,16 @@
             this.separator5 = this.Factory.CreateRibbonSeparator();
             this.域名高亮 = this.Factory.CreateRibbonButton();
             this.取消高亮 = this.Factory.CreateRibbonButton();
-            this.版本 = this.Factory.CreateRibbonButton();
+            this.编号设置 = this.Factory.CreateRibbonMenu();
+            this.上标 = this.Factory.CreateRibbonButton();
+            this.正常 = this.Factory.CreateRibbonButton();
             this.一键排版 = this.Factory.CreateRibbonButton();
             this.separator6 = this.Factory.CreateRibbonSeparator();
-            this.另存PDF = this.Factory.CreateRibbonButton();
-            this.文档拆分 = this.Factory.CreateRibbonButton();
+            this.另存PDF = this.Factory.CreateRibbonSplitButton();
+            this.版本 = this.Factory.CreateRibbonButton();
+            this.文档操作 = this.Factory.CreateRibbonMenu();
             this.文档合并 = this.Factory.CreateRibbonButton();
+            this.文档拆分 = this.Factory.CreateRibbonButton();
             this.快速密级 = this.Factory.CreateRibbonMenu();
             this.公开 = this.Factory.CreateRibbonButton();
             this.内部 = this.Factory.CreateRibbonButton();
@@ -442,12 +446,11 @@
             this.全文处理.Items.Add(this.separator5);
             this.全文处理.Items.Add(this.域名高亮);
             this.全文处理.Items.Add(this.取消高亮);
-            this.全文处理.Items.Add(this.版本);
+            this.全文处理.Items.Add(this.编号设置);
             this.全文处理.Items.Add(this.一键排版);
             this.全文处理.Items.Add(this.separator6);
             this.全文处理.Items.Add(this.另存PDF);
-            this.全文处理.Items.Add(this.文档拆分);
-            this.全文处理.Items.Add(this.文档合并);
+            this.全文处理.Items.Add(this.文档操作);
             this.全文处理.Items.Add(this.快速密级);
             this.全文处理.Label = "全文处理";
             this.全文处理.Name = "全文处理";
@@ -499,13 +502,28 @@
             this.取消高亮.ShowImage = true;
             this.取消高亮.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.取消高亮_Click);
             // 
-            // 版本
+            // 编号设置
             // 
-            this.版本.Label = "版本V2.1";
-            this.版本.Name = "版本";
-            this.版本.OfficeImageId = "Info";
-            this.版本.ShowImage = true;
-            this.版本.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.版本_Click);
+            this.编号设置.Items.Add(this.上标);
+            this.编号设置.Items.Add(this.正常);
+            this.编号设置.Label = "编号设置";
+            this.编号设置.Name = "编号设置";
+            this.编号设置.OfficeImageId = "ControlWizards";
+            this.编号设置.ShowImage = true;
+            // 
+            // 上标
+            // 
+            this.上标.Label = "上标";
+            this.上标.Name = "上标";
+            this.上标.ShowImage = true;
+            this.上标.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.上标_Click);
+            // 
+            // 正常
+            // 
+            this.正常.Label = "正常";
+            this.正常.Name = "正常";
+            this.正常.ShowImage = true;
+            this.正常.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.正常_Click);
             // 
             // 一键排版
             // 
@@ -519,23 +537,40 @@
             // 另存PDF
             // 
             this.另存PDF.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.另存PDF.Items.Add(this.版本);
             this.另存PDF.Label = "另存PDF";
             this.另存PDF.Name = "另存PDF";
             this.另存PDF.OfficeImageId = "FileSaveAs";
-            this.另存PDF.ShowImage = true;
             this.另存PDF.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.另存PDF_Click);
             // 
-            // 文档拆分
+            // 版本
             // 
-            this.文档拆分.Label = "文档拆分";
-            this.文档拆分.Name = "文档拆分";
-            this.文档拆分.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.文档拆分_Click);
+            this.版本.Label = "版本V2.2";
+            this.版本.Name = "版本";
+            this.版本.OfficeImageId = "Info";
+            this.版本.ShowImage = true;
+            this.版本.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.版本_Click);
+            // 
+            // 文档操作
+            // 
+            this.文档操作.Items.Add(this.文档合并);
+            this.文档操作.Items.Add(this.文档拆分);
+            this.文档操作.Label = "文档操作";
+            this.文档操作.Name = "文档操作";
             // 
             // 文档合并
             // 
             this.文档合并.Label = "文档合并";
             this.文档合并.Name = "文档合并";
+            this.文档合并.ShowImage = true;
             this.文档合并.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.文档合并_Click);
+            // 
+            // 文档拆分
+            // 
+            this.文档拆分.Label = "文档拆分";
+            this.文档拆分.Name = "文档拆分";
+            this.文档拆分.ShowImage = true;
+            this.文档拆分.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.文档拆分_Click);
             // 
             // 快速密级
             // 
@@ -602,7 +637,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 希腊字母;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 常用符号;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup 全文处理;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton 另存PDF;
+        internal Microsoft.Office.Tools.Ribbon.RibbonSplitButton 另存PDF;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup 公式处理;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 公式编号;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 中标转英标;
@@ -637,14 +672,18 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 位图化;
         internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator5;
         internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator6;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton 文档拆分;
+        internal Microsoft.Office.Tools.Ribbon.RibbonMenu 文档操作;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 文档合并;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 文档拆分;
         internal Microsoft.Office.Tools.Ribbon.RibbonMenu 快速密级;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 公开;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 内部;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 移除密级;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 多级列表;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 样式设置;
+        internal Microsoft.Office.Tools.Ribbon.RibbonMenu 编号设置;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 上标;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 正常;
     }
 
     partial class ThisRibbonCollection

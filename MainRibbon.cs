@@ -243,16 +243,22 @@ namespace WordMan
                 };
 
                 // 使用Word查找替换保持格式
+                // 使用范围副本避免原始范围被修改
+                Word.Range workingRange = rng.Duplicate;
                 foreach (var pair in dict)
                 {
                     try
                     {
-                        rng.Find.ClearFormatting();
-                        rng.Find.Text = pair.Key;
-                        rng.Find.Replacement.ClearFormatting();
-                        rng.Find.Replacement.Text = pair.Value;
-                        rng.Find.MatchWildcards = false;
-                        rng.Find.Execute(Replace: Word.WdReplace.wdReplaceAll);
+                        workingRange.Find.ClearFormatting();
+                        workingRange.Find.Replacement.ClearFormatting();
+                        workingRange.Find.Text = pair.Key;
+                        workingRange.Find.Replacement.Text = pair.Value;
+                        workingRange.Find.MatchWildcards = false;
+                        workingRange.Find.MatchCase = false;
+                        workingRange.Find.MatchWholeWord = false;
+                        workingRange.Find.Forward = true;
+                        workingRange.Find.Wrap = Word.WdFindWrap.wdFindStop;
+                        workingRange.Find.Execute(Replace: Word.WdReplace.wdReplaceAll);
                     }
                     catch
                     {
@@ -270,38 +276,72 @@ namespace WordMan
                         int startPos = rng.Start;
                         int endPos = rng.End;
                         
-                        // 处理双引号 - 逐个替换
-                        bool isLeft = true;
-                        var searchRange = app.ActiveDocument.Range(startPos, endPos);
-                        searchRange.Find.ClearFormatting();
-                        searchRange.Find.Text = "\"";
-                        searchRange.Find.Forward = true;
-                        searchRange.Find.Wrap = Word.WdFindWrap.wdFindStop;
+                        // 先收集所有引号位置，避免在循环中修改文档导致位置变化
+                        List<int> doubleQuotePositions = new List<int>();
+                        List<int> singleQuotePositions = new List<int>();
                         
-                        while (searchRange.Find.Execute())
+                        // 收集双引号位置（使用字符串搜索，避免Find的复杂性）
+                        string rangeText = app.ActiveDocument.Range(startPos, endPos).Text;
+                        int currentPos = startPos;
+                        int textIndex = 0;
+                        while (textIndex < rangeText.Length)
                         {
-                            var hitRange = app.ActiveDocument.Range(searchRange.Start, searchRange.Start + 1);
-                            hitRange.Text = isLeft ? "\u201c" : "\u201d";
-                            isLeft = !isLeft;
-                            // 更新搜索范围，从当前位置继续
-                            searchRange.SetRange(hitRange.End, endPos);
+                            if (rangeText[textIndex] == '"')
+                            {
+                                doubleQuotePositions.Add(currentPos + textIndex);
+                            }
+                            textIndex++;
                         }
                         
-                        // 处理单引号 - 逐个替换
-                        isLeft = true;
-                        searchRange = app.ActiveDocument.Range(startPos, endPos);
-                        searchRange.Find.ClearFormatting();
-                        searchRange.Find.Text = "'";
-                        searchRange.Find.Forward = true;
-                        searchRange.Find.Wrap = Word.WdFindWrap.wdFindStop;
-                        
-                        while (searchRange.Find.Execute())
+                        // 收集单引号位置
+                        textIndex = 0;
+                        while (textIndex < rangeText.Length)
                         {
-                            var hitRange = app.ActiveDocument.Range(searchRange.Start, searchRange.Start + 1);
-                            hitRange.Text = isLeft ? "\u2018" : "\u2019";
-                            isLeft = !isLeft;
-                            // 更新搜索范围，从当前位置继续
-                            searchRange.SetRange(hitRange.End, endPos);
+                            if (rangeText[textIndex] == '\'')
+                            {
+                                singleQuotePositions.Add(currentPos + textIndex);
+                            }
+                            textIndex++;
+                        }
+                        
+                        // 倒序替换双引号（避免位置变化影响后续替换）
+                        bool isLeft = true;
+                        for (int i = doubleQuotePositions.Count - 1; i >= 0; i--)
+                        {
+                            try
+                            {
+                                var hitRange = app.ActiveDocument.Range(doubleQuotePositions[i], doubleQuotePositions[i] + 1);
+                                string currentText = hitRange.Text;
+                                if (currentText == "\"")
+                                {
+                                    hitRange.Text = isLeft ? "\u201c" : "\u201d";
+                                    isLeft = !isLeft;
+                                }
+                            }
+                            catch
+                            {
+                                continue;
+                            }
+                        }
+                        
+                        // 倒序替换单引号
+                        isLeft = true;
+                        for (int i = singleQuotePositions.Count - 1; i >= 0; i--)
+                        {
+                            try
+                            {
+                                var hitRange = app.ActiveDocument.Range(singleQuotePositions[i], singleQuotePositions[i] + 1);
+                                string currentText = hitRange.Text;
+                                if (currentText == "'")
+                                {
+                                    hitRange.Text = isLeft ? "\u2018" : "\u2019";
+                                    isLeft = !isLeft;
+                                }
+                            }
+                            catch
+                            {
+                                continue;
+                            }
                         }
                     }
                     catch
@@ -1789,7 +1829,187 @@ namespace WordMan
                 MessageBox.Show($"文档合并失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        private void 上标_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                var doc = app.ActiveDocument;
 
+                if (doc == null || doc.Fields == null)
+                {
+                    System.Windows.Forms.MessageBox.Show("未检测到文档或文档没有字段。");
+                    return;
+                }
+
+                int refCount = 0;
+                int otherCount = 0;
+                string[] excludeKeywords = { "图", "表", "公式", "figure", "table", "equation",
+                           "fig", "tab", "图表", "图片", "图形", "插图" };
+
+                app.ScreenUpdating = false;
+
+                // 使用Fields.Count避免枚举时修改集合的问题
+                int fieldCount = doc.Fields.Count;
+
+                for (int i = 1; i <= fieldCount; i++)
+                {
+                    try
+                    {
+                        Microsoft.Office.Interop.Word.Field field = doc.Fields[i];
+
+                        // 更准确的REF字段判断
+                        if (field.Type == Microsoft.Office.Interop.Word.WdFieldType.wdFieldRef ||
+                            field.Type == Microsoft.Office.Interop.Word.WdFieldType.wdFieldSequence)
+                        {
+                            string codeText = field.Code?.Text ?? "";
+                            string resultText = field.Result?.Text ?? "";
+
+                            // 检查是否需要排除（图表公式等）
+                            string combinedText = (codeText + " " + resultText).ToLower();
+                            bool isExcluded = excludeKeywords.Any(keyword =>
+                                combinedText.Contains(keyword.ToLower()));
+
+                            if (!isExcluded)
+                            {
+                                // 安全地设置上标
+                                if (field.Result != null && field.Result.Font != null)
+                                {
+                                    field.Result.Font.Superscript = 1;
+                                    refCount++;
+                                }
+                            }
+                            else
+                            {
+                                otherCount++;
+                            }
+                        }
+                        else
+                        {
+                            otherCount++;
+                        }
+                    }
+                    catch (Exception fieldEx)
+                    {
+                        // 单个字段处理失败时继续处理其他字段
+                        System.Diagnostics.Debug.WriteLine($"处理字段时出错: {fieldEx.Message}");
+                        continue;
+                    }
+                }
+
+                app.ScreenUpdating = true;
+
+                // 显示处理结果
+                System.Windows.Forms.MessageBox.Show(
+                    $"处理完成：\n" +
+                    $"• 参考文献引用: {refCount} 个（已设为上标）\n" +
+                    $"• 其他字段: {otherCount} 个（未处理）",
+                    "完成",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    Globals.ThisAddIn.Application.ScreenUpdating = true;
+                }
+                catch { }
+
+                System.Windows.Forms.MessageBox.Show($"处理过程中出现错误：{ex.Message}");
+            }
+        }
+
+        private void 正常_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                var doc = app.ActiveDocument;
+
+                if (doc == null || doc.Fields == null)
+                {
+                    System.Windows.Forms.MessageBox.Show("未检测到文档或文档没有字段。");
+                    return;
+                }
+
+                int refCount = 0;
+                int otherCount = 0;
+                string[] excludeKeywords = { "图", "表", "公式", "figure", "table", "equation",
+                           "fig", "tab", "图表", "图片", "图形", "插图" };
+
+                app.ScreenUpdating = false;
+
+                // 使用Fields.Count避免枚举时修改集合的问题
+                int fieldCount = doc.Fields.Count;
+
+                for (int i = 1; i <= fieldCount; i++)
+                {
+                    try
+                    {
+                        Microsoft.Office.Interop.Word.Field field = doc.Fields[i];
+
+                        // 更准确的REF字段判断
+                        if (field.Type == Microsoft.Office.Interop.Word.WdFieldType.wdFieldRef ||
+                            field.Type == Microsoft.Office.Interop.Word.WdFieldType.wdFieldSequence)
+                        {
+                            string codeText = field.Code?.Text ?? "";
+                            string resultText = field.Result?.Text ?? "";
+
+                            // 检查是否需要排除（图表公式等）
+                            string combinedText = (codeText + " " + resultText).ToLower();
+                            bool isExcluded = excludeKeywords.Any(keyword =>
+                                combinedText.Contains(keyword.ToLower()));
+
+                            if (!isExcluded)
+                            {
+                                // 安全地设置正常格式
+                                if (field.Result != null && field.Result.Font != null)
+                                {
+                                    field.Result.Font.Superscript = 0;
+                                    refCount++;
+                                }
+                            }
+                            else
+                            {
+                                otherCount++;
+                            }
+                        }
+                        else
+                        {
+                            otherCount++;
+                        }
+                    }
+                    catch (Exception fieldEx)
+                    {
+                        // 单个字段处理失败时继续处理其他字段
+                        System.Diagnostics.Debug.WriteLine($"处理字段时出错: {fieldEx.Message}");
+                        continue;
+                    }
+                }
+
+                app.ScreenUpdating = true;
+
+                // 显示处理结果
+                System.Windows.Forms.MessageBox.Show(
+                    $"处理完成：\n" +
+                    $"• 参考文献引用: {refCount} 个（已设为正常格式）\n" +
+                    $"• 其他字段: {otherCount} 个（未处理）",
+                    "完成",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    Globals.ThisAddIn.Application.ScreenUpdating = true;
+                }
+                catch { }
+
+                System.Windows.Forms.MessageBox.Show($"处理过程中出现错误：{ex.Message}");
+            }
+        }
 
     }
 }

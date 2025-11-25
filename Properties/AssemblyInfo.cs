@@ -9,9 +9,9 @@ using System.Security;
 [assembly: AssemblyTitle("WordMan")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Organization")]
-[assembly: AssemblyProduct("WordMan")]
-[assembly: AssemblyCopyright("Copyright © Organization 2025")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("")]
+[assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -34,6 +34,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainRibbon));
             this.WordMan = this.Factory.CreateRibbonTab();
             this.文本处理 = this.Factory.CreateRibbonGroup();
             this.去除断行 = this.Factory.CreateRibbonButton();
@@ -130,7 +131,7 @@
             // 
             // 去除断行
             // 
-            this.去除断行.Image = global::WordMan.Properties.Resources.GroupTaskOutcomesActions;
+            this.去除断行.Image = ((System.Drawing.Image)(resources.GetObject("去除断行.Image")));
             this.去除断行.Label = "去除断行";
             this.去除断行.Name = "去除断行";
             this.去除断行.ScreenTip = "去除多余空行";
@@ -139,7 +140,7 @@
             // 
             // 去除空格
             // 
-            this.去除空格.Image = global::WordMan.Properties.Resources.Delete;
+            this.去除空格.Image = ((System.Drawing.Image)(resources.GetObject("去除空格.Image")));
             this.去除空格.Label = "去除空格";
             this.去除空格.Name = "去除空格";
             this.去除空格.OfficeImageId = "Delete";
@@ -149,7 +150,7 @@
             // 
             // 去除空行
             // 
-            this.去除空行.Image = global::WordMan.Properties.Resources.DeleteCells;
+            this.去除空行.Image = ((System.Drawing.Image)(resources.GetObject("去除空行.Image")));
             this.去除空行.Label = "去除空行";
             this.去除空行.Name = "去除空行";
             this.去除空行.OfficeImageId = "Delete";
@@ -159,7 +160,7 @@
             // 
             // 英标转中标
             // 
-            this.英标转中标.Image = global::WordMan.Properties.Resources.CommaSign;
+            this.英标转中标.Image = ((System.Drawing.Image)(resources.GetObject("英标转中标.Image")));
             this.英标转中标.Label = "英标转中标";
             this.英标转中标.Name = "英标转中标";
             this.英标转中标.OfficeImageId = "CommaSign";
@@ -179,7 +180,7 @@
             // 
             // 自动加空格
             // 
-            this.自动加空格.Image = global::WordMan.Properties.Resources.GroupTableCellFormat;
+            this.自动加空格.Image = ((System.Drawing.Image)(resources.GetObject("自动加空格.Image")));
             this.自动加空格.Label = "自动加空格";
             this.自动加空格.Name = "自动加空格";
             this.自动加空格.OfficeImageId = "TextAlignLeft";
@@ -194,7 +195,7 @@
             // 缩进2字符
             // 
             this.缩进2字符.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.缩进2字符.Image = global::WordMan.Properties.Resources.WordIndent;
+            this.缩进2字符.Image = global::WordMan.Properties.Resources.增加缩进;
             this.缩进2字符.Label = "缩进2字符";
             this.缩进2字符.Name = "缩进2字符";
             this.缩进2字符.OfficeImageId = "TextAlignRight";
@@ -204,7 +205,7 @@
             // 去除缩进
             // 
             this.去除缩进.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.去除缩进.Image = global::WordMan.Properties.Resources.WordOutdent;
+            this.去除缩进.Image = global::WordMan.Properties.Resources.减少缩进;
             this.去除缩进.Label = "去除缩进";
             this.去除缩进.Name = "去除缩进";
             this.去除缩进.OfficeImageId = "TextAlignLeft";
@@ -218,7 +219,7 @@
             // 希腊字母
             // 
             this.希腊字母.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.希腊字母.Image = global::WordMan.Properties.Resources.EquationEdit;
+            this.希腊字母.Image = global::WordMan.Properties.Resources.希腊;
             this.希腊字母.Label = "希腊字母";
             this.希腊字母.Name = "希腊字母";
             this.希腊字母.OfficeImageId = "EquationEdit";
@@ -228,7 +229,7 @@
             // 常用符号
             // 
             this.常用符号.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.常用符号.Image = global::WordMan.Properties.Resources.EquationChangeLimitLocation;
+            this.常用符号.Image = global::WordMan.Properties.Resources.符号;
             this.常用符号.Label = "常用符号";
             this.常用符号.Name = "常用符号";
             this.常用符号.OfficeImageId = "EquationOperatorGallery";
@@ -252,7 +253,7 @@
             // 创建三线表
             // 
             this.创建三线表.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.创建三线表.Image = global::WordMan.Properties.Resources.TableInsert;
+            this.创建三线表.Image = global::WordMan.Properties.Resources.三线图;
             this.创建三线表.Label = "创建三线表";
             this.创建三线表.Name = "创建三线表";
             this.创建三线表.OfficeImageId = "AccessFormModalDialog";
@@ -261,7 +262,7 @@
             // 
             // 设为三线表
             // 
-            this.设为三线表.Image = global::WordMan.Properties.Resources.TableProperties3;
+            this.设为三线表.Image = global::WordMan.Properties.Resources.表前插入行;
             this.设为三线表.Label = "设为三线表";
             this.设为三线表.Name = "设为三线表";
             this.设为三线表.OfficeImageId = "TableProperties";
@@ -271,7 +272,7 @@
             // 
             // 插入N行
             // 
-            this.插入N行.Image = global::WordMan.Properties.Resources.TableRowsInsertBelowWord;
+            this.插入N行.Image = ((System.Drawing.Image)(resources.GetObject("插入N行.Image")));
             this.插入N行.Label = "插入N行";
             this.插入N行.Name = "插入N行";
             this.插入N行.OfficeImageId = "EquationMatrixInsertRowAfter";
@@ -280,7 +281,7 @@
             // 
             // 插入N列
             // 
-            this.插入N列.Image = global::WordMan.Properties.Resources.TableColumnsInsertRight;
+            this.插入N列.Image = ((System.Drawing.Image)(resources.GetObject("插入N列.Image")));
             this.插入N列.Label = "插入N列";
             this.插入N列.Name = "插入N列";
             this.插入N列.OfficeImageId = "EquationMatrixInsertColumnAfter";
@@ -294,7 +295,7 @@
             // 表格编号
             // 
             this.表格编号.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.表格编号.Image = global::WordMan.Properties.Resources.CaptionProperties2;
+            this.表格编号.Image = global::WordMan.Properties.Resources.表格编号;
             this.表格编号.Label = "表格编号";
             this.表格编号.Name = "表格编号";
             this.表格编号.OfficeImageId = "TableDesign";
@@ -305,7 +306,7 @@
             // 表注样式1
             // 
             this.表注样式1.Checked = true;
-            this.表注样式1.Image = global::WordMan.Properties.Resources.TableAutoFormat;
+            this.表注样式1.Image = global::WordMan.Properties.Resources.表前插入行;
             this.表注样式1.Label = "表 1  ";
             this.表注样式1.Name = "表注样式1";
             this.表注样式1.OfficeImageId = "AdpDiagramNewTable";
@@ -314,7 +315,7 @@
             // 
             // 表注样式2
             // 
-            this.表注样式2.Image = global::WordMan.Properties.Resources.TableAutoFormat;
+            this.表注样式2.Image = global::WordMan.Properties.Resources.表前插入行;
             this.表注样式2.Label = "表 1-1";
             this.表注样式2.Name = "表注样式2";
             this.表注样式2.OfficeImageId = "AdpDiagramNewTable";
@@ -323,7 +324,7 @@
             // 
             // 表注样式3
             // 
-            this.表注样式3.Image = global::WordMan.Properties.Resources.TableAutoFormat;
+            this.表注样式3.Image = global::WordMan.Properties.Resources.表前插入行;
             this.表注样式3.Label = "表 1.1";
             this.表注样式3.Name = "表注样式3";
             this.表注样式3.OfficeImageId = "AdpDiagramNewTable";
@@ -342,7 +343,7 @@
             // 公式编号
             // 
             this.公式编号.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.公式编号.Image = global::WordMan.Properties.Resources.Formula;
+            this.公式编号.Image = global::WordMan.Properties.Resources.公式;
             this.公式编号.Label = "公式编号";
             this.公式编号.Name = "公式编号";
             this.公式编号.OfficeImageId = "FormulaEvaluate";
@@ -353,7 +354,6 @@
             // 公式样式1
             // 
             this.公式样式1.Checked = true;
-            this.公式样式1.Image = global::WordMan.Properties.Resources.FormulaEvaluate;
             this.公式样式1.Label = "（ 1 ）";
             this.公式样式1.Name = "公式样式1";
             this.公式样式1.OfficeImageId = "Numbering";
@@ -362,7 +362,6 @@
             // 
             // 公式样式2
             // 
-            this.公式样式2.Image = global::WordMan.Properties.Resources.FormulaEvaluate;
             this.公式样式2.Label = "（1-1）";
             this.公式样式2.Name = "公式样式2";
             this.公式样式2.OfficeImageId = "Numbering";
@@ -372,7 +371,6 @@
             // 
             // 公式样式3
             // 
-            this.公式样式3.Image = global::WordMan.Properties.Resources.FormulaEvaluate;
             this.公式样式3.Label = "（1.1）";
             this.公式样式3.Name = "公式样式3";
             this.公式样式3.OfficeImageId = "Numbering";
@@ -396,7 +394,7 @@
             // 图片编号
             // 
             this.图片编号.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.图片编号.Image = global::WordMan.Properties.Resources.PictureStylesGallery;
+            this.图片编号.Image = global::WordMan.Properties.Resources.图片;
             this.图片编号.Label = "图片编号";
             this.图片编号.Name = "图片编号";
             this.图片编号.OfficeImageId = "ContentControlPicture";
@@ -408,7 +406,7 @@
             // 图注样式1
             // 
             this.图注样式1.Checked = true;
-            this.图注样式1.Image = global::WordMan.Properties.Resources.GroupOrganizationChartStyleClassic;
+            this.图注样式1.Image = global::WordMan.Properties.Resources.照片管理;
             this.图注样式1.Label = "图 1  ";
             this.图注样式1.Name = "图注样式1";
             this.图注样式1.OfficeImageId = "GroupOrganizationChartStyleClassic";
@@ -417,7 +415,7 @@
             // 
             // 图注样式2
             // 
-            this.图注样式2.Image = global::WordMan.Properties.Resources.GroupOrganizationChartStyleClassic;
+            this.图注样式2.Image = global::WordMan.Properties.Resources.照片管理;
             this.图注样式2.Label = "图 1-1";
             this.图注样式2.Name = "图注样式2";
             this.图注样式2.OfficeImageId = "GroupOrganizationChartStyleClassic";
@@ -427,7 +425,7 @@
             // 
             // 图注样式3
             // 
-            this.图注样式3.Image = global::WordMan.Properties.Resources.GroupOrganizationChartStyleClassic;
+            this.图注样式3.Image = global::WordMan.Properties.Resources.照片管理;
             this.图注样式3.Label = "图 1.1";
             this.图注样式3.Name = "图注样式3";
             this.图注样式3.OfficeImageId = "GroupOrganizationChartStyleClassic";
@@ -441,7 +439,7 @@
             // 
             // 宽度刷
             // 
-            this.宽度刷.Image = global::WordMan.Properties.Resources.PictureReflectionGalleryItem;
+            this.宽度刷.Image = ((System.Drawing.Image)(resources.GetObject("宽度刷.Image")));
             this.宽度刷.Label = "宽度刷";
             this.宽度刷.Name = "宽度刷";
             this.宽度刷.OfficeImageId = "FormatPainter";
@@ -450,7 +448,7 @@
             // 
             // 高度刷
             // 
-            this.高度刷.Image = global::WordMan.Properties.Resources.PictureColorTempertatureGallery;
+            this.高度刷.Image = ((System.Drawing.Image)(resources.GetObject("高度刷.Image")));
             this.高度刷.Label = "高度刷";
             this.高度刷.Name = "高度刷";
             this.高度刷.OfficeImageId = "FormatPainter";
@@ -459,7 +457,7 @@
             // 
             // 位图化
             // 
-            this.位图化.Image = global::WordMan.Properties.Resources.PasteAsPicture;
+            this.位图化.Image = global::WordMan.Properties.Resources.照片管理;
             this.位图化.Label = "位图化";
             this.位图化.Name = "位图化";
             this.位图化.OfficeImageId = "PasteAsPicture";
@@ -486,7 +484,7 @@
             // 排版工具
             // 
             this.排版工具.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.排版工具.Image = global::WordMan.Properties.Resources.FormatPainter;
+            this.排版工具.Image = global::WordMan.Properties.Resources.格式刷;
             this.排版工具.Label = "排版工具";
             this.排版工具.Name = "排版工具";
             this.排版工具.OfficeImageId = "FormatPainter";
@@ -496,7 +494,7 @@
             // 样式设置
             // 
             this.样式设置.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.样式设置.Image = global::WordMan.Properties.Resources.GroupPensOneNote;
+            this.样式设置.Image = global::WordMan.Properties.Resources.笔筒;
             this.样式设置.Label = "样式设置";
             this.样式设置.Name = "样式设置";
             this.样式设置.OfficeImageId = "CaptionInsert";
@@ -506,7 +504,7 @@
             // 多级列表
             // 
             this.多级列表.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.多级列表.Image = global::WordMan.Properties.Resources.NumberedListControl;
+            this.多级列表.Image = global::WordMan.Properties.Resources.列表模式;
             this.多级列表.Label = "多级列表";
             this.多级列表.Name = "多级列表";
             this.多级列表.OfficeImageId = "Numbering";
@@ -519,7 +517,7 @@
             // 
             // 域名高亮
             // 
-            this.域名高亮.Image = global::WordMan.Properties.Resources.FormatBar;
+            this.域名高亮.Image = global::WordMan.Properties.Resources.彩色;
             this.域名高亮.Label = "域名高亮";
             this.域名高亮.Name = "域名高亮";
             this.域名高亮.OfficeImageId = "TextHighlightColorPicker";
@@ -528,7 +526,7 @@
             // 
             // 取消高亮
             // 
-            this.取消高亮.Image = global::WordMan.Properties.Resources.FormatComment;
+            this.取消高亮.Image = global::WordMan.Properties.Resources.黑色;
             this.取消高亮.Label = "取消高亮";
             this.取消高亮.Name = "取消高亮";
             this.取消高亮.OfficeImageId = "FormatPlaceholder";
@@ -537,7 +535,7 @@
             // 
             // 编号设置
             // 
-            this.编号设置.Image = global::WordMan.Properties.Resources.ControlWizards;
+            this.编号设置.Image = global::WordMan.Properties.Resources.魔术棒;
             this.编号设置.Items.Add(this.上标);
             this.编号设置.Items.Add(this.正常);
             this.编号设置.Label = "文献编号";
@@ -571,7 +569,7 @@
             // 另存PDF
             // 
             this.另存PDF.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.另存PDF.Image = global::WordMan.Properties.Resources.SaveAsPub;
+            this.另存PDF.Image = global::WordMan.Properties.Resources.pdf;
             this.另存PDF.Items.Add(this.版本);
             this.另存PDF.Label = "另存PDF";
             this.另存PDF.Name = "另存PDF";
@@ -580,7 +578,7 @@
             // 
             // 版本
             // 
-            this.版本.Label = "版本V2.3";
+            this.版本.Label = "版本V2.4";
             this.版本.Name = "版本";
             this.版本.OfficeImageId = "Info";
             this.版本.ShowImage = true;

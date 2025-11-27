@@ -1,4 +1,4 @@
-﻿using Microsoft.Office.Interop.Word;
+﻿﻿﻿﻿﻿using Microsoft.Office.Interop.Word;
 using Microsoft.Office.Tools.Ribbon;
 using System;
 using System.Collections.Generic;
@@ -97,126 +97,15 @@ namespace WordMan
                 }
             }
         }
-        private void 去除缩进_Click(object sender, RibbonControlEventArgs e)
-        {
-            var selection = Globals.ThisAddIn.Application.Selection;
-            if (selection != null)
-            {
-                var paraFormat = selection.ParagraphFormat;
 
-                // 先清除首行缩进（字符和磅）
-                paraFormat.CharacterUnitFirstLineIndent = 0f;
-                paraFormat.FirstLineIndent = 0f;
 
-                // 再清除段落左缩进（字符和磅）
-                paraFormat.CharacterUnitLeftIndent = 0f;
-                paraFormat.LeftIndent = 0f;
-
-                // 可选：右缩进也清零（防止有些文档右缩进影响排版）
-                paraFormat.CharacterUnitRightIndent = 0f;
-                paraFormat.RightIndent = 0f;
-            }
-        }
-        private void 缩进2字符_Click(object sender, RibbonControlEventArgs e)
-        {
-            var selection = Globals.ThisAddIn.Application.Selection;
-            if (selection != null)
-            {
-                var paraFormat = selection.ParagraphFormat;
-                paraFormat.CharacterUnitFirstLineIndent = 2f;
-            }
-        }
-        private void 希腊字母_Click(object sender, RibbonControlEventArgs e)
-        {
-            GreekLetterForm form = new GreekLetterForm();
-            form.Show();
-        }
-        private void 常用符号_Click(object sender, RibbonControlEventArgs e)
-        {
-            CommonSymbolForm form = new CommonSymbolForm();
-            form.Show();
-        }
-        private void 另存PDF_Click(object sender, RibbonControlEventArgs e)
-        {
-            var app = Globals.ThisAddIn.Application;
-            var doc = app.ActiveDocument;
-
-            // 1. 检查文档是否已保存过
-            if (string.IsNullOrEmpty(doc.Path))
-            {
-                System.Windows.Forms.MessageBox.Show(
-                    "请先保存文档，再导出为PDF。",
-                    "提示",
-                    System.Windows.Forms.MessageBoxButtons.OK,
-                    System.Windows.Forms.MessageBoxIcon.Information);
-
-                // 调用Word的“另存为”对话框
-                app.Dialogs[Microsoft.Office.Interop.Word.WdWordDialog.wdDialogFileSaveAs].Show();
-
-                // 不再自动导出PDF，无论保存没保存，直接退出
-                return;
-            }
-
-            try
-            {
-                string docPath = doc.FullName;
-                string directory = System.IO.Path.GetDirectoryName(docPath);
-                string fileNameWithoutExt = System.IO.Path.GetFileNameWithoutExtension(docPath);
-                string pdfPath = System.IO.Path.Combine(directory, fileNameWithoutExt + ".pdf");
-
-                // 2. 导出为PDF，设置 OpenAfterExport 为 false
-                doc.ExportAsFixedFormat(
-                    pdfPath,
-                    Microsoft.Office.Interop.Word.WdExportFormat.wdExportFormatPDF,
-                    OpenAfterExport: false, // 不自动打开PDF
-                    OptimizeFor: Microsoft.Office.Interop.Word.WdExportOptimizeFor.wdExportOptimizeForPrint,
-                    Range: Microsoft.Office.Interop.Word.WdExportRange.wdExportAllDocument,
-                    Item: Microsoft.Office.Interop.Word.WdExportItem.wdExportDocumentContent,
-                    CreateBookmarks: Microsoft.Office.Interop.Word.WdExportCreateBookmarks.wdExportCreateHeadingBookmarks,
-                    DocStructureTags: true,
-                    BitmapMissingFonts: true,
-                    UseISO19005_1: false
-                );
-
-                // 3. 成功后弹窗，询问是否打开PDF
-                var result = System.Windows.Forms.MessageBox.Show(
-                    "成功导出为PDF！是否现在打开该PDF？",
-                    "导出成功",
-                    System.Windows.Forms.MessageBoxButtons.YesNo,
-                    System.Windows.Forms.MessageBoxIcon.Question);
-
-                if (result == System.Windows.Forms.DialogResult.Yes)
-                {
-                    try
-                    {
-                        System.Diagnostics.Process.Start(pdfPath);
-                    }
-                    catch (Exception exOpen)
-                    {
-                        System.Windows.Forms.MessageBox.Show(
-                            "打开PDF文件出错：" + exOpen.Message,
-                            "错误",
-                            System.Windows.Forms.MessageBoxButtons.OK,
-                            System.Windows.Forms.MessageBoxIcon.Error);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Windows.Forms.MessageBox.Show(
-                    "导出PDF失败：" + ex.Message,
-                    "错误",
-                    System.Windows.Forms.MessageBoxButtons.OK,
-                    System.Windows.Forms.MessageBoxIcon.Error);
-            }
-        }
         private void 英中标点互转_Click(object sender, RibbonControlEventArgs e, bool englishToChinese)
         {
             try
             {
                 var app = Globals.ThisAddIn.Application;
-                var rng = app.Selection.Range.Start != app.Selection.Range.End 
-                    ? app.Selection.Range 
+                var rng = app.Selection.Range.Start != app.Selection.Range.End
+                    ? app.Selection.Range
                     : app.Selection.Paragraphs[1].Range;
 
                 if (string.IsNullOrWhiteSpace(rng.Text))
@@ -275,11 +164,11 @@ namespace WordMan
                         // 保存原始范围
                         int startPos = rng.Start;
                         int endPos = rng.End;
-                        
+
                         // 先收集所有引号位置，避免在循环中修改文档导致位置变化
                         List<int> doubleQuotePositions = new List<int>();
                         List<int> singleQuotePositions = new List<int>();
-                        
+
                         // 收集双引号位置（使用字符串搜索，避免Find的复杂性）
                         string rangeText = app.ActiveDocument.Range(startPos, endPos).Text;
                         int currentPos = startPos;
@@ -292,7 +181,7 @@ namespace WordMan
                             }
                             textIndex++;
                         }
-                        
+
                         // 收集单引号位置
                         textIndex = 0;
                         while (textIndex < rangeText.Length)
@@ -303,7 +192,7 @@ namespace WordMan
                             }
                             textIndex++;
                         }
-                        
+
                         // 倒序替换双引号（避免位置变化影响后续替换）
                         bool isLeft = true;
                         for (int i = doubleQuotePositions.Count - 1; i >= 0; i--)
@@ -323,7 +212,7 @@ namespace WordMan
                                 continue;
                             }
                         }
-                        
+
                         // 倒序替换单引号
                         isLeft = true;
                         for (int i = singleQuotePositions.Count - 1; i >= 0; i--)
@@ -359,7 +248,7 @@ namespace WordMan
                 Globals.ThisAddIn.Application.ScreenUpdating = true;
             }
         }
-            
+
         private void 英标转中标_Click(object sender, RibbonControlEventArgs e)
         {
             英中标点互转_Click(sender, e, true);
@@ -403,140 +292,49 @@ namespace WordMan
             }
         }
 
-        public enum FormulaNumberStyle
+        private void 缩进2字符_Click(object sender, RibbonControlEventArgs e)
         {
-            Parenthesis1,    // (1)
-            Parenthesis1_1,  // (1-1)
-            Parenthesis1_1dot// (1.1)
-        }
-        private FormulaNumberStyle CurrentStyle = FormulaNumberStyle.Parenthesis1;
-
-        private void 公式样式1_Click(object sender, RibbonControlEventArgs e)
-        {
-            公式样式1.Checked = true;
-            公式样式2.Checked = false;
-            公式样式3.Checked = false;
-            CurrentStyle = FormulaNumberStyle.Parenthesis1;
-        }
-        private void 公式样式2_Click(object sender, RibbonControlEventArgs e)
-        {
-            公式样式1.Checked = false;
-            公式样式2.Checked = true;
-            公式样式3.Checked = false;
-            CurrentStyle = FormulaNumberStyle.Parenthesis1_1;
-        }
-        private void 公式样式3_Click(object sender, RibbonControlEventArgs e)
-        {
-            公式样式1.Checked = false;
-            公式样式2.Checked = false;
-            公式样式3.Checked = true;
-            CurrentStyle = FormulaNumberStyle.Parenthesis1_1dot;
-        }
-
-        private void 公式编号_Click(object sender, RibbonControlEventArgs e)
-        {
-            var app = Globals.ThisAddIn.Application;
-            var sel = app.Selection;
-            Word.Paragraph para = sel.Paragraphs[1];
-
-            // 保存当前光标位置
-            int originalStart = sel.Start;
-            int originalEnd = sel.End;
-
-            try
+            var selection = Globals.ThisAddIn.Application.Selection;
+            if (selection != null)
             {
-                // 1. 选择段落内容（不包含段落标记）并剪切
-                Word.Range contentRange = para.Range.Duplicate;
-                contentRange.End = contentRange.End - 1; // 排除段落标记
-                contentRange.Cut();
-
-                // 2. 删除当前段落
-                para.Range.Delete();
-
-                // 3. 创建并配置表格
-                Word.Table table = CreateFormulaTable(sel, app);
-                
-                // 4. 粘贴公式内容到第二列
-                table.Cell(1, 2).Range.Paste();
-
-                // 5. 插入公式编号到第三列
-                InsertFormulaNumber(table, sel);
-
-                // 6. 将光标移动到表格第二列
-                table.Cell(1, 2).Range.Select();
-            }
-            catch (Exception ex)
-            {
-                // 如果出错，恢复原始选择
-                sel.SetRange(originalStart, originalEnd);
-                MessageBox.Show($"公式编号插入失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                var paraFormat = selection.ParagraphFormat;
+                paraFormat.CharacterUnitFirstLineIndent = 2f;
             }
         }
 
-        private Word.Table CreateFormulaTable(Word.Selection sel, Word.Application app)
+        private void 去除缩进_Click(object sender, RibbonControlEventArgs e)
         {
-            // 插入一行三列的表格
-            Word.Table table = sel.Tables.Add(sel.Range, 1, 3);
-            
-            // 设置表格属性为无边框
-            table.Borders.Enable = 0;
-
-            // 计算并设置列宽
-            float pageWidth = sel.PageSetup.PageWidth - sel.PageSetup.LeftMargin - sel.PageSetup.RightMargin;
-            float[] columnWidths = { pageWidth * 0.15f, pageWidth * 0.7f, pageWidth * 0.15f }; // 左15%, 中70%, 右15%
-            
-            for (int i = 0; i < 3; i++)
+            var selection = Globals.ThisAddIn.Application.Selection;
+            if (selection != null)
             {
-                table.Columns[i + 1].Width = app.CentimetersToPoints(columnWidths[i] / 28.35f);
+                var paraFormat = selection.ParagraphFormat;
+
+                // 先清除首行缩进（字符和磅）
+                paraFormat.CharacterUnitFirstLineIndent = 0f;
+                paraFormat.FirstLineIndent = 0f;
+
+                // 再清除段落左缩进（字符和磅）
+                paraFormat.CharacterUnitLeftIndent = 0f;
+                paraFormat.LeftIndent = 0f;
+
+                // 可选：右缩进也清零（防止有些文档右缩进影响排版）
+                paraFormat.CharacterUnitRightIndent = 0f;
+                paraFormat.RightIndent = 0f;
             }
-
-            // 设置单元格对齐方式
-            Word.WdParagraphAlignment[] alignments = 
-            {
-                Word.WdParagraphAlignment.wdAlignParagraphLeft,   // 第一列：左对齐
-                Word.WdParagraphAlignment.wdAlignParagraphCenter, // 第二列：居中
-                Word.WdParagraphAlignment.wdAlignParagraphRight   // 第三列：右对齐
-            };
-
-            for (int i = 0; i < 3; i++)
-            {
-                table.Cell(1, i + 1).Range.ParagraphFormat.Alignment = alignments[i];
-            }
-
-            return table;
+        }
+        private void 希腊字母_Click(object sender, RibbonControlEventArgs e)
+        {
+            GreekLetterForm form = new GreekLetterForm();
+            form.Show();
+        }
+        private void 常用符号_Click(object sender, RibbonControlEventArgs e)
+        {
+            CommonSymbolForm form = new CommonSymbolForm();
+            form.Show();
         }
 
-        private void InsertFormulaNumber(Word.Table table, Word.Selection sel)
-        {
-            const string leftBracket = "(";
-            const string rightBracket = ")";
-            const string seqName = "公式";
 
-            // 移动到第三列
-            table.Cell(1, 3).Range.Select();
-            sel.TypeText(leftBracket);
 
-            switch (CurrentStyle)
-            {
-                case FormulaNumberStyle.Parenthesis1:
-                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldSequence, seqName, false);
-                    break;
-
-                case FormulaNumberStyle.Parenthesis1_1:
-                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldStyleRef, "1 \\s", false);
-                    sel.TypeText("-");
-                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldSequence, seqName + "\\s 1", false);
-                    break;
-
-                case FormulaNumberStyle.Parenthesis1_1dot:
-                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldStyleRef, "1 \\s", false);
-                    sel.TypeText(".");
-                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldSequence, seqName + "\\s 1", false);
-                    break;
-            }
-
-            sel.TypeText(rightBracket);
-        }
         private void 创建三线表_Click(object sender, RibbonControlEventArgs e)
         {
             var app = Globals.ThisAddIn.Application;
@@ -548,81 +346,86 @@ namespace WordMan
             // 2. 选中整个表格
             table.Select();
 
-            // 3. 调用已有的设为三线表方法
-            设为三线表_Click(sender, e);
+            // 3. 调用已有的设为三线方法
+            设为三线_Click(sender, e);
 
+        }
+
+        private void 设为三线_Click(object sender, Microsoft.Office.Tools.Ribbon.RibbonControlEventArgs e)
+        {
+            var app = Globals.ThisAddIn.Application;
+            var sel = app.Selection;
+            if (sel == null || sel.Tables.Count == 0)
+                return;
+
+            Word.Table table = sel.Tables[1];
+            int firstRowIndex = int.MaxValue;
+            int lastRowIndex = int.MinValue;
+
+            // 首先找出最小和最大行号（因为有合并单元格，不能用Rows.Count）
+            foreach (Word.Cell cell in table.Range.Cells)
+            {
+                if (cell.RowIndex < firstRowIndex)
+                    firstRowIndex = cell.RowIndex;
+                if (cell.RowIndex > lastRowIndex)
+                    lastRowIndex = cell.RowIndex;
+            }
+
+            // 遍历所有单元格，清除所有边框
+            foreach (Word.Cell cell in table.Range.Cells)
+            {
+                foreach (Word.WdBorderType borderType in new[]
+                {
+                Word.WdBorderType.wdBorderLeft,
+                Word.WdBorderType.wdBorderRight,
+                Word.WdBorderType.wdBorderTop,
+                Word.WdBorderType.wdBorderBottom
+            })
+                {
+                    cell.Borders[borderType].LineStyle = Word.WdLineStyle.wdLineStyleNone;
+                }
+            }
+
+            // 遍历所有单元格，为三线表加主线
+            foreach (Word.Cell cell in table.Range.Cells)
+            {
+                if (cell.RowIndex == firstRowIndex)
+                {
+                    // 第一行：加上边粗线
+                    cell.Borders[Word.WdBorderType.wdBorderTop].LineStyle = Word.WdLineStyle.wdLineStyleSingle;
+                    cell.Borders[Word.WdBorderType.wdBorderTop].LineWidth = Word.WdLineWidth.wdLineWidth150pt; // 1.5磅
+
+                    // 第一行：加下边细线（即三线表"中线"）
+                    cell.Borders[Word.WdBorderType.wdBorderBottom].LineStyle = Word.WdLineStyle.wdLineStyleSingle;
+                    cell.Borders[Word.WdBorderType.wdBorderBottom].LineWidth = Word.WdLineWidth.wdLineWidth075pt; // 0.75磅
+                }
+                if (cell.RowIndex == lastRowIndex)
+                {
+                    // 最后一行：加下边粗线
+                    cell.Borders[Word.WdBorderType.wdBorderBottom].LineStyle = Word.WdLineStyle.wdLineStyleSingle;
+                    cell.Borders[Word.WdBorderType.wdBorderBottom].LineWidth = Word.WdLineWidth.wdLineWidth150pt; // 1.5磅
+                }
+            }
+
+            // 可以额外设置格式和对齐等
+            table.Range.Font.Size = 10.5f;
+            table.Range.Font.NameFarEast = "宋体";
+            table.Range.Font.Name = "Times New Roman";
+            table.Range.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
+            table.Rows.Alignment = Word.WdRowAlignment.wdAlignRowCenter;
+            table.Range.Cells.VerticalAlignment = Word.WdCellVerticalAlignment.wdCellAlignVerticalCenter;
+            table.Range.ParagraphFormat.LineSpacingRule = Word.WdLineSpacing.wdLineSpaceSingle;
+
+            // 自动适应
+            table.PreferredWidthType = Word.WdPreferredWidthType.wdPreferredWidthPercent;
+            table.PreferredWidth = 100f;
+            table.AutoFitBehavior(Word.WdAutoFitBehavior.wdAutoFitWindow);
         }
 
         private void 设为三线表_Click(object sender, Microsoft.Office.Tools.Ribbon.RibbonControlEventArgs e)
-    {
-        var app = Globals.ThisAddIn.Application;
-        var sel = app.Selection;
-        if (sel == null || sel.Tables.Count == 0)
-            return;
-
-        Word.Table table = sel.Tables[1];
-        int firstRowIndex = int.MaxValue;
-        int lastRowIndex = int.MinValue;
-
-        // 首先找出最小和最大行号（因为有合并单元格，不能用Rows.Count）
-        foreach (Word.Cell cell in table.Range.Cells)
         {
-            if (cell.RowIndex < firstRowIndex)
-                firstRowIndex = cell.RowIndex;
-            if (cell.RowIndex > lastRowIndex)
-                lastRowIndex = cell.RowIndex;
+            // 已废弃的方法，保持空实现以避免编译错误
         }
-
-        // 遍历所有单元格，清除所有边框
-        foreach (Word.Cell cell in table.Range.Cells)
-        {
-            foreach (Word.WdBorderType borderType in new[]
-            {
-            Word.WdBorderType.wdBorderLeft,
-            Word.WdBorderType.wdBorderRight,
-            Word.WdBorderType.wdBorderTop,
-            Word.WdBorderType.wdBorderBottom
-        })
-            {
-                cell.Borders[borderType].LineStyle = Word.WdLineStyle.wdLineStyleNone;
-            }
-        }
-
-        // 遍历所有单元格，为三线表加主线
-        foreach (Word.Cell cell in table.Range.Cells)
-        {
-            if (cell.RowIndex == firstRowIndex)
-            {
-                // 第一行：加上边粗线
-                cell.Borders[Word.WdBorderType.wdBorderTop].LineStyle = Word.WdLineStyle.wdLineStyleSingle;
-                cell.Borders[Word.WdBorderType.wdBorderTop].LineWidth = Word.WdLineWidth.wdLineWidth150pt; // 1.5磅
-
-                // 第一行：加下边细线（即三线表“中线”）
-                cell.Borders[Word.WdBorderType.wdBorderBottom].LineStyle = Word.WdLineStyle.wdLineStyleSingle;
-                cell.Borders[Word.WdBorderType.wdBorderBottom].LineWidth = Word.WdLineWidth.wdLineWidth075pt; // 0.75磅
-            }
-            if (cell.RowIndex == lastRowIndex)
-            {
-                // 最后一行：加下边粗线
-                cell.Borders[Word.WdBorderType.wdBorderBottom].LineStyle = Word.WdLineStyle.wdLineStyleSingle;
-                cell.Borders[Word.WdBorderType.wdBorderBottom].LineWidth = Word.WdLineWidth.wdLineWidth150pt; // 1.5磅
-            }
-        }
-
-        // 可以额外设置格式和对齐等
-        table.Range.Font.Size = 10.5f;
-        table.Range.Font.NameFarEast = "宋体";
-        table.Range.Font.Name = "Times New Roman";
-        table.Range.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
-        table.Rows.Alignment = Word.WdRowAlignment.wdAlignRowCenter;
-        table.Range.Cells.VerticalAlignment = Word.WdCellVerticalAlignment.wdCellAlignVerticalCenter;
-        table.Range.ParagraphFormat.LineSpacingRule = Word.WdLineSpacing.wdLineSpaceSingle;
-
-        // 自动适应
-        table.PreferredWidthType = Word.WdPreferredWidthType.wdPreferredWidthPercent;
-        table.PreferredWidth = 100f;
-        table.AutoFitBehavior(Word.WdAutoFitBehavior.wdAutoFitWindow);
-    }
 
 
         private void 插入N行_Click(object sender, RibbonControlEventArgs e)
@@ -755,97 +558,139 @@ namespace WordMan
             }
         }
 
-        private void 域名高亮_Click(object sender, RibbonControlEventArgs e)
+        public enum FormulaNumberStyle
         {
-            var app = Globals.ThisAddIn.Application;
-            var doc = app.ActiveDocument;
-            if (doc == null)
-            {
-                System.Windows.Forms.MessageBox.Show("未检测到文档。");
-                return;
-            }
+            Parenthesis1,    // (1)
+            Parenthesis1_1,  // (1-1)
+            Parenthesis1_1dot// (1.1)
+        }
+        private FormulaNumberStyle CurrentStyle = FormulaNumberStyle.Parenthesis1;
 
-            foreach (Word.Field field in doc.Fields)
-            {
-                string code = field.Code.Text.Trim();
-                Word.Range fieldResult = field.Result;
-                string fieldText = fieldResult.Text;
-
-                // 1. 标准交叉引用：REF和HYPERLINK
-                if (code.StartsWith("REF", StringComparison.OrdinalIgnoreCase) ||
-                    code.StartsWith("HYPERLINK", StringComparison.OrdinalIgnoreCase))
-                {
-                    // 根据内容判定类型
-                    if (fieldText.Contains("图"))
-                    {
-                        // 图，蓝色
-                        fieldResult.Font.Color = Word.WdColor.wdColorBlue;
-                    }
-                    else if (fieldText.Contains("表"))
-                    {
-                        // 表，绿色
-                        fieldResult.Font.Color = Word.WdColor.wdColorGreen;
-                    }
-                    else if (fieldText.Contains("公式"))
-                    {
-                        // 公式，红色
-                        fieldResult.Font.Color = Word.WdColor.wdColorRed;
-                    }
-                    else
-                    {
-                        // 其它，紫色
-                        fieldResult.Font.Color = Word.WdColor.wdColorBrown;
-                    }
-                }
-                // 2. EndNote 文献引用（ADDIN类型，包含EN.CITE或EN.CITATION标记）
-                else if (field.Type == Word.WdFieldType.wdFieldAddin &&
-                         (code.Contains("EN.CITE") || code.Contains("EN.CITATION")))
-                {
-                    // 文献引用，高亮为金黄色
-                    fieldResult.Font.Color = Word.WdColor.wdColorGold;
-                }
-            }
-
-            System.Windows.Forms.MessageBox.Show("交叉引用与文献引用已高亮！");
+        private void 公式样式1_Click(object sender, RibbonControlEventArgs e)
+        {
+            公式样式1.Checked = true;
+            公式样式2.Checked = false;
+            公式样式3.Checked = false;
+            CurrentStyle = FormulaNumberStyle.Parenthesis1;
+        }
+        private void 公式样式2_Click(object sender, RibbonControlEventArgs e)
+        {
+            公式样式1.Checked = false;
+            公式样式2.Checked = true;
+            公式样式3.Checked = false;
+            CurrentStyle = FormulaNumberStyle.Parenthesis1_1;
+        }
+        private void 公式样式3_Click(object sender, RibbonControlEventArgs e)
+        {
+            公式样式1.Checked = false;
+            公式样式2.Checked = false;
+            公式样式3.Checked = true;
+            CurrentStyle = FormulaNumberStyle.Parenthesis1_1dot;
         }
 
-        private void 取消高亮_Click(object sender, RibbonControlEventArgs e)
+        private void 公式编号_Click(object sender, RibbonControlEventArgs e)
         {
             var app = Globals.ThisAddIn.Application;
-            var doc = app.ActiveDocument;
-            if (doc == null)
+            var sel = app.Selection;
+            Word.Paragraph para = sel.Paragraphs[1];
+
+            // 保存当前光标位置
+            int originalStart = sel.Start;
+            int originalEnd = sel.End;
+
+            try
             {
-                System.Windows.Forms.MessageBox.Show("未检测到文档。");
-                return;
-            }
+                // 1. 选择段落内容（不包含段落标记）并剪切
+                Word.Range contentRange = para.Range.Duplicate;
+                contentRange.End = contentRange.End - 1; // 排除段落标记
+                contentRange.Cut();
 
-            foreach (Word.Field field in doc.Fields)
+                // 2. 删除当前段落
+                para.Range.Delete();
+
+                // 3. 创建并配置表格
+                Word.Table table = CreateFormulaTable(sel, app);
+
+                // 4. 粘贴公式内容到第二列
+                table.Cell(1, 2).Range.Paste();
+
+                // 5. 插入公式编号到第三列
+                InsertFormulaNumber(table, sel);
+
+                // 6. 将光标移动到表格第二列
+                table.Cell(1, 2).Range.Select();
+            }
+            catch (Exception ex)
             {
-                string code = field.Code.Text.Trim();
-                Word.Range fieldResult = field.Result;
-                string fieldText = fieldResult.Text;
-
-                // 1. 标准交叉引用：REF和HYPERLINK
-                if (code.StartsWith("REF", StringComparison.OrdinalIgnoreCase) ||
-                    code.StartsWith("HYPERLINK", StringComparison.OrdinalIgnoreCase))
-                {
-                    fieldResult.Font.Color = Word.WdColor.wdColorBlack;
-                }
-                // 2. EndNote 文献引用（ADDIN类型，包含EN.CITE或EN.CITATION标记）
-                else if (field.Type == Word.WdFieldType.wdFieldAddin &&
-                         (code.Contains("EN.CITE") || code.Contains("EN.CITATION")))
-                {
-                    // 文献引用，高亮为金黄色
-                    fieldResult.Font.Color = Word.WdColor.wdColorBlack;
-                }
+                // 如果出错，恢复原始选择
+                sel.SetRange(originalStart, originalEnd);
+                MessageBox.Show($"公式编号插入失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            System.Windows.Forms.MessageBox.Show("交叉引用与文献引用已取消高亮！");
         }
 
-        private void 版本_Click(object sender, RibbonControlEventArgs e)
+        private Word.Table CreateFormulaTable(Word.Selection sel, Word.Application app)
         {
-            System.Diagnostics.Process.Start("https://github.com/eyinwei/WordMan_VSTO");
+            // 插入一行三列的表格
+            Word.Table table = sel.Tables.Add(sel.Range, 1, 3);
+
+            // 设置表格属性为无边框
+            table.Borders.Enable = 0;
+
+            // 计算并设置列宽
+            float pageWidth = sel.PageSetup.PageWidth - sel.PageSetup.LeftMargin - sel.PageSetup.RightMargin;
+            float[] columnWidths = { pageWidth * 0.15f, pageWidth * 0.7f, pageWidth * 0.15f }; // 左15%, 中70%, 右15%
+
+            for (int i = 0; i < 3; i++)
+            {
+                table.Columns[i + 1].Width = app.CentimetersToPoints(columnWidths[i] / 28.35f);
+            }
+
+            // 设置单元格对齐方式
+            Word.WdParagraphAlignment[] alignments =
+            {
+                Word.WdParagraphAlignment.wdAlignParagraphLeft,   // 第一列：左对齐
+                Word.WdParagraphAlignment.wdAlignParagraphCenter, // 第二列：居中
+                Word.WdParagraphAlignment.wdAlignParagraphRight   // 第三列：右对齐
+            };
+
+            for (int i = 0; i < 3; i++)
+            {
+                table.Cell(1, i + 1).Range.ParagraphFormat.Alignment = alignments[i];
+            }
+
+            return table;
+        }
+
+        private void InsertFormulaNumber(Word.Table table, Word.Selection sel)
+        {
+            const string leftBracket = "(";
+            const string rightBracket = ")";
+            const string seqName = "公式";
+
+            // 移动到第三列
+            table.Cell(1, 3).Range.Select();
+            sel.TypeText(leftBracket);
+
+            switch (CurrentStyle)
+            {
+                case FormulaNumberStyle.Parenthesis1:
+                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldSequence, seqName, false);
+                    break;
+
+                case FormulaNumberStyle.Parenthesis1_1:
+                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldStyleRef, "1 \\s", false);
+                    sel.TypeText("-");
+                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldSequence, seqName + "\\s 1", false);
+                    break;
+
+                case FormulaNumberStyle.Parenthesis1_1dot:
+                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldStyleRef, "1 \\s", false);
+                    sel.TypeText(".");
+                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldSequence, seqName + "\\s 1", false);
+                    break;
+            }
+
+            sel.TypeText(rightBracket);
         }
 
         enum PictureNumberStyle
@@ -1551,16 +1396,6 @@ namespace WordMan
             heightBrushTimer = null;
         }
 
-
-
-
-        // 排版按钮点击事件
-        private void TypesettingButton_Click(object sender, RibbonControlEventArgs e)
-        {
-            // 仅一行：调用任务窗格的静态方法，剩下的全由任务窗格自己处理
-            TypesettingTaskPane.TriggerShowOrHide();
-        }
-
         // 位图化按钮点击事件
         private void 位图化_Click(object sender, RibbonControlEventArgs e)
         {
@@ -1568,7 +1403,7 @@ namespace WordMan
             {
                 var app = Globals.ThisAddIn.Application;
                 var selection = app.Selection;
-                
+
                 // 检查是否选中了单个图形并转换
                 if (selection.InlineShapes.Count == 1)
                     ConvertToBitmap(selection.InlineShapes[1], app);
@@ -1624,7 +1459,420 @@ namespace WordMan
             return false;
         }
 
+        // 添加字段来存储原始位置和状态
+        private Word.Range originalRange;
+        private bool isCrossReferenceMode = false;
+        private Microsoft.Office.Tools.Ribbon.RibbonToggleButton crossReferenceToggleButton;
+        private System.Windows.Forms.Timer escKeyListener;
 
+        private void 交叉引用_Click(object sender, RibbonControlEventArgs e)
+        {
+            // 获取toggleButton
+            crossReferenceToggleButton = sender as Microsoft.Office.Tools.Ribbon.RibbonToggleButton;
+
+            // 如果已经在交叉引用模式，则退出
+            if (isCrossReferenceMode)
+            {
+                ExitCrossReferenceMode();
+                return;
+            }
+
+            try
+            {
+                // 记录当前光标位置
+                originalRange = Globals.ThisAddIn.Application.Selection.Range;
+
+                // 启用交叉引用模式
+                isCrossReferenceMode = true;
+
+                // 设置按钮为按下状态
+                crossReferenceToggleButton.Checked = true;
+
+                // 注册选择变化事件监听器
+                Globals.ThisAddIn.Application.WindowSelectionChange += Application_WindowSelectionChange;
+
+                // 初始化ESC键监听器
+                InitializeEscKeyListener();
+
+                // 更新状态栏提示
+                Globals.ThisAddIn.Application.StatusBar = "交叉引用模式：请将光标移动到题注所在行，按ESC或再次点击按钮退出";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"启动交叉引用模式失败: {ex.Message}", "错误",
+                               MessageBoxButtons.OK, MessageBoxIcon.Error);
+                isCrossReferenceMode = false;
+                crossReferenceToggleButton.Checked = false;
+            }
+        }
+
+        private void Application_WindowSelectionChange(Word.Selection Sel)
+        {
+            // 只在交叉引用模式下处理
+            if (!isCrossReferenceMode) return;
+
+            // 获取当前选择位置
+            Word.Range currentRange = Sel.Range;
+
+            // 查找题注标签和编号
+            CaptionInfo captionInfo = FindCaptionInfo(currentRange);
+
+            if (captionInfo != null)
+            {
+                // 找到题注，插入交叉引用
+                InsertCrossReferenceAtOriginalPosition(captionInfo);
+
+                // 退出交叉引用模式
+                ExitCrossReferenceMode();
+            }
+        }
+
+        private void InitializeEscKeyListener()
+        {
+            // 初始化ESC键监听器
+            escKeyListener = new System.Windows.Forms.Timer();
+            escKeyListener.Interval = 100; // 100毫秒检查一次
+            escKeyListener.Tick += EscKeyListener_Tick;
+            escKeyListener.Start();
+        }
+
+        private void EscKeyListener_Tick(object sender, EventArgs e)
+        {
+            // 检查ESC键是否被按下
+            if (isCrossReferenceMode && (GetAsyncKeyState(Keys.Escape) & 0x8000) != 0)
+            {
+                ExitCrossReferenceMode();
+            }
+        }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern short GetAsyncKeyState(Keys vKey);
+
+        private void InsertCrossReferenceAtOriginalPosition(CaptionInfo captionInfo)
+        {
+            // 返回到原始位置并插入交叉引用
+            Globals.ThisAddIn.Application.Selection.SetRange(
+                originalRange.Start, originalRange.End);
+
+            // 直接使用Word的交叉引用功能
+            object referenceType = captionInfo.Identifier; // 如"图", "表"
+            Word.WdReferenceKind referenceKind = Word.WdReferenceKind.wdOnlyLabelAndNumber;
+            object referenceItem = captionInfo.Number; // 编号
+
+            Globals.ThisAddIn.Application.Selection.InsertCrossReference(
+                referenceType,
+                referenceKind,
+                referenceItem,
+                System.Type.Missing,
+                System.Type.Missing,
+                System.Type.Missing,
+                System.Type.Missing);
+        }
+
+        private void ExitCrossReferenceMode()
+        {
+            // 退出交叉引用模式
+            isCrossReferenceMode = false;
+
+            // 取消注册事件监听器
+            Globals.ThisAddIn.Application.WindowSelectionChange -= Application_WindowSelectionChange;
+
+            // 停止ESC键监听器
+            if (escKeyListener != null)
+            {
+                escKeyListener.Stop();
+                escKeyListener.Dispose();
+                escKeyListener = null;
+            }
+
+            // 清除状态栏提示
+            Globals.ThisAddIn.Application.StatusBar = "";
+
+            // 恢复按钮状态
+            if (crossReferenceToggleButton != null)
+            {
+                crossReferenceToggleButton.Checked = false;
+            }
+
+            // 清除原始位置引用
+            originalRange = null;
+        }
+
+        private CaptionInfo FindCaptionInfo(Word.Range range)
+        {
+            // 获取当前段落
+            Word.Paragraph paragraph = range.Paragraphs[1];
+            Word.Range paraRange = paragraph.Range;
+
+            // 在段落中查找域
+            foreach (Word.Field field in paraRange.Fields)
+            {
+                if (field.Type == Word.WdFieldType.wdFieldSequence)
+                {
+                    // 获取SEQ域的标识符（如"图"、"表"等）
+                    string fieldCode = field.Code.Text;
+                    string identifier = ExtractIdentifierFromFieldCode(fieldCode);
+
+                    // 获取题注的完整文本（显示文本）
+                    string captionText = field.Result.Text.Trim();
+
+                    // 获取题注编号（从显示文本中提取数字）
+                    string number = ExtractNumberFromCaption(captionText);
+
+                    if (!string.IsNullOrEmpty(identifier) && !string.IsNullOrEmpty(number))
+                    {
+                        return new CaptionInfo
+                        {
+                            Identifier = identifier,
+                            Number = number,
+                            FullText = captionText
+                        };
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private string ExtractIdentifierFromFieldCode(string fieldCode)
+        {
+            // 解析域代码，提取标识符
+            // 示例: " SEQ 图 \* ARABIC " -> "图"
+            fieldCode = fieldCode.Trim();
+
+            if (fieldCode.StartsWith("SEQ", StringComparison.OrdinalIgnoreCase))
+            {
+                string remaining = fieldCode.Substring(3).Trim();
+
+                // 找到第一个空格或反斜杠
+                int spaceIndex = remaining.IndexOf(' ');
+                int backslashIndex = remaining.IndexOf('\\');
+
+                int endIndex = -1;
+                if (spaceIndex >= 0 && backslashIndex >= 0)
+                    endIndex = Math.Min(spaceIndex, backslashIndex);
+                else if (spaceIndex >= 0)
+                    endIndex = spaceIndex;
+                else if (backslashIndex >= 0)
+                    endIndex = backslashIndex;
+
+                if (endIndex >= 0)
+                    return remaining.Substring(0, endIndex).Trim();
+                else
+                    return remaining.Trim();
+            }
+
+            return null;
+        }
+
+        private string ExtractNumberFromCaption(string captionText)
+        {
+            // 使用正则表达式提取数字（包括带分隔符的如1-1, 1.1等）
+            var match = System.Text.RegularExpressions.Regex.Match(
+                captionText, @"[\d]+[\.\-]?[\d]*");
+
+            return match.Success ? match.Value : null;
+        }
+
+        // 辅助类，存储题注信息
+        private class CaptionInfo
+        {
+            public string Identifier { get; set; }  // 标签类型，如"图", "表"
+            public string Number { get; set; }      // 编号，如"1", "1-1"
+            public string FullText { get; set; }    // 完整题注文本
+        }
+
+
+
+        // 排版按钮点击事件
+        private void TypesettingButton_Click(object sender, RibbonControlEventArgs e)
+        {
+            // 仅一行：调用任务窗格的静态方法，剩下的全由任务窗格自己处理
+            TypesettingTaskPane.TriggerShowOrHide();
+        }
+
+        // 文档样式设置按钮点击事件
+        private void 样式设置_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var styleSettings = new StyleSettings();
+                styleSettings.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"打开样式设置失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void 域名高亮_Click(object sender, RibbonControlEventArgs e)
+        {
+            var app = Globals.ThisAddIn.Application;
+            var doc = app.ActiveDocument;
+            if (doc == null)
+            {
+                System.Windows.Forms.MessageBox.Show("未检测到文档。");
+                return;
+            }
+
+            foreach (Word.Field field in doc.Fields)
+            {
+                string code = field.Code.Text.Trim();
+                Word.Range fieldResult = field.Result;
+                string fieldText = fieldResult.Text;
+
+                // 1. 标准交叉引用：REF和HYPERLINK
+                if (code.StartsWith("REF", StringComparison.OrdinalIgnoreCase) ||
+                    code.StartsWith("HYPERLINK", StringComparison.OrdinalIgnoreCase))
+                {
+                    // 根据内容判定类型
+                    if (fieldText.Contains("图"))
+                    {
+                        // 图，蓝色
+                        fieldResult.Font.Color = Word.WdColor.wdColorBlue;
+                    }
+                    else if (fieldText.Contains("表"))
+                    {
+                        // 表，绿色
+                        fieldResult.Font.Color = Word.WdColor.wdColorGreen;
+                    }
+                    else if (fieldText.Contains("公式"))
+                    {
+                        // 公式，红色
+                        fieldResult.Font.Color = Word.WdColor.wdColorRed;
+                    }
+                    else
+                    {
+                        // 其它，紫色
+                        fieldResult.Font.Color = Word.WdColor.wdColorBrown;
+                    }
+                }
+                // 2. EndNote 文献引用（ADDIN类型，包含EN.CITE或EN.CITATION标记）
+                else if (field.Type == Word.WdFieldType.wdFieldAddin &&
+                         (code.Contains("EN.CITE") || code.Contains("EN.CITATION")))
+                {
+                    // 文献引用，高亮为金黄色
+                    fieldResult.Font.Color = Word.WdColor.wdColorGold;
+                }
+            }
+
+            System.Windows.Forms.MessageBox.Show("交叉引用与文献引用已高亮！");
+        }
+
+        private void 取消高亮_Click(object sender, RibbonControlEventArgs e)
+        {
+            var app = Globals.ThisAddIn.Application;
+            var doc = app.ActiveDocument;
+            if (doc == null)
+            {
+                System.Windows.Forms.MessageBox.Show("未检测到文档。");
+                return;
+            }
+
+            foreach (Word.Field field in doc.Fields)
+            {
+                string code = field.Code.Text.Trim();
+                Word.Range fieldResult = field.Result;
+                string fieldText = fieldResult.Text;
+
+                // 1. 标准交叉引用：REF和HYPERLINK
+                if (code.StartsWith("REF", StringComparison.OrdinalIgnoreCase) ||
+                    code.StartsWith("HYPERLINK", StringComparison.OrdinalIgnoreCase))
+                {
+                    fieldResult.Font.Color = Word.WdColor.wdColorBlack;
+                }
+                // 2. EndNote 文献引用（ADDIN类型，包含EN.CITE或EN.CITATION标记）
+                else if (field.Type == Word.WdFieldType.wdFieldAddin &&
+                         (code.Contains("EN.CITE") || code.Contains("EN.CITATION")))
+                {
+                    // 文献引用，高亮为金黄色
+                    fieldResult.Font.Color = Word.WdColor.wdColorBlack;
+                }
+            }
+
+            System.Windows.Forms.MessageBox.Show("交叉引用与文献引用已取消高亮！");
+        }
+
+
+
+        private void 另存PDF_Click(object sender, RibbonControlEventArgs e)
+        {
+            var app = Globals.ThisAddIn.Application;
+            var doc = app.ActiveDocument;
+
+            // 1. 检查文档是否已保存过
+            if (string.IsNullOrEmpty(doc.Path))
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    "请先保存文档，再导出为PDF。",
+                    "提示",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Information);
+
+                // 调用Word的“另存为”对话框
+                app.Dialogs[Microsoft.Office.Interop.Word.WdWordDialog.wdDialogFileSaveAs].Show();
+
+                // 不再自动导出PDF，无论保存没保存，直接退出
+                return;
+            }
+
+            try
+            {
+                string docPath = doc.FullName;
+                string directory = System.IO.Path.GetDirectoryName(docPath);
+                string fileNameWithoutExt = System.IO.Path.GetFileNameWithoutExtension(docPath);
+                string pdfPath = System.IO.Path.Combine(directory, fileNameWithoutExt + ".pdf");
+
+                // 2. 导出为PDF，设置 OpenAfterExport 为 false
+                doc.ExportAsFixedFormat(
+                    pdfPath,
+                    Microsoft.Office.Interop.Word.WdExportFormat.wdExportFormatPDF,
+                    OpenAfterExport: false, // 不自动打开PDF
+                    OptimizeFor: Microsoft.Office.Interop.Word.WdExportOptimizeFor.wdExportOptimizeForPrint,
+                    Range: Microsoft.Office.Interop.Word.WdExportRange.wdExportAllDocument,
+                    Item: Microsoft.Office.Interop.Word.WdExportItem.wdExportDocumentContent,
+                    CreateBookmarks: Microsoft.Office.Interop.Word.WdExportCreateBookmarks.wdExportCreateHeadingBookmarks,
+                    DocStructureTags: true,
+                    BitmapMissingFonts: true,
+                    UseISO19005_1: false
+                );
+
+                // 3. 成功后弹窗，询问是否打开PDF
+                var result = System.Windows.Forms.MessageBox.Show(
+                    "成功导出为PDF！是否现在打开该PDF？",
+                    "导出成功",
+                    System.Windows.Forms.MessageBoxButtons.YesNo,
+                    System.Windows.Forms.MessageBoxIcon.Question);
+
+                if (result == System.Windows.Forms.DialogResult.Yes)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(pdfPath);
+                    }
+                    catch (Exception exOpen)
+                    {
+                        System.Windows.Forms.MessageBox.Show(
+                            "打开PDF文件出错：" + exOpen.Message,
+                            "错误",
+                            System.Windows.Forms.MessageBoxButtons.OK,
+                            System.Windows.Forms.MessageBoxIcon.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(
+                    "导出PDF失败：" + ex.Message,
+                    "错误",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Error);
+            }
+        }
+        private void 版本_Click(object sender, RibbonControlEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/eyinwei/WordMan_VSTO");
+        }
 
         // 快速密级相关功能
         private void 公开_Click(object sender, RibbonControlEventArgs e)
@@ -1774,19 +2022,7 @@ namespace WordMan
             }
         }
 
-        // 文档样式设置按钮点击事件
-        private void 样式设置_Click(object sender, RibbonControlEventArgs e)
-        {
-            try
-            {
-                var styleSettings = new StyleSettings();
-                styleSettings.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"打开样式设置失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
+
 
         // 文档拆分按钮点击事件
         private void 文档拆分_Click(object sender, RibbonControlEventArgs e)
@@ -2010,6 +2246,7 @@ namespace WordMan
                 System.Windows.Forms.MessageBox.Show($"处理过程中出现错误：{ex.Message}");
             }
         }
+
 
     }
 }

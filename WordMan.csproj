@@ -414,6 +414,9 @@
   <ItemGroup>
     <None Include="Resources\DollarSign.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\引用.png" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

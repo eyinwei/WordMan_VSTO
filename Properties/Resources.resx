@@ -118,6 +118,12 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="pdf" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\pdf.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="DollarSign" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\DollarSign.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="PictureColorTempertatureGallery" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\PictureColorTempertatureGallery.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -126,9 +132,6 @@
   </data>
   <data name="减少缩进" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\减少缩进.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="黑色" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\黑色.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="GroupTableCellFormat" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\GroupTableCellFormat.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -154,17 +157,17 @@
   <data name="DeleteCells" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\DeleteCells.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="CommaSign" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\CommaSign.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="三线图" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\三线图.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="CommaSign" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CommaSign.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="黑色" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\黑色.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="希腊" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\希腊.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="表前插入行" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\表前插入行.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Delete" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Delete.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -193,10 +196,10 @@
   <data name="格式刷" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\格式刷.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="pdf" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\pdf.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="表前插入行" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\表前插入行.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="DollarSign" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\DollarSign.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="引用" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\引用.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

@@ -243,6 +243,16 @@ namespace WordMan.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        public static System.Drawing.Bitmap 引用 {
+            get {
+                object obj = ResourceManager.GetObject("引用", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         public static System.Drawing.Bitmap 彩色 {
             get {
                 object obj = ResourceManager.GetObject("彩色", resourceCulture);

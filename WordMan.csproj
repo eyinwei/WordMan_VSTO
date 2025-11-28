@@ -26,7 +26,7 @@
     <NoStandardLibraries>false</NoStandardLibraries>
     <RootNamespace>WordMan</RootNamespace>
     <AssemblyName>WordMan</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <DefineConstants>VSTO40;UseOfficeInterop</DefineConstants>
     <ResolveComReferenceSilent>true</ResolveComReferenceSilent>
     <TargetFrameworkProfile />
@@ -161,43 +161,15 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
-  <Choose>
-    <When Condition="$([System.String]::Copy(&quot;;$(DefineConstants);&quot;).ToLower().Contains(';useofficeinterop;')) or $([System.String]::Copy(&quot;,$(DefineConstants),&quot;).ToLower().Contains(',useofficeinterop,'))">
-      <ItemGroup>
-        <Reference Include="Office, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
-          <Private>False</Private>
-          <EmbedInteropTypes>true</EmbedInteropTypes>
-        </Reference>
-        <Reference Include="Microsoft.Office.Interop.Word, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
-          <Private>False</Private>
-          <EmbedInteropTypes>true</EmbedInteropTypes>
-        </Reference>
-      </ItemGroup>
-    </When>
-    <Otherwise>
-      <ItemGroup>
-        <COMReference Include="Microsoft.Office.Core">
-          <Guid>{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}</Guid>
-          <VersionMajor>2</VersionMajor>
-          <VersionMinor>7</VersionMinor>
-          <Lcid>0</Lcid>
-          <WrapperTool>tlbimp</WrapperTool>
-          <Isolated>False</Isolated>
-          <EmbedInteropTypes>true</EmbedInteropTypes>
-        </COMReference>
-        <COMReference Include="Microsoft.Office.Interop.Word">
-          <Guid>{00020905-0000-0000-C000-000000000046}</Guid>
-          <VersionMajor>8</VersionMajor>
-          <VersionMinor>6</VersionMinor>
-          <Lcid>0</Lcid>
-          <WrapperTool>tlbimp</WrapperTool>
-          <Isolated>False</Isolated>
-          <EmbedInteropTypes>true</EmbedInteropTypes>
-        </COMReference>
-      </ItemGroup>
-    </Otherwise>
-  </Choose>
   <ItemGroup>
+    <Reference Include="Office, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
+      <Private>False</Private>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Word, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
+      <Private>False</Private>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </Reference>
     <Reference Include="stdole, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>False</Private>
     </Reference>
@@ -213,8 +185,8 @@
     can be found.
   -->
   <ItemGroup>
-    <Compile Include="MultiLevel\ConfigurationManager.cs" />
-    <Compile Include="MultiLevel\MultiLevelDataManager.cs" />
+    <Compile Include="StyleTools\MultiLevel\ConfigurationManager.cs" />
+    <Compile Include="StyleTools\MultiLevel\MultiLevelDataManager.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -226,54 +198,54 @@
     <Compile Include="Syboms\CommonSymbolForm.Designer.cs">
       <DependentUpon>CommonSymbolForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="StyleSetting\StyleSettings.cs">
+    <Compile Include="StyleTools\StyleSetting\StyleSettings.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="StyleSetting\StyleSettings.Designer.cs">
+    <Compile Include="StyleTools\StyleSetting\StyleSettings.Designer.cs">
       <DependentUpon>StyleSettings.cs</DependentUpon>
     </Compile>
-    <Compile Include="StyleSetting\StyleSettingsUIDesigner.cs" />
-    <Compile Include="StyleSetting\StyleFileManager.cs" />
-    <Compile Include="StyleSetting\StylePresetManager.cs" />
-    <Compile Include="StyleSetting\StyleSelectionForm.cs">
+    <Compile Include="StyleTools\StyleSetting\StyleSettingsUIDesigner.cs" />
+    <Compile Include="StyleTools\StyleSetting\StyleFileManager.cs" />
+    <Compile Include="StyleTools\StyleSetting\StylePresetManager.cs" />
+    <Compile Include="StyleTools\StyleSetting\StyleSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MultiLevel\WordStyleInfo.cs" />
+    <Compile Include="StyleTools\MultiLevel\WordStyleInfo.cs" />
     <Compile Include="ControlsManager.cs" />
-    <Compile Include="MultiLevel\MultiLevelListForm.cs">
+    <Compile Include="StyleTools\MultiLevel\MultiLevelListForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MultiLevel\MultiLevelListForm.Designer.cs">
+    <Compile Include="StyleTools\MultiLevel\MultiLevelListForm.Designer.cs">
       <DependentUpon>MultiLevelListForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MultiLevel\LevelStyleSettingsForm.cs">
+    <Compile Include="StyleTools\MultiLevel\LevelStyleSettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MultiLevel\LevelStyleSettingsForm.Designer.cs">
+    <Compile Include="StyleTools\MultiLevel\LevelStyleSettingsForm.Designer.cs">
       <DependentUpon>LevelStyleSettingsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="TypesettingTaskPane.cs">
+    <Compile Include="StyleTools\TypesettingTaskPane.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="TypesettingTaskPane.Designer.cs">
+    <Compile Include="StyleTools\TypesettingTaskPane.Designer.cs">
       <DependentUpon>TypesettingTaskPane.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="MultiLevel\LevelStyleSettingsForm.resx">
+    <EmbeddedResource Include="StyleTools\MultiLevel\LevelStyleSettingsForm.resx">
       <DependentUpon>LevelStyleSettingsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MultiLevel\MultiLevelListForm.resx">
+    <EmbeddedResource Include="StyleTools\MultiLevel\MultiLevelListForm.resx">
       <DependentUpon>MultiLevelListForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SplitAndMerge\DocumentMergeForm.resx">
       <DependentUpon>DocumentMergeForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="StyleSetting\StyleSelectionForm.resx">
+    <EmbeddedResource Include="StyleTools\StyleSetting\StyleSelectionForm.resx">
       <DependentUpon>StyleSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="StyleSetting\StyleSettings.resx">
+    <EmbeddedResource Include="StyleTools\StyleSetting\StyleSettings.resx">
       <DependentUpon>StyleSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Syboms\CommonSymbolForm.resx">
@@ -290,7 +262,7 @@
     <EmbeddedResource Include="Syboms\GreekLetterForm.resx">
       <DependentUpon>GreekLetterForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TypesettingTaskPane.resx">
+    <EmbeddedResource Include="StyleTools\TypesettingTaskPane.resx">
       <DependentUpon>TypesettingTaskPane.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
@@ -328,11 +300,13 @@
     <Compile Include="SplitAndMerge\DocumentMergeForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="CaptionManager.cs" />
+    <Compile Include="ImageProcessor.cs" />
+    <Compile Include="TextProcessor.cs" />
+    <Compile Include="TableProcessor.cs" />
     <AppDesigner Include="Properties\" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Icons\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="Resources\pdf.png" />
   </ItemGroup>

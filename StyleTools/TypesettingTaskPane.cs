@@ -95,8 +95,6 @@ namespace WordMan
                 BackColor = LABEL_BACKCOLOR
             };
 
-            // 计算整体宽度和居中位置
-            int totalWidth = TITLE_LABEL_WIDTH + COMBO_SPACING + COMBO_WIDTH;
 
             // 创建标签
             var titleLabel = CreateTitleLabel();

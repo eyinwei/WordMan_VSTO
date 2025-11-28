@@ -1,326 +1,65 @@
-﻿﻿﻿﻿﻿using Microsoft.Office.Interop.Word;
+﻿﻿using Microsoft.Office.Interop.Word;
 using Microsoft.Office.Tools.Ribbon;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
-using Microsoft.VisualBasic;    
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using Microsoft.Office.Core;
+using Microsoft.VisualBasic;
 using Word = Microsoft.Office.Interop.Word;
 using WordMan.SplitAndMerge;
 using WordMan.MultiLevel;
+using static WordMan.CaptionManager;
+using WordMan;
 
 namespace WordMan
 {
     public partial class MainRibbon : Microsoft.Office.Tools.Ribbon.RibbonBase
     {
+        private ImageProcessor imageProcessor = new ImageProcessor();
+        private TextProcessor textProcessor = new TextProcessor();
+        private TableProcessor tableProcessor = new TableProcessor();
 
-        private void MainRibbon_Load(object sender, RibbonUIEventArgs e)
-        {                                   
-
-        }
         private void 去除断行_Click(object sender, RibbonControlEventArgs e)
         {
-            var app = Globals.ThisAddIn.Application;
-            var sel = app.Selection;
-            if (sel == null || sel.Range == null || string.IsNullOrEmpty(sel.Range.Text))
-                return;
-
-            Word.Range rng = sel.Range.Duplicate;
-            string text = rng.Text;
-
-            // 判断末尾是否有回车
-            bool endsWithReturn = text.EndsWith("\r");
-
-            // 如果结尾有回车，先排除最后一个回车后再处理
-            int processLength = endsWithReturn ? text.Length - 1 : text.Length;
-            Word.Range processRange = rng.Duplicate;
-            processRange.End = processRange.Start + processLength;
-
-            // 替换所有回车
-            processRange.Find.ClearFormatting();
-            processRange.Find.Replacement.ClearFormatting();
-            processRange.Find.Text = "^013"; // 回车
-            processRange.Find.Replacement.Text = "";
-            processRange.Find.Execute(Replace: Word.WdReplace.wdReplaceAll);
-
-            // 替换所有软回车
-            processRange.Find.Text = "^11"; // 手动换行(软回车)
-            processRange.Find.Replacement.Text = "";
-            processRange.Find.Execute(Replace: Word.WdReplace.wdReplaceAll);
-
-            // 这样可一键撤销，且格式不会丢失
+            textProcessor.RemoveLineBreaks();
         }
         private void 去除空格_Click(object sender, RibbonControlEventArgs e)
         {
-            var app = Globals.ThisAddIn.Application;
-            var sel = app.Selection;
-            Word.Range rng;
-
-            if (sel != null && sel.Range != null &&
-                !string.IsNullOrWhiteSpace(sel.Range.Text) &&
-                sel.Range.Start != sel.Range.End)
-            {
-                rng = sel.Range;
-            }
-            else if (sel != null && sel.Paragraphs != null && sel.Paragraphs.Count > 0)
-            {
-                rng = sel.Paragraphs[1].Range;
-            }
-            else
-            {
-                MessageBox.Show("未检测到可操作的文本或段落。");
-                return;
-            }
-            rng.Find.Execute(" ", ReplaceWith: "", Replace: Word.WdReplace.wdReplaceAll);
-            rng.Find.Execute("　", ReplaceWith: "", Replace: Word.WdReplace.wdReplaceAll);
+            textProcessor.RemoveSpaces();
         }
         private void 去除空行_Click(object sender, RibbonControlEventArgs e)
         {
-            // 获取Word应用程序对象
-            var app = Globals.ThisAddIn.Application;
-
-            // 获取当前选区
-            Word.Range rng = app.Selection.Range;
-
-            // 从后往前遍历选区内的所有段落
-            for (int i = rng.Paragraphs.Count; i >= 1; i--)
-            {
-                Word.Paragraph para = rng.Paragraphs[i];
-                // 去除回车、换行、空格、全角空格、Tab等
-                string text = para.Range.Text.Trim('\r', '\n', ' ', '\t', '　');
-                if (string.IsNullOrEmpty(text))
-                {
-                    para.Range.Delete();
-                }
-            }
-        }
-
-
-        private void 英中标点互转_Click(object sender, RibbonControlEventArgs e, bool englishToChinese)
-        {
-            try
-            {
-                var app = Globals.ThisAddIn.Application;
-                var rng = app.Selection.Range.Start != app.Selection.Range.End
-                    ? app.Selection.Range
-                    : app.Selection.Paragraphs[1].Range;
-
-                if (string.IsNullOrWhiteSpace(rng.Text))
-                {
-                    MessageBox.Show("未检测到可操作的文本或段落。");
-                    return;
-                }
-
-                app.ScreenUpdating = false;
-
-                // 标点符号映射
-                var dict = englishToChinese ? new Dictionary<string, string>
-                {
-                    {";", "；"}, {":", "："}, {",", "，"}, {".", "。"}, {"?", "？"}, {"!", "！"},
-                    {"(", "（"}, {")", "）"}, {"[", "【"}, {"]", "】"}, {"<", "《"}, {">", "》"}
-                } : new Dictionary<string, string>
-                {
-                    {"；", ";"}, {"：", ":"}, {"，", ","}, {"。", "."}, {"？", "?"}, {"！", "!"},
-                    {"（", "("}, {"）", ")"}, {"【", "["}, {"】", "]"}, {"《", "<"}, {"》", ">"},
-                    {"　", " "}, {"＂", "\""}, {"＇", "'"}, {"＆", "&"}, {"＃", "#"},
-                    {"％", "%"}, {"＊", "*"}, {"＋", "+"}, {"－", "-"}, {"＝", "="},
-                    {"＠", "@"}, {"＄", "$"}, {"＾", "^"}, {"＿", "_"}, {"｀", "`"},
-                    {"｜", "|"}, {"＼", "\\"}, {"～", "~"}
-                };
-
-                // 使用Word查找替换保持格式
-                // 使用范围副本避免原始范围被修改
-                Word.Range workingRange = rng.Duplicate;
-                foreach (var pair in dict)
-                {
-                    try
-                    {
-                        workingRange.Find.ClearFormatting();
-                        workingRange.Find.Replacement.ClearFormatting();
-                        workingRange.Find.Text = pair.Key;
-                        workingRange.Find.Replacement.Text = pair.Value;
-                        workingRange.Find.MatchWildcards = false;
-                        workingRange.Find.MatchCase = false;
-                        workingRange.Find.MatchWholeWord = false;
-                        workingRange.Find.Forward = true;
-                        workingRange.Find.Wrap = Word.WdFindWrap.wdFindStop;
-                        workingRange.Find.Execute(Replace: Word.WdReplace.wdReplaceAll);
-                    }
-                    catch
-                    {
-                        // 忽略单个符号替换失败，继续处理其他符号
-                        continue;
-                    }
-                }
-
-                // 英标转中标时处理成对引号
-                if (englishToChinese)
-                {
-                    try
-                    {
-                        // 保存原始范围
-                        int startPos = rng.Start;
-                        int endPos = rng.End;
-
-                        // 先收集所有引号位置，避免在循环中修改文档导致位置变化
-                        List<int> doubleQuotePositions = new List<int>();
-                        List<int> singleQuotePositions = new List<int>();
-
-                        // 收集双引号位置（使用字符串搜索，避免Find的复杂性）
-                        string rangeText = app.ActiveDocument.Range(startPos, endPos).Text;
-                        int currentPos = startPos;
-                        int textIndex = 0;
-                        while (textIndex < rangeText.Length)
-                        {
-                            if (rangeText[textIndex] == '"')
-                            {
-                                doubleQuotePositions.Add(currentPos + textIndex);
-                            }
-                            textIndex++;
-                        }
-
-                        // 收集单引号位置
-                        textIndex = 0;
-                        while (textIndex < rangeText.Length)
-                        {
-                            if (rangeText[textIndex] == '\'')
-                            {
-                                singleQuotePositions.Add(currentPos + textIndex);
-                            }
-                            textIndex++;
-                        }
-
-                        // 倒序替换双引号（避免位置变化影响后续替换）
-                        bool isLeft = true;
-                        for (int i = doubleQuotePositions.Count - 1; i >= 0; i--)
-                        {
-                            try
-                            {
-                                var hitRange = app.ActiveDocument.Range(doubleQuotePositions[i], doubleQuotePositions[i] + 1);
-                                string currentText = hitRange.Text;
-                                if (currentText == "\"")
-                                {
-                                    hitRange.Text = isLeft ? "\u201c" : "\u201d";
-                                    isLeft = !isLeft;
-                                }
-                            }
-                            catch
-                            {
-                                continue;
-                            }
-                        }
-
-                        // 倒序替换单引号
-                        isLeft = true;
-                        for (int i = singleQuotePositions.Count - 1; i >= 0; i--)
-                        {
-                            try
-                            {
-                                var hitRange = app.ActiveDocument.Range(singleQuotePositions[i], singleQuotePositions[i] + 1);
-                                string currentText = hitRange.Text;
-                                if (currentText == "'")
-                                {
-                                    hitRange.Text = isLeft ? "\u2018" : "\u2019";
-                                    isLeft = !isLeft;
-                                }
-                            }
-                            catch
-                            {
-                                continue;
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        // 忽略引号替换失败
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"转换失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                Globals.ThisAddIn.Application.ScreenUpdating = true;
-            }
+            textProcessor.RemoveEmptyLines();
         }
 
         private void 英标转中标_Click(object sender, RibbonControlEventArgs e)
         {
-            英中标点互转_Click(sender, e, true);
+            textProcessor.ConvertEnglishToChinesePunctuation();
         }
         private void 中标转英标_Click(object sender, RibbonControlEventArgs e)
         {
-            英中标点互转_Click(sender, e, false);
+            textProcessor.ConvertChineseToEnglishPunctuation();
         }
 
         private void 自动加空格_Click(object sender, RibbonControlEventArgs e)
         {
-            Word.Application app = Globals.ThisAddIn.Application;
-            Word.Selection selection = app.Selection;
-
-            // 需要查找的正则：数字后紧跟单位（英文字母、μ、Ω、°、℃等），且二者之间无空格
-            string pattern = @"(\d+(?:\.\d+)?)([a-zA-ZμΩℓ‰°℃℉Å])";
-
-            // 只处理选区或当前段落
-            Word.Range range = selection.Type == Word.WdSelectionType.wdSelectionNormal
-                ? selection.Range
-                : selection.Paragraphs[1].Range;
-
-            // 由于Word原生Find不支持复杂正则，所以采用文本查找+偏移定位方式
-            Regex regex = new Regex(pattern);
-            string text = range.Text;
-
-            // 记录需要插入空格的相对位置（倒序处理，防止位置错乱）
-            var matches = regex.Matches(text);
-            for (int i = matches.Count - 1; i >= 0; i--)
-            {
-                var match = matches[i];
-                int insertPos = range.Start + match.Index + match.Groups[1].Length;
-                // 检查当前位置是否已有空格
-                if (text.Length > match.Index + match.Groups[1].Length
-                    && text[match.Index + match.Groups[1].Length] != ' ')
-                {
-                    Word.Range insertRange = range.Duplicate;
-                    insertRange.Start = insertRange.End = insertPos;
-                    insertRange.InsertAfter(" "); // 在数字和单位中间插入空格，样式不变
-                }
-            }
+            textProcessor.AutoAddSpaces();
         }
 
         private void 缩进2字符_Click(object sender, RibbonControlEventArgs e)
         {
-            var selection = Globals.ThisAddIn.Application.Selection;
-            if (selection != null)
-            {
-                var paraFormat = selection.ParagraphFormat;
-                paraFormat.CharacterUnitFirstLineIndent = 2f;
-            }
+            textProcessor.IndentTwoCharacters();
         }
 
         private void 去除缩进_Click(object sender, RibbonControlEventArgs e)
         {
-            var selection = Globals.ThisAddIn.Application.Selection;
-            if (selection != null)
-            {
-                var paraFormat = selection.ParagraphFormat;
-
-                // 先清除首行缩进（字符和磅）
-                paraFormat.CharacterUnitFirstLineIndent = 0f;
-                paraFormat.FirstLineIndent = 0f;
-
-                // 再清除段落左缩进（字符和磅）
-                paraFormat.CharacterUnitLeftIndent = 0f;
-                paraFormat.LeftIndent = 0f;
-
-                // 可选：右缩进也清零（防止有些文档右缩进影响排版）
-                paraFormat.CharacterUnitRightIndent = 0f;
-                paraFormat.RightIndent = 0f;
-            }
+            textProcessor.RemoveIndent();
         }
         private void 希腊字母_Click(object sender, RibbonControlEventArgs e)
         {
@@ -333,22 +72,9 @@ namespace WordMan
             form.Show();
         }
 
-
-
         private void 创建三线表_Click(object sender, RibbonControlEventArgs e)
         {
-            var app = Globals.ThisAddIn.Application;
-            var sel = app.Selection;
-
-            // 1. 创建3x2表格
-            Word.Table table = sel.Tables.Add(sel.Range, 3, 3);
-
-            // 2. 选中整个表格
-            table.Select();
-
-            // 3. 调用已有的设为三线方法
-            设为三线_Click(sender, e);
-
+            tableProcessor.CreateThreeLineTable();
         }
 
         private void 设为三线_Click(object sender, Microsoft.Office.Tools.Ribbon.RibbonControlEventArgs e)
@@ -359,211 +85,20 @@ namespace WordMan
                 return;
 
             Word.Table table = sel.Tables[1];
-            int firstRowIndex = int.MaxValue;
-            int lastRowIndex = int.MinValue;
-
-            // 首先找出最小和最大行号（因为有合并单元格，不能用Rows.Count）
-            foreach (Word.Cell cell in table.Range.Cells)
-            {
-                if (cell.RowIndex < firstRowIndex)
-                    firstRowIndex = cell.RowIndex;
-                if (cell.RowIndex > lastRowIndex)
-                    lastRowIndex = cell.RowIndex;
-            }
-
-            // 遍历所有单元格，清除所有边框
-            foreach (Word.Cell cell in table.Range.Cells)
-            {
-                foreach (Word.WdBorderType borderType in new[]
-                {
-                Word.WdBorderType.wdBorderLeft,
-                Word.WdBorderType.wdBorderRight,
-                Word.WdBorderType.wdBorderTop,
-                Word.WdBorderType.wdBorderBottom
-            })
-                {
-                    cell.Borders[borderType].LineStyle = Word.WdLineStyle.wdLineStyleNone;
-                }
-            }
-
-            // 遍历所有单元格，为三线表加主线
-            foreach (Word.Cell cell in table.Range.Cells)
-            {
-                if (cell.RowIndex == firstRowIndex)
-                {
-                    // 第一行：加上边粗线
-                    cell.Borders[Word.WdBorderType.wdBorderTop].LineStyle = Word.WdLineStyle.wdLineStyleSingle;
-                    cell.Borders[Word.WdBorderType.wdBorderTop].LineWidth = Word.WdLineWidth.wdLineWidth150pt; // 1.5磅
-
-                    // 第一行：加下边细线（即三线表"中线"）
-                    cell.Borders[Word.WdBorderType.wdBorderBottom].LineStyle = Word.WdLineStyle.wdLineStyleSingle;
-                    cell.Borders[Word.WdBorderType.wdBorderBottom].LineWidth = Word.WdLineWidth.wdLineWidth075pt; // 0.75磅
-                }
-                if (cell.RowIndex == lastRowIndex)
-                {
-                    // 最后一行：加下边粗线
-                    cell.Borders[Word.WdBorderType.wdBorderBottom].LineStyle = Word.WdLineStyle.wdLineStyleSingle;
-                    cell.Borders[Word.WdBorderType.wdBorderBottom].LineWidth = Word.WdLineWidth.wdLineWidth150pt; // 1.5磅
-                }
-            }
-
-            // 可以额外设置格式和对齐等
-            table.Range.Font.Size = 10.5f;
-            table.Range.Font.NameFarEast = "宋体";
-            table.Range.Font.Name = "Times New Roman";
-            table.Range.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
-            table.Rows.Alignment = Word.WdRowAlignment.wdAlignRowCenter;
-            table.Range.Cells.VerticalAlignment = Word.WdCellVerticalAlignment.wdCellAlignVerticalCenter;
-            table.Range.ParagraphFormat.LineSpacingRule = Word.WdLineSpacing.wdLineSpaceSingle;
-
-            // 自动适应
-            table.PreferredWidthType = Word.WdPreferredWidthType.wdPreferredWidthPercent;
-            table.PreferredWidth = 100f;
-            table.AutoFitBehavior(Word.WdAutoFitBehavior.wdAutoFitWindow);
+            tableProcessor.SetThreeLineTable(table);
         }
-
-        private void 设为三线表_Click(object sender, Microsoft.Office.Tools.Ribbon.RibbonControlEventArgs e)
-        {
-            // 已废弃的方法，保持空实现以避免编译错误
-        }
-
 
         private void 插入N行_Click(object sender, RibbonControlEventArgs e)
         {
-            var app = Globals.ThisAddIn.Application;
-            var sel = app.Selection;
-
-            if (sel == null || sel.Tables.Count == 0)
-            {
-                MessageBox.Show("请将光标放在表格内！", "提示");
-                return;
-            }
-
-            // 输入要插入的行数
-            string input = Interaction.InputBox("请输入要插入的行数：", "插入行", "1");
-            if (string.IsNullOrWhiteSpace(input))
-                return;
-
-            if (!int.TryParse(input, out int n) || n <= 0)
-            {
-                MessageBox.Show("请输入有效的正整数！", "提示");
-                return;
-            }
-
-            // 选择插入方向
-            var direction = MessageBox.Show(
-                "点击“是”在上方插入，点击“否”在下方插入。\n点击“取消”终止操作。",
-                "选择插入方向",
-                MessageBoxButtons.YesNoCancel,
-                MessageBoxIcon.Question
-            );
-
-            if (direction == DialogResult.Cancel)
-                return;
-
-            Word.Table table = sel.Tables[1];
-            Word.Row refRow;
-            if (sel.Rows.Count > 0)
-                refRow = sel.Rows[1];
-            else
-            {
-                int rowIdx = sel.Information[Word.WdInformation.wdStartOfRangeRowNumber];
-                refRow = table.Rows[rowIdx];
-            }
-
-            try
-            {
-                for (int i = 0; i < n; i++)
-                {
-                    if (direction == DialogResult.Yes)
-                        refRow.Range.Rows.Add(refRow);        // 上方
-                    else
-                        refRow.Range.Rows.Add(refRow.Next);   // 下方
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("插入失败：" + ex.Message, "错误");
-            }
+            tableProcessor.InsertNRows();
         }
-
 
         private void 插入N列_Click(object sender, RibbonControlEventArgs e)
         {
-            var app = Globals.ThisAddIn.Application;
-            var sel = app.Selection;
-
-            if (sel == null || sel.Tables.Count == 0)
-            {
-                MessageBox.Show("请将光标放在表格内！", "提示");
-                return;
-            }
-
-            // 输入要插入的列数
-            string input = Interaction.InputBox("请输入要插入的列数：", "插入列", "1");
-            if (string.IsNullOrWhiteSpace(input))
-                return;
-
-            if (!int.TryParse(input, out int n) || n <= 0)
-            {
-                MessageBox.Show("请输入有效的正整数！", "提示");
-                return;
-            }
-
-            // 选择插入方向
-            var direction = MessageBox.Show(
-                "点击“是”在左侧插入，点击“否”在右侧插入。\n点击“取消”终止操作。",
-                "选择插入方向",
-                MessageBoxButtons.YesNoCancel,
-                MessageBoxIcon.Question
-            );
-
-            if (direction == DialogResult.Cancel)
-                return;
-
-            Word.Table table = sel.Tables[1];
-            Word.Column refCol;
-            if (sel.Columns.Count > 0)
-                refCol = sel.Columns[1];
-            else
-            {
-                int colIdx = sel.Information[Word.WdInformation.wdStartOfRangeColumnNumber];
-                refCol = table.Columns[colIdx];
-            }
-
-            try
-            {
-                for (int i = 0; i < n; i++)
-                {
-                    if (direction == DialogResult.Yes)
-                        refCol.Select(); // 先选中目标列
-                    else
-                        refCol.Select();
-
-                    if (direction == DialogResult.Yes)
-                        refCol.Select(); // 选中左侧目标列
-                    else
-                        refCol.Select();
-
-                    // 插入列
-                    if (direction == DialogResult.Yes)
-                        table.Columns.Add(refCol);
-                    else
-                        table.Columns.Add(refCol.Next);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("插入失败：" + ex.Message, "错误");
-            }
+            tableProcessor.InsertNColumns();
         }
 
-        public enum FormulaNumberStyle
-        {
-            Parenthesis1,    // (1)
-            Parenthesis1_1,  // (1-1)
-            Parenthesis1_1dot// (1.1)
-        }
+        // 公式编号样式相关枚举和变量
         private FormulaNumberStyle CurrentStyle = FormulaNumberStyle.Parenthesis1;
 
         private void 公式样式1_Click(object sender, RibbonControlEventArgs e)
@@ -590,16 +125,21 @@ namespace WordMan
 
         private void 公式编号_Click(object sender, RibbonControlEventArgs e)
         {
-            var app = Globals.ThisAddIn.Application;
-            var sel = app.Selection;
-            Word.Paragraph para = sel.Paragraphs[1];
-
-            // 保存当前光标位置
-            int originalStart = sel.Start;
-            int originalEnd = sel.End;
-
+            // 保存原始选择位置
+            int originalStart = 0;
+            int originalEnd = 0;
+            
             try
             {
+                var app = Globals.ThisAddIn.Application;
+                var sel = app.Selection;
+                
+                // 保存当前光标位置
+                originalStart = sel.Start;
+                originalEnd = sel.End;
+                
+                Word.Paragraph para = sel.Paragraphs[1];
+
                 // 1. 选择段落内容（不包含段落标记）并剪切
                 Word.Range contentRange = para.Range.Duplicate;
                 contentRange.End = contentRange.End - 1; // 排除段落标记
@@ -609,13 +149,13 @@ namespace WordMan
                 para.Range.Delete();
 
                 // 3. 创建并配置表格
-                Word.Table table = CreateFormulaTable(sel, app);
+                Word.Table table = CaptionManager.CreateFormulaTable(sel, app);
 
                 // 4. 粘贴公式内容到第二列
                 table.Cell(1, 2).Range.Paste();
 
                 // 5. 插入公式编号到第三列
-                InsertFormulaNumber(table, sel);
+                CaptionManager.InsertFormulaNumber(table, sel, CurrentStyle);
 
                 // 6. 将光标移动到表格第二列
                 table.Cell(1, 2).Range.Select();
@@ -623,83 +163,24 @@ namespace WordMan
             catch (Exception ex)
             {
                 // 如果出错，恢复原始选择
-                sel.SetRange(originalStart, originalEnd);
-                MessageBox.Show($"公式编号插入失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                try
+                {
+                    var app = Globals.ThisAddIn.Application;
+                    var sel = app.Selection;
+                    sel.SetRange(originalStart, originalEnd);
+                }
+                catch { }
+                
+                MessageBox.Show($"公式编号插入失败：{ex.Message}\n\n请确保光标位于包含公式的段落中。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private Word.Table CreateFormulaTable(Word.Selection sel, Word.Application app)
-        {
-            // 插入一行三列的表格
-            Word.Table table = sel.Tables.Add(sel.Range, 1, 3);
+        // 图片编号样式相关枚举和变量
+        private PictureNumberStyle CurrentPicStyle = PictureNumberStyle.Arabic;
 
-            // 设置表格属性为无边框
-            table.Borders.Enable = 0;
+        // 表格编号样式相关枚举和变量
+        private TableNumberStyle CurrentTableStyle = TableNumberStyle.Arabic;
 
-            // 计算并设置列宽
-            float pageWidth = sel.PageSetup.PageWidth - sel.PageSetup.LeftMargin - sel.PageSetup.RightMargin;
-            float[] columnWidths = { pageWidth * 0.15f, pageWidth * 0.7f, pageWidth * 0.15f }; // 左15%, 中70%, 右15%
-
-            for (int i = 0; i < 3; i++)
-            {
-                table.Columns[i + 1].Width = app.CentimetersToPoints(columnWidths[i] / 28.35f);
-            }
-
-            // 设置单元格对齐方式
-            Word.WdParagraphAlignment[] alignments =
-            {
-                Word.WdParagraphAlignment.wdAlignParagraphLeft,   // 第一列：左对齐
-                Word.WdParagraphAlignment.wdAlignParagraphCenter, // 第二列：居中
-                Word.WdParagraphAlignment.wdAlignParagraphRight   // 第三列：右对齐
-            };
-
-            for (int i = 0; i < 3; i++)
-            {
-                table.Cell(1, i + 1).Range.ParagraphFormat.Alignment = alignments[i];
-            }
-
-            return table;
-        }
-
-        private void InsertFormulaNumber(Word.Table table, Word.Selection sel)
-        {
-            const string leftBracket = "(";
-            const string rightBracket = ")";
-            const string seqName = "公式";
-
-            // 移动到第三列
-            table.Cell(1, 3).Range.Select();
-            sel.TypeText(leftBracket);
-
-            switch (CurrentStyle)
-            {
-                case FormulaNumberStyle.Parenthesis1:
-                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldSequence, seqName, false);
-                    break;
-
-                case FormulaNumberStyle.Parenthesis1_1:
-                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldStyleRef, "1 \\s", false);
-                    sel.TypeText("-");
-                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldSequence, seqName + "\\s 1", false);
-                    break;
-
-                case FormulaNumberStyle.Parenthesis1_1dot:
-                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldStyleRef, "1 \\s", false);
-                    sel.TypeText(".");
-                    sel.Fields.Add(sel.Range, Word.WdFieldType.wdFieldSequence, seqName + "\\s 1", false);
-                    break;
-            }
-
-            sel.TypeText(rightBracket);
-        }
-
-        enum PictureNumberStyle
-        {
-            Arabic,     // 图 1
-            Dash,       // 图 1-1
-            Dot         // 图 1.1
-        }
-        PictureNumberStyle CurrentPicStyle = PictureNumberStyle.Arabic;
         private void 图注样式1_Click(object sender, RibbonControlEventArgs e)
         {
             图注样式1.Checked = true;
@@ -724,50 +205,64 @@ namespace WordMan
 
         private void 图片编号_Click(object sender, RibbonControlEventArgs e)
         {
-            var app = Globals.ThisAddIn.Application;
-            var sel = app.Selection;
-            var doc = app.ActiveDocument;
-
-            HashSet<int> handledParagraphs = new HashSet<int>();
-            List<Word.Paragraph> targetParas = new List<Word.Paragraph>();
-
-            // 选区有图片
-            foreach (Word.InlineShape ils in sel.Range.InlineShapes)
+            try
             {
-                var para = ils.Range.Paragraphs.First;
-                if (!handledParagraphs.Contains(para.Range.Start))
+                var app = Globals.ThisAddIn.Application;
+                var sel = app.Selection;
+                var doc = app.ActiveDocument;
+
+                HashSet<int> handledParagraphs = new HashSet<int>();
+                List<Word.Paragraph> targetParas = new List<Word.Paragraph>();
+
+                // 选区有图片
+                try
                 {
-                    targetParas.Add(para);
-                    handledParagraphs.Add(para.Range.Start);
+                    foreach (Word.InlineShape ils in sel.Range.InlineShapes)
+                    {
+                        var para = ils.Range.Paragraphs.First;
+                        if (!handledParagraphs.Contains(para.Range.Start))
+                        {
+                            targetParas.Add(para);
+                            handledParagraphs.Add(para.Range.Start);
+                        }
+                    }
+                }
+                catch { }
+                
+                try
+                {
+                    foreach (Word.Shape s in sel.Range.ShapeRange)
+                    {
+                        var para = s.Anchor.Paragraphs.First;
+                        if (!handledParagraphs.Contains(para.Range.Start))
+                        {
+                            targetParas.Add(para);
+                            handledParagraphs.Add(para.Range.Start);
+                        }
+                    }
+                }
+                catch { }
+
+                // 若未选中图片，则取光标所在段落
+                if (targetParas.Count == 0 && sel.Paragraphs.Count > 0)
+                {
+                    var para = sel.Paragraphs.First;
+                    if (!handledParagraphs.Contains(para.Range.Start))
+                    {
+                        targetParas.Add(para);
+                        handledParagraphs.Add(para.Range.Start);
+                    }
+                }
+
+                // 必须逆序处理，防止段落因插入而错位
+                for (int i = targetParas.Count - 1; i >= 0; i--)
+                {
+                    CaptionManager.InsertPictureCaption(targetParas[i], CurrentPicStyle);
                 }
             }
-            foreach (Word.Shape s in sel.Range.ShapeRange)
+            catch (Exception ex)
             {
-                var para = s.Anchor.Paragraphs.First;
-                if (!handledParagraphs.Contains(para.Range.Start))
-                {
-                    targetParas.Add(para);
-                    handledParagraphs.Add(para.Range.Start);
-                }
-            }
-
-            // 若未选中图片，则取光标所在段落
-            if (targetParas.Count == 0 && sel.Paragraphs.Count > 0)
-            {
-                var para = sel.Paragraphs.First;
-                if (!handledParagraphs.Contains(para.Range.Start))
-                {
-                    targetParas.Add(para);
-                    handledParagraphs.Add(para.Range.Start);
-                }
-            }
-
-
-
-            // 必须逆序处理，防止段落因插入而错位
-            for (int i = targetParas.Count - 1; i >= 0; i--)
-            {
-                InsertCaptionIfNotExists(targetParas[i], CurrentPicStyle);
+                MessageBox.Show($"图片编号插入失败：{ex.Message}\n\n请确保光标位于包含图片的段落中。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -781,32 +276,50 @@ namespace WordMan
             var nextPara = picPara.Next() as Word.Paragraph;
             if (nextPara != null)
             {
-                string nextText = nextPara.Range.Text.TrimStart();
-                if ((nextPara.get_Style() is Word.Style style && style.NameLocal == "题注")
-                    || nextText.StartsWith("图"))
+                string nextText = nextPara.Range.Text.Trim();
+                // 检查是否已经有题注样式或以"图"开头的文本
+                if (!string.IsNullOrEmpty(nextText))
                 {
-                    return; // 已有题注
+                    if ((nextPara.get_Style() is Word.Style style && style.NameLocal == "题注")
+                        || nextText.StartsWith("图"))
+                    {
+                        return; // 已有题注
+                    }
                 }
             }
 
-            // 2. 插入空段并获得新段落
+            // 2. 保存原始段落位置用于定位
+            int originalPicPosition = picPara.Range.End;
+
+            // 3. 插入空段并获得新段落
             var afterPicRange = picPara.Range.Duplicate;
             afterPicRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
             afterPicRange.InsertParagraphAfter();
-            var captionPara = picPara.Next() as Word.Paragraph;
+            
+            // 4. 查找刚插入的题注段落
+            Word.Paragraph captionPara = null;
+            foreach (Word.Paragraph para in doc.Paragraphs)
+            {
+                if (para.Range.Start == originalPicPosition)
+                {
+                    captionPara = para;
+                    break;
+                }
+            }
+            
             if (captionPara == null) return;
 
-            // 3. 清空新段内容
-            var captionRange = captionPara.Range.Duplicate;
-            captionRange.End -= 1; // 去除段落标记
-            captionRange.Text = "";
+            // 5. 精确控制题注段落内容（解决空行问题）
+            Word.Range captionRange = captionPara.Range.Duplicate;
+            captionRange.End = captionRange.Start + 1; // 仅保留段落起始位置
+            captionRange.Text = ""; // 彻底清空，避免默认空字符
 
-            // 4. 插入“图 ”（带空格）
+            // 6. 插入"图 "（带空格）
             var insertRange = doc.Range(captionRange.Start, captionRange.Start);
             insertRange.InsertAfter("图 ");
             insertRange.SetRange(insertRange.Start + 2, insertRange.Start + 2); // 定位到空格后
 
-            // 5. 插入编号
+            // 7. 插入编号
             switch (numberStyle)
             {
                 case PictureNumberStyle.Arabic:
@@ -837,17 +350,9 @@ namespace WordMan
                     break;
             }
 
-            // 6. 设置样式为“题注”
+            // 8. 设置样式为"题注"
             captionPara.set_Style("题注");
         }
-
-        enum TableNumberStyle
-        {
-            Arabic,     // 表 1
-            Dash,       // 表 1-1
-            Dot         // 表 1.1
-        }
-        TableNumberStyle CurrentTableStyle = TableNumberStyle.Arabic;
 
         private void 表注样式1_Click(object sender, RibbonControlEventArgs e)
         {
@@ -872,591 +377,74 @@ namespace WordMan
         }
         private void 表格编号_Click(object sender, RibbonControlEventArgs e)
         {
-            var app = Globals.ThisAddIn.Application;
-            var sel = app.Selection;
-            var doc = app.ActiveDocument;
-
-            HashSet<int> handledTables = new HashSet<int>();
-            List<Word.Table> targetTables = new List<Word.Table>();
-
-            // 1. 选区有表格则全部处理（修复多表格选择问题）
-            // 关键修改：使用table.Range.InRange(sel.Range)判断表格是否完全在选区内
-            foreach (Word.Table table in doc.Tables)
+            try
             {
-                try
+                var app = Globals.ThisAddIn.Application;
+                var sel = app.Selection;
+                var doc = app.ActiveDocument;
+
+                HashSet<int> handledTables = new HashSet<int>();
+                List<Word.Table> targetTables = new List<Word.Table>();
+
+                // 1. 选区有表格则全部处理（修复多表格选择问题）
+                // 关键修改：使用table.Range.InRange(sel.Range)判断表格是否完全在选区内
+                foreach (Word.Table table in doc.Tables)
                 {
-                    // 检查表格是否被选中（表格范围在选区范围内）
-                    if (table.Range.InRange(sel.Range) && !handledTables.Contains(table.Range.Start))
+                    try
+                    {
+                        // 检查表格是否被选中（表格范围在选区范围内）
+                        if (table.Range.InRange(sel.Range) && !handledTables.Contains(table.Range.Start))
+                        {
+                            targetTables.Add(table);
+                            handledTables.Add(table.Range.Start);
+                        }
+                    }
+                    catch { } // 处理表格范围判断可能出现的异常
+                }
+
+                // 2. 若未选中表格，则处理光标所在表格
+                if (targetTables.Count == 0 && sel.Tables.Count > 0)
+                {
+                    var table = sel.Tables[1];
+                    if (!handledTables.Contains(table.Range.Start))
                     {
                         targetTables.Add(table);
                         handledTables.Add(table.Range.Start);
                     }
                 }
-                catch { } // 处理表格范围判断可能出现的异常
-            }
 
-            // 2. 若未选中表格，则处理光标所在表格
-            if (targetTables.Count == 0 && sel.Tables.Count > 0)
-            {
-                var table = sel.Tables[1];
-                if (!handledTables.Contains(table.Range.Start))
+                // 必须逆序处理，防止插入错位
+                for (int i = targetTables.Count - 1; i >= 0; i--)
                 {
-                    targetTables.Add(table);
-                    handledTables.Add(table.Range.Start);
+                    CaptionManager.InsertTableCaption(targetTables[i], CurrentTableStyle);
                 }
             }
-
-            // 必须逆序处理，防止插入错位
-            for (int i = targetTables.Count - 1; i >= 0; i--)
+            catch (Exception ex)
             {
-                InsertTableCaptionIfNotExists(targetTables[i], CurrentTableStyle);
+                MessageBox.Show($"表格编号插入失败：{ex.Message}\n\n请确保光标位于包含表格的段落中。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        private void InsertTableCaptionIfNotExists(Word.Table table, TableNumberStyle numberStyle)
-        {
-            if (table == null) return;
-            var doc = table.Application.ActiveDocument;
-            var app = doc.Application;
-
-            // 获取表格真正的外部起始位置
-            Word.Range tableRange = table.Range;
-            int tableStart = tableRange.Start;
-
-            // 检查是否在表格内部（调整到表格外部）
-            bool isInFirstCell = table.Cell(1, 1).Range.InRange(tableRange);
-            if (isInFirstCell)
-            {
-                tableStart = Math.Max(0, tableStart - 1);
-            }
-
-            // 1. 检查表格前是否已有题注
-            Word.Paragraph prevPara = null;
-            Word.Range beforeTableRange = doc.Range(0, tableStart);
-            if (beforeTableRange.Paragraphs.Count > 0)
-            {
-                prevPara = beforeTableRange.Paragraphs[beforeTableRange.Paragraphs.Count];
-                string prevText = prevPara.Range.Text.TrimStart();
-                if ((prevPara.get_Style() is Word.Style style && style.NameLocal == "题注")
-                    || prevText.StartsWith("表"))
-                {
-                    return; // 已有题注
-                }
-            }
-
-            // 2. 保存原始表格位置用于定位
-            int originalTablePosition = tableRange.Start;
-
-            // 3. 插入题注段落（确保在表格外）
-            // 关键修改：先清除可能的空内容，避免多余空行
-            Word.Range insertRange = doc.Range(tableStart, tableStart);
-            insertRange.Text = ""; // 清除插入位置可能的空内容
-            insertRange.InsertParagraphBefore();
-
-            // 4. 查找刚插入的题注段落
-            Word.Paragraph captionPara = null;
-            foreach (Word.Paragraph para in doc.Paragraphs)
-            {
-                if (para.Range.End == originalTablePosition)
-                {
-                    captionPara = para;
-                    break;
-                }
-            }
-
-            if (captionPara == null) return;
-
-            // 5. 精确控制题注段落内容（解决空行问题）
-            Word.Range captionRange = captionPara.Range.Duplicate;
-            captionRange.End = captionRange.Start + 1; // 仅保留段落起始位置
-            captionRange.Text = ""; // 彻底清空，避免默认空字符
-
-            // 6. 插入"表 "和编号
-            var fieldRange = doc.Range(captionRange.Start, captionRange.Start);
-            fieldRange.InsertAfter("表 ");
-            fieldRange.SetRange(fieldRange.Start + 2, fieldRange.Start + 2);
-
-            switch (numberStyle)
-            {
-                case TableNumberStyle.Arabic:
-                    fieldRange.Fields.Add(fieldRange, Word.WdFieldType.wdFieldSequence, "表 \\* ARABIC", false);
-                    break;
-                case TableNumberStyle.Dash:
-                case TableNumberStyle.Dot:
-                    var styleRefField = fieldRange.Fields.Add(
-                        fieldRange, Word.WdFieldType.wdFieldStyleRef, "1 \\s", false);
-                    styleRefField.Result.Select();
-                    var selection = fieldRange.Application.Selection;
-                    selection.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
-                    selection.EndKey(Word.WdUnits.wdLine, Word.WdMovementType.wdMove);
-
-                    selection.TypeText(numberStyle == TableNumberStyle.Dash ? "-" : ".");
-
-                    selection.EndKey(Word.WdUnits.wdLine, Word.WdMovementType.wdMove);
-
-                    selection.Range.Fields.Add(
-                        selection.Range, Word.WdFieldType.wdFieldSequence, "表 \\s 1", false);
-                    break;
-            }
-
-            // 7. 设置样式为题注并移除可能的多余空行
-            captionPara.set_Style("题注");
-            captionPara.SpaceAfter = 0; // 去除段后间距
-            captionPara.LineSpacingRule = Word.WdLineSpacing.wdLineSpaceSingle; // 单倍行距
-        }
-
-
-        // 宽度刷相关字段
-        private float copiedWidth = 0f;
-        private Timer widthBrushTimer;
-        private object lastSelectionStart = null;
-        private object lastSelectionEnd = null;
-        private DateTime lastActivityTime = DateTime.Now;
-        private int lastSelectionHash = 0;
 
         private void 宽度刷_Click(object sender, RibbonControlEventArgs e)
         {
-            var toggleButton = sender as Microsoft.Office.Tools.Ribbon.RibbonToggleButton;
-            try
-            {
-                var app = Globals.ThisAddIn.Application;
-                if (toggleButton.Checked)
-                    ActivateWidthBrush(app, toggleButton);
-                else
-                    DeactivateWidthBrush(app);
-            }
-            catch
-            {
-                toggleButton.Checked = false;
-                DeactivateWidthBrush(Globals.ThisAddIn.Application);
-            }
+            imageProcessor.WidthBrush_Click(sender, e, 宽度刷);
         }
-
-        private void ActivateWidthBrush(Word.Application app, Microsoft.Office.Tools.Ribbon.RibbonToggleButton toggleButton)
-        {
-            var selection = app.Selection;
-            if (selection.InlineShapes.Count == 0 && selection.ShapeRange.Count == 0)
-            {
-                toggleButton.Checked = false;
-                return;
-            }
-
-            float width = 0f;
-            if (selection.InlineShapes.Count > 0)
-                width = selection.InlineShapes[1].Width;
-            else if (selection.ShapeRange.Count > 0)
-                width = selection.ShapeRange[1].Width;
-
-            if (width <= 0)
-            {
-                toggleButton.Checked = false;
-                return;
-            }
-
-            copiedWidth = width;
-            lastActivityTime = DateTime.Now;
-            lastSelectionHash = GetSelectionHash(selection);
-            StartWidthBrushMonitoring(app);
-            app.StatusBar = $"宽度刷已激活 - 宽度: {width}磅 - 按ESC或点击空白区域退出";
-        }
-
-        private void DeactivateWidthBrush(Word.Application app)
-        {
-            widthBrushTimer?.Stop();
-            widthBrushTimer?.Dispose();
-            widthBrushTimer = null;
-            lastSelectionStart = null;
-            lastSelectionEnd = null;
-            lastSelectionHash = 0;
-            宽度刷.Checked = false;
-            try { app.StatusBar = ""; } catch { }
-        }
-
-        private void StartWidthBrushMonitoring(Word.Application app)
-        {
-            widthBrushTimer = new Timer();
-            widthBrushTimer.Interval = 100;
-            widthBrushTimer.Tick += (s, timerE) =>
-            {
-                if (!宽度刷.Checked) { DeactivateWidthBrush(app); return; }
-                try
-                {
-                    var currentSelection = app.Selection;
-                    int currentHash = GetSelectionHash(currentSelection);
-
-                    // 检查退出条件
-                    if (currentHash != lastSelectionHash)
-                    {
-                        bool isEmptyNow = currentSelection.InlineShapes.Count == 0 && currentSelection.ShapeRange.Count == 0 &&
-                            (currentSelection.Type == Word.WdSelectionType.wdSelectionIP || currentSelection.Type == Word.WdSelectionType.wdSelectionNormal) &&
-                            string.IsNullOrWhiteSpace(currentSelection.Text?.Replace("\r", ""));
-
-                        TimeSpan timeSinceLastActivity = DateTime.Now - lastActivityTime;
-                        if (isEmptyNow && timeSinceLastActivity.TotalMilliseconds < 500) { DeactivateWidthBrush(app); return; }
-
-                        if (currentSelection.InlineShapes.Count == 0 && currentSelection.ShapeRange.Count == 0 &&
-                            currentSelection.Paragraphs.Count > 0 &&
-                            string.IsNullOrWhiteSpace(currentSelection.Paragraphs[1].Range.Text.Replace("\r", "")))
-                        { DeactivateWidthBrush(app); return; }
-                    }
-
-                    // 长时间停留在空白区域退出
-                    if (currentSelection.InlineShapes.Count == 0 && currentSelection.ShapeRange.Count == 0 &&
-                        string.IsNullOrWhiteSpace(currentSelection.Text?.Replace("\r", "")) &&
-                        (DateTime.Now - lastActivityTime).TotalMilliseconds > 1000)
-                    { DeactivateWidthBrush(app); return; }
-
-                    // 应用宽度
-                    bool hasImageSelection = currentSelection.InlineShapes.Count > 0 || currentSelection.ShapeRange.Count > 0;
-                    if (hasImageSelection)
-                    {
-                        bool isNewSelection = false;
-                        try
-                        {
-                            if (lastSelectionStart == null || lastSelectionEnd == null ||
-                                !lastSelectionStart.Equals(currentSelection.Start) || !lastSelectionEnd.Equals(currentSelection.End))
-                            {
-                                isNewSelection = true;
-                                lastSelectionStart = currentSelection.Start;
-                                lastSelectionEnd = currentSelection.End;
-                                lastActivityTime = DateTime.Now;
-                                lastSelectionHash = currentHash;
-                            }
-                        }
-                        catch { isNewSelection = true; lastActivityTime = DateTime.Now; lastSelectionHash = currentHash; }
-
-                        if (isNewSelection && ApplyWidthToSelection(currentSelection))
-                            app.StatusBar = $"宽度刷: 已应用宽度 {copiedWidth}磅 - 按ESC或点击空白区域退出";
-                    }
-                    else if (currentHash != lastSelectionHash)
-                    {
-                        lastActivityTime = DateTime.Now;
-                        lastSelectionHash = currentHash;
-                    }
-                }
-                catch { }
-            };
-            widthBrushTimer.Start();
-        }
-
-        private int GetSelectionHash(Word.Selection selection)
-        {
-            try
-            {
-                int hash = 0;
-                hash ^= selection.Start.GetHashCode();
-                hash ^= selection.End.GetHashCode();
-                hash ^= selection.Type.GetHashCode();
-                hash ^= selection.InlineShapes.Count.GetHashCode();
-                hash ^= selection.ShapeRange.Count.GetHashCode();
-                if (!string.IsNullOrEmpty(selection.Text))
-                    hash ^= selection.Text.GetHashCode();
-                return hash;
-            }
-            catch { return DateTime.Now.Millisecond; }
-        }
-
-        private bool ApplyWidthToSelection(Word.Selection selection)
-        {
-            bool applied = false;
-            try
-            {
-                if (selection.InlineShapes.Count > 0)
-                {
-                    foreach (Word.InlineShape shape in selection.InlineShapes)
-                    {
-                        if (shape.Type == Word.WdInlineShapeType.wdInlineShapePicture ||
-                            shape.Type == Word.WdInlineShapeType.wdInlineShapeLinkedPicture ||
-                            shape.Type == Word.WdInlineShapeType.wdInlineShapeChart ||
-                            shape.Type == Word.WdInlineShapeType.wdInlineShapeSmartArt)
-                        {
-                            shape.Width = copiedWidth;
-                            applied = true;
-                        }
-                    }
-                }
-
-                if (selection.ShapeRange.Count > 0)
-                {
-                    foreach (Word.Shape shape in selection.ShapeRange)
-                    {
-                        if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoPicture ||
-                            shape.Type == Microsoft.Office.Core.MsoShapeType.msoLinkedPicture ||
-                            shape.Type == Microsoft.Office.Core.MsoShapeType.msoChart ||
-                            shape.Type == Microsoft.Office.Core.MsoShapeType.msoSmartArt)
-                        {
-                            shape.Width = copiedWidth;
-                            applied = true;
-                        }
-                    }
-                }
-            }
-            catch { }
-            return applied;
-        }
-
-
-        // 高度刷相关字段
-        private float copiedHeight = 0f;
-        private Timer heightBrushTimer;
-        private object lastHeightSelectionStart = null;
-        private object lastHeightSelectionEnd = null;
-        private DateTime lastHeightActivityTime = DateTime.Now;
-        private int lastHeightSelectionHash = 0;
 
         private void 高度刷_Click(object sender, RibbonControlEventArgs e)
         {
-            var toggleButton = sender as Microsoft.Office.Tools.Ribbon.RibbonToggleButton;
-            try
-            {
-                var app = Globals.ThisAddIn.Application;
-                if (toggleButton.Checked)
-                    ActivateHeightBrush(app, toggleButton);
-                else
-                    DeactivateHeightBrush(app);
-            }
-            catch
-            {
-                toggleButton.Checked = false;
-                DeactivateHeightBrush(Globals.ThisAddIn.Application);
-            }
-        }
-
-        private void ActivateHeightBrush(Word.Application app, Microsoft.Office.Tools.Ribbon.RibbonToggleButton toggleButton)
-        {
-            var selection = app.Selection;
-            if (selection.InlineShapes.Count == 0 && selection.ShapeRange.Count == 0)
-            {
-                toggleButton.Checked = false;
-                return;
-            }
-
-            float height = 0f;
-            if (selection.InlineShapes.Count > 0)
-                height = selection.InlineShapes[1].Height;
-            else if (selection.ShapeRange.Count > 0)
-                height = selection.ShapeRange[1].Height;
-
-            if (height <= 0)
-            {
-                toggleButton.Checked = false;
-                return;
-            }
-
-            copiedHeight = height;
-            lastHeightActivityTime = DateTime.Now;
-            lastHeightSelectionHash = GetHeightSelectionHash(selection);
-            StartHeightBrushMonitoring(app);
-            app.StatusBar = $"高度刷已激活 - 高度: {height}磅 - 按ESC或点击空白区域退出";
-        }
-
-        private void DeactivateHeightBrush(Word.Application app)
-        {
-            heightBrushTimer?.Stop();
-            heightBrushTimer?.Dispose();
-            heightBrushTimer = null;
-            lastHeightSelectionStart = null;
-            lastHeightSelectionEnd = null;
-            lastHeightSelectionHash = 0;
-            高度刷.Checked = false;
-            try { app.StatusBar = ""; } catch { }
-        }
-
-        private void StartHeightBrushMonitoring(Word.Application app)
-        {
-            heightBrushTimer = new Timer();
-            heightBrushTimer.Interval = 100;
-            heightBrushTimer.Tick += (s, timerE) =>
-            {
-                if (!高度刷.Checked) { DeactivateHeightBrush(app); return; }
-                try
-                {
-                    var currentSelection = app.Selection;
-                    int currentHash = GetHeightSelectionHash(currentSelection);
-
-                    // 检查退出条件
-                    if (currentHash != lastHeightSelectionHash)
-                    {
-                        bool isEmptyNow = currentSelection.InlineShapes.Count == 0 && currentSelection.ShapeRange.Count == 0 &&
-                            (currentSelection.Type == Word.WdSelectionType.wdSelectionIP || currentSelection.Type == Word.WdSelectionType.wdSelectionNormal) &&
-                            string.IsNullOrWhiteSpace(currentSelection.Text?.Replace("\r", ""));
-
-                        TimeSpan timeSinceLastActivity = DateTime.Now - lastHeightActivityTime;
-                        if (isEmptyNow && timeSinceLastActivity.TotalMilliseconds < 500) { DeactivateHeightBrush(app); return; }
-
-                        if (currentSelection.InlineShapes.Count == 0 && currentSelection.ShapeRange.Count == 0 &&
-                            currentSelection.Paragraphs.Count > 0 &&
-                            string.IsNullOrWhiteSpace(currentSelection.Paragraphs[1].Range.Text.Replace("\r", "")))
-                        { DeactivateHeightBrush(app); return; }
-                    }
-
-                    // 长时间停留在空白区域退出
-                    if (currentSelection.InlineShapes.Count == 0 && currentSelection.ShapeRange.Count == 0 &&
-                        string.IsNullOrWhiteSpace(currentSelection.Text?.Replace("\r", "")) &&
-                        (DateTime.Now - lastHeightActivityTime).TotalMilliseconds > 1000)
-                    { DeactivateHeightBrush(app); return; }
-
-                    // 应用高度
-                    bool hasImageSelection = currentSelection.InlineShapes.Count > 0 || currentSelection.ShapeRange.Count > 0;
-                    if (hasImageSelection)
-                    {
-                        bool isNewSelection = false;
-                        try
-                        {
-                            if (lastHeightSelectionStart == null || lastHeightSelectionEnd == null ||
-                                !lastHeightSelectionStart.Equals(currentSelection.Start) || !lastHeightSelectionEnd.Equals(currentSelection.End))
-                            {
-                                isNewSelection = true;
-                                lastHeightSelectionStart = currentSelection.Start;
-                                lastHeightSelectionEnd = currentSelection.End;
-                                lastHeightActivityTime = DateTime.Now;
-                                lastHeightSelectionHash = currentHash;
-                            }
-                        }
-                        catch { isNewSelection = true; lastHeightActivityTime = DateTime.Now; lastHeightSelectionHash = currentHash; }
-
-                        if (isNewSelection && ApplyHeightToSelection(currentSelection))
-                            app.StatusBar = $"高度刷: 已应用高度 {copiedHeight}磅 - 按ESC或点击空白区域退出";
-                    }
-                    else if (currentHash != lastHeightSelectionHash)
-                    {
-                        lastHeightActivityTime = DateTime.Now;
-                        lastHeightSelectionHash = currentHash;
-                    }
-                }
-                catch { }
-            };
-            heightBrushTimer.Start();
-        }
-
-        private int GetHeightSelectionHash(Word.Selection selection)
-        {
-            try
-            {
-                int hash = 0;
-                hash ^= selection.Start.GetHashCode();
-                hash ^= selection.End.GetHashCode();
-                hash ^= selection.Type.GetHashCode();
-                hash ^= selection.InlineShapes.Count.GetHashCode();
-                hash ^= selection.ShapeRange.Count.GetHashCode();
-                if (!string.IsNullOrEmpty(selection.Text))
-                    hash ^= selection.Text.GetHashCode();
-                return hash;
-            }
-            catch { return DateTime.Now.Millisecond; }
-        }
-
-        private bool ApplyHeightToSelection(Word.Selection selection)
-        {
-            bool applied = false;
-            try
-            {
-                if (selection.InlineShapes.Count > 0)
-                {
-                    foreach (Word.InlineShape shape in selection.InlineShapes)
-                    {
-                        if (shape.Type == Word.WdInlineShapeType.wdInlineShapePicture ||
-                            shape.Type == Word.WdInlineShapeType.wdInlineShapeLinkedPicture ||
-                            shape.Type == Word.WdInlineShapeType.wdInlineShapeChart ||
-                            shape.Type == Word.WdInlineShapeType.wdInlineShapeSmartArt)
-                        {
-                            shape.Height = copiedHeight;
-                            applied = true;
-                        }
-                    }
-                }
-
-                if (selection.ShapeRange.Count > 0)
-                {
-                    foreach (Word.Shape shape in selection.ShapeRange)
-                    {
-                        if (shape.Type == Microsoft.Office.Core.MsoShapeType.msoPicture ||
-                            shape.Type == Microsoft.Office.Core.MsoShapeType.msoLinkedPicture ||
-                            shape.Type == Microsoft.Office.Core.MsoShapeType.msoChart ||
-                            shape.Type == Microsoft.Office.Core.MsoShapeType.msoSmartArt)
-                        {
-                            shape.Height = copiedHeight;
-                            applied = true;
-                        }
-                    }
-                }
-            }
-            catch { }
-            return applied;
+            imageProcessor.HeightBrush_Click(sender, e, 高度刷);
         }
 
         // 在Cleanup方法中添加高度刷的清理
         public void Cleanup()
         {
-            widthBrushTimer?.Stop();
-            widthBrushTimer?.Dispose();
-            widthBrushTimer = null;
-
-            heightBrushTimer?.Stop();
-            heightBrushTimer?.Dispose();
-            heightBrushTimer = null;
+            imageProcessor.Cleanup();
         }
 
         // 位图化按钮点击事件
         private void 位图化_Click(object sender, RibbonControlEventArgs e)
         {
-            try
-            {
-                var app = Globals.ThisAddIn.Application;
-                var selection = app.Selection;
-
-                // 检查是否选中了单个图形并转换
-                if (selection.InlineShapes.Count == 1)
-                    ConvertToBitmap(selection.InlineShapes[1], app);
-                else if (selection.ShapeRange.Count == 1)
-                    ConvertToBitmap(selection.ShapeRange[1], app);
-            }
-            catch
-            {
-                // 静默处理错误，不显示提示
-            }
-        }
-
-        // 转换方法
-        private void ConvertToBitmap(object shape, Word.Application app)
-        {
-            // 如果不是位图则转换
-            if (!IsBitmap(shape))
-            {
-                // 统一处理：选择、复制、删除、粘贴
-                if (shape is Word.InlineShape inlineShape)
-                {
-                    inlineShape.Select();
-                    app.Selection.Copy();
-                    inlineShape.Delete();
-                }
-                else if (shape is Word.Shape wordShape)
-                {
-                    wordShape.Select();
-                    app.Selection.Copy();
-                    wordShape.Delete();
-                }
-                app.Selection.PasteSpecial(DataType: Word.WdPasteDataType.wdPasteBitmap);
-            }
-        }
-
-        // 判断是否为位图
-        private bool IsBitmap(object shape)
-        {
-            if (shape is Word.InlineShape inlineShape)
-            {
-                var type = inlineShape.Type;
-                return (type == Word.WdInlineShapeType.wdInlineShapePicture ||
-                        type == Word.WdInlineShapeType.wdInlineShapeLinkedPicture) &&
-                       inlineShape.PictureFormat != null;
-            }
-            else if (shape is Word.Shape wordShape)
-            {
-                var type = wordShape.Type;
-                return (type == Microsoft.Office.Core.MsoShapeType.msoPicture ||
-                        type == Microsoft.Office.Core.MsoShapeType.msoLinkedPicture) &&
-                       wordShape.PictureFormat != null;
-            }
-            return false;
+            imageProcessor.ConvertToBitmap_Click(sender, e);
         }
 
         // 添加字段来存储原始位置和状态
@@ -1515,12 +503,12 @@ namespace WordMan
             Word.Range currentRange = Sel.Range;
 
             // 查找题注标签和编号
-            CaptionInfo captionInfo = FindCaptionInfo(currentRange);
+            CaptionManager.CaptionInfo captionInfo = CaptionManager.FindCaptionInfo(currentRange);
 
             if (captionInfo != null)
             {
                 // 找到题注，插入交叉引用
-                InsertCrossReferenceAtOriginalPosition(captionInfo);
+                CaptionManager.InsertCrossReferenceAtOriginalPosition(originalRange, captionInfo);
 
                 // 退出交叉引用模式
                 ExitCrossReferenceMode();
@@ -1547,27 +535,6 @@ namespace WordMan
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern short GetAsyncKeyState(Keys vKey);
-
-        private void InsertCrossReferenceAtOriginalPosition(CaptionInfo captionInfo)
-        {
-            // 返回到原始位置并插入交叉引用
-            Globals.ThisAddIn.Application.Selection.SetRange(
-                originalRange.Start, originalRange.End);
-
-            // 直接使用Word的交叉引用功能
-            object referenceType = captionInfo.Identifier; // 如"图", "表"
-            Word.WdReferenceKind referenceKind = Word.WdReferenceKind.wdOnlyLabelAndNumber;
-            object referenceItem = captionInfo.Number; // 编号
-
-            Globals.ThisAddIn.Application.Selection.InsertCrossReference(
-                referenceType,
-                referenceKind,
-                referenceItem,
-                System.Type.Missing,
-                System.Type.Missing,
-                System.Type.Missing,
-                System.Type.Missing);
-        }
 
         private void ExitCrossReferenceMode()
         {
@@ -1597,92 +564,6 @@ namespace WordMan
             // 清除原始位置引用
             originalRange = null;
         }
-
-        private CaptionInfo FindCaptionInfo(Word.Range range)
-        {
-            // 获取当前段落
-            Word.Paragraph paragraph = range.Paragraphs[1];
-            Word.Range paraRange = paragraph.Range;
-
-            // 在段落中查找域
-            foreach (Word.Field field in paraRange.Fields)
-            {
-                if (field.Type == Word.WdFieldType.wdFieldSequence)
-                {
-                    // 获取SEQ域的标识符（如"图"、"表"等）
-                    string fieldCode = field.Code.Text;
-                    string identifier = ExtractIdentifierFromFieldCode(fieldCode);
-
-                    // 获取题注的完整文本（显示文本）
-                    string captionText = field.Result.Text.Trim();
-
-                    // 获取题注编号（从显示文本中提取数字）
-                    string number = ExtractNumberFromCaption(captionText);
-
-                    if (!string.IsNullOrEmpty(identifier) && !string.IsNullOrEmpty(number))
-                    {
-                        return new CaptionInfo
-                        {
-                            Identifier = identifier,
-                            Number = number,
-                            FullText = captionText
-                        };
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        private string ExtractIdentifierFromFieldCode(string fieldCode)
-        {
-            // 解析域代码，提取标识符
-            // 示例: " SEQ 图 \* ARABIC " -> "图"
-            fieldCode = fieldCode.Trim();
-
-            if (fieldCode.StartsWith("SEQ", StringComparison.OrdinalIgnoreCase))
-            {
-                string remaining = fieldCode.Substring(3).Trim();
-
-                // 找到第一个空格或反斜杠
-                int spaceIndex = remaining.IndexOf(' ');
-                int backslashIndex = remaining.IndexOf('\\');
-
-                int endIndex = -1;
-                if (spaceIndex >= 0 && backslashIndex >= 0)
-                    endIndex = Math.Min(spaceIndex, backslashIndex);
-                else if (spaceIndex >= 0)
-                    endIndex = spaceIndex;
-                else if (backslashIndex >= 0)
-                    endIndex = backslashIndex;
-
-                if (endIndex >= 0)
-                    return remaining.Substring(0, endIndex).Trim();
-                else
-                    return remaining.Trim();
-            }
-
-            return null;
-        }
-
-        private string ExtractNumberFromCaption(string captionText)
-        {
-            // 使用正则表达式提取数字（包括带分隔符的如1-1, 1.1等）
-            var match = System.Text.RegularExpressions.Regex.Match(
-                captionText, @"[\d]+[\.\-]?[\d]*");
-
-            return match.Success ? match.Value : null;
-        }
-
-        // 辅助类，存储题注信息
-        private class CaptionInfo
-        {
-            public string Identifier { get; set; }  // 标签类型，如"图", "表"
-            public string Number { get; set; }      // 编号，如"1", "1-1"
-            public string FullText { get; set; }    // 完整题注文本
-        }
-
-
 
         // 排版按钮点击事件
         private void TypesettingButton_Click(object sender, RibbonControlEventArgs e)
@@ -1793,8 +674,6 @@ namespace WordMan
             System.Windows.Forms.MessageBox.Show("交叉引用与文献引用已取消高亮！");
         }
 
-
-
         private void 另存PDF_Click(object sender, RibbonControlEventArgs e)
         {
             var app = Globals.ThisAddIn.Application;
@@ -1809,7 +688,7 @@ namespace WordMan
                     System.Windows.Forms.MessageBoxButtons.OK,
                     System.Windows.Forms.MessageBoxIcon.Information);
 
-                // 调用Word的“另存为”对话框
+                // 调用Word的"另存为"对话框
                 app.Dialogs[Microsoft.Office.Interop.Word.WdWordDialog.wdDialogFileSaveAs].Show();
 
                 // 不再自动导出PDF，无论保存没保存，直接退出
@@ -2021,8 +900,6 @@ namespace WordMan
                 // 静默处理错误，避免影响用户体验
             }
         }
-
-
 
         // 文档拆分按钮点击事件
         private void 文档拆分_Click(object sender, RibbonControlEventArgs e)
@@ -2247,13 +1124,5 @@ namespace WordMan
             }
         }
 
-
     }
 }
-
-
-
-
-
-
-

@@ -3,32 +3,28 @@
   "WorkspaceRootPath": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|d:\\users\\yw\\documents\\vsto develop\\wordman_vsto\\styletools\\typesettingtaskpane.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|solutionrelative:styletools\\typesettingtaskpane.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\mainribbon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|solutionrelative:mainribbon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|d:\\users\\yw\\documents\\vsto develop\\wordman_vsto\\mainribbon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|solutionrelative:mainribbon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|d:\\users\\yw\\documents\\vsto develop\\wordman_vsto\\styletools\\multilevel\\configurationmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|solutionrelative:styletools\\multilevel\\configurationmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|d:\\users\\yw\\documents\\vsto develop\\wordman_vsto\\styletools\\multilevel\\levelstylesettingsform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|solutionrelative:styletools\\multilevel\\levelstylesettingsform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|d:\\users\\yw\\documents\\vsto develop\\wordman_vsto\\imageprocessor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|solutionrelative:imageprocessor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\mainribbon.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|solutionrelative:mainribbon.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|d:\\users\\yw\\documents\\vsto develop\\wordman_vsto\\mainribbon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|solutionrelative:mainribbon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\mainribbon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|solutionrelative:mainribbon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\textprocessor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|solutionrelative:textprocessor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\styletools\\typesettingtaskpane.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7DF77B8D-BA24-4C23-8505-B8FA6F2433E5}|WordMan.csproj|solutionrelative:styletools\\typesettingtaskpane.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -55,65 +51,28 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "TypesettingTaskPane.cs",
-              "DocumentMoniker": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\StyleTools\\TypesettingTaskPane.cs",
-              "RelativeDocumentMoniker": "StyleTools\\TypesettingTaskPane.cs",
-              "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\StyleTools\\TypesettingTaskPane.cs",
-              "RelativeToolTip": "StyleTools\\TypesettingTaskPane.cs",
-              "ViewState": "AgIAAFkBAAAAAAAAAADgv3EBAAA3AAAAAAAAAA==",
+              "Title": "ImageProcessor.cs",
+              "DocumentMoniker": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\ImageProcessor.cs",
+              "RelativeDocumentMoniker": "ImageProcessor.cs",
+              "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\ImageProcessor.cs",
+              "RelativeToolTip": "ImageProcessor.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAIgCAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T17:24:56.834Z",
+              "WhenOpened": "2025-12-01T03:53:00.57Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "LevelStyleSettingsForm.cs [\u8BBE\u8BA1]",
-              "DocumentMoniker": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\StyleTools\\MultiLevel\\LevelStyleSettingsForm.cs",
-              "RelativeDocumentMoniker": "StyleTools\\MultiLevel\\LevelStyleSettingsForm.cs",
-              "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\StyleTools\\MultiLevel\\LevelStyleSettingsForm.cs [\u8BBE\u8BA1]",
-              "RelativeToolTip": "StyleTools\\MultiLevel\\LevelStyleSettingsForm.cs [\u8BBE\u8BA1]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T17:17:52.003Z",
-              "EditorCaption": " [\u8BBE\u8BA1]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ConfigurationManager.cs",
-              "DocumentMoniker": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\StyleTools\\MultiLevel\\ConfigurationManager.cs",
-              "RelativeDocumentMoniker": "StyleTools\\MultiLevel\\ConfigurationManager.cs",
-              "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\StyleTools\\MultiLevel\\ConfigurationManager.cs",
-              "RelativeToolTip": "StyleTools\\MultiLevel\\ConfigurationManager.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAgAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T17:17:15.495Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 1,
               "Title": "MainRibbon.Designer.cs",
               "DocumentMoniker": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\MainRibbon.Designer.cs",
               "RelativeDocumentMoniker": "MainRibbon.Designer.cs",
               "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\MainRibbon.Designer.cs",
               "RelativeToolTip": "MainRibbon.Designer.cs",
-              "ViewState": "AgIAAAsBAAAAAAAAAAAlwDcBAABgAAAAAAAAAA==",
+              "ViewState": "AgIAADkAAAAAAAAAAAAlwFQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T16:39:31.128Z",
+              "WhenOpened": "2025-11-30T03:44:15.162Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "TextProcessor.cs",
-              "DocumentMoniker": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\TextProcessor.cs",
-              "RelativeDocumentMoniker": "TextProcessor.cs",
-              "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\TextProcessor.cs",
-              "RelativeToolTip": "TextProcessor.cs",
-              "ViewState": "AgIAAIwAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T16:18:44.423Z"
             },
             {
               "$type": "Document",
@@ -124,21 +83,44 @@
               "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\MainRibbon.cs [\u8BBE\u8BA1]",
               "RelativeToolTip": "MainRibbon.cs [\u8BBE\u8BA1]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T16:15:05.561Z",
+              "WhenOpened": "2025-11-30T02:28:32.394Z",
               "EditorCaption": " [\u8BBE\u8BA1]"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "MainRibbon.cs",
               "DocumentMoniker": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\MainRibbon.cs",
               "RelativeDocumentMoniker": "MainRibbon.cs",
               "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\MainRibbon.cs",
               "RelativeToolTip": "MainRibbon.cs",
-              "ViewState": "AgIAACwCAAAAAAAAAAAEwDoCAAAMAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAADgvxcAAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-27T13:24:26.232Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-27T13:24:26.232Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "TypesettingTaskPane.cs",
+              "DocumentMoniker": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\StyleTools\\TypesettingTaskPane.cs",
+              "RelativeDocumentMoniker": "StyleTools\\TypesettingTaskPane.cs",
+              "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\StyleTools\\TypesettingTaskPane.cs",
+              "RelativeToolTip": "StyleTools\\TypesettingTaskPane.cs",
+              "ViewState": "AgIAAFkBAAAAAAAAAADgv3EBAAA3AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T17:24:56.834Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "TextProcessor.cs",
+              "DocumentMoniker": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\TextProcessor.cs",
+              "RelativeDocumentMoniker": "TextProcessor.cs",
+              "ToolTip": "D:\\Users\\YW\\Documents\\VSTO Develop\\WordMan_VSTO\\TextProcessor.cs",
+              "RelativeToolTip": "TextProcessor.cs",
+              "ViewState": "AgIAACUBAAAAAAAAAAAQwFYBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T16:18:44.423Z"
             }
           ]
         }

@@ -1,16 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.Office.Tools.Ribbon;
 using Word = Microsoft.Office.Interop.Word;
 
 namespace WordMan
 {
     public class TextProcessor
     {
+        private Word.ApplicationEvents4_WindowSelectionChangeEventHandler formatPainterSelectionChangeHandler;
+        private Microsoft.Office.Tools.Ribbon.RibbonToggleButton currentFormatPainterButton;
         #region 去除断行功能
         public void RemoveLineBreaks()
         {
@@ -76,10 +76,7 @@ namespace WordMan
         #region 去除空行功能
         public void RemoveEmptyLines()
         {
-            // 获取Word应用程序对象
             var app = Globals.ThisAddIn.Application;
-
-            // 获取当前选区
             Word.Range rng = app.Selection.Range;
 
             // 从后往前遍历选区内的所有段落
@@ -114,6 +111,7 @@ namespace WordMan
 
                 app.ScreenUpdating = false;
 
+
                 // 标点符号映射
                 var dict = englishToChinese ? new Dictionary<string, string>
                 {
@@ -123,14 +121,12 @@ namespace WordMan
                 {
                     {"；", ";"}, {"：", ":"}, {"，", ","}, {"。", "."}, {"？", "?"}, {"！", "!"},
                     {"（", "("}, {"）", ")"}, {"【", "["}, {"】", "]"}, {"《", "<"}, {"》", ">"},
-                    {"　", " "}, {"＂", "\""}, {"＇", "'"}, {"＆", "&"}, {"＃", "#"},
+                    {"　", " "}, {"＆", "&"}, {"＃", "#"},
                     {"％", "%"}, {"＊", "*"}, {"＋", "+"}, {"－", "-"}, {"＝", "="},
                     {"＠", "@"}, {"＄", "$"}, {"＾", "^"}, {"＿", "_"}, {"｀", "`"},
                     {"｜", "|"}, {"＼", "\\"}, {"～", "~"}
                 };
 
-                // 使用Word查找替换保持格式
-                // 使用范围副本避免原始范围被修改
                 Word.Range workingRange = rng.Duplicate;
                 foreach (var pair in dict)
                 {
@@ -154,88 +150,6 @@ namespace WordMan
                     }
                 }
 
-                // 英标转中标时处理成对引号
-                if (englishToChinese)
-                {
-                    try
-                    {
-                        // 保存原始范围
-                        int startPos = rng.Start;
-                        int endPos = rng.End;
-
-                        // 先收集所有引号位置，避免在循环中修改文档导致位置变化
-                        List<int> doubleQuotePositions = new List<int>();
-                        List<int> singleQuotePositions = new List<int>();
-
-                        // 收集双引号位置（使用字符串搜索，避免Find的复杂性）
-                        string rangeText = app.ActiveDocument.Range(startPos, endPos).Text;
-                        int currentPos = startPos;
-                        int textIndex = 0;
-                        while (textIndex < rangeText.Length)
-                        {
-                            if (rangeText[textIndex] == '"')
-                            {
-                                doubleQuotePositions.Add(currentPos + textIndex);
-                            }
-                            textIndex++;
-                        }
-
-                        // 收集单引号位置
-                        textIndex = 0;
-                        while (textIndex < rangeText.Length)
-                        {
-                            if (rangeText[textIndex] == '\'')
-                            {
-                                singleQuotePositions.Add(currentPos + textIndex);
-                            }
-                            textIndex++;
-                        }
-
-                        // 倒序替换双引号（避免位置变化影响后续替换）
-                        bool isLeft = true;
-                        for (int i = doubleQuotePositions.Count - 1; i >= 0; i--)
-                        {
-                            try
-                            {
-                                var hitRange = app.ActiveDocument.Range(doubleQuotePositions[i], doubleQuotePositions[i] + 1);
-                                string currentText = hitRange.Text;
-                                if (currentText == "\"")
-                                {
-                                    hitRange.Text = isLeft ? "\u201c" : "\u201d";
-                                    isLeft = !isLeft;
-                                }
-                            }
-                            catch
-                            {
-                                continue;
-                            }
-                        }
-
-                        // 倒序替换单引号
-                        isLeft = true;
-                        for (int i = singleQuotePositions.Count - 1; i >= 0; i--)
-                        {
-                            try
-                            {
-                                var hitRange = app.ActiveDocument.Range(singleQuotePositions[i], singleQuotePositions[i] + 1);
-                                string currentText = hitRange.Text;
-                                if (currentText == "'")
-                                {
-                                    hitRange.Text = isLeft ? "\u2018" : "\u2019";
-                                    isLeft = !isLeft;
-                                }
-                            }
-                            catch
-                            {
-                                continue;
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        // 忽略引号替换失败
-                    }
-                }
             }
             catch (Exception ex)
             {
@@ -272,11 +186,9 @@ namespace WordMan
                 ? selection.Range
                 : selection.Paragraphs[1].Range;
 
-            // 由于Word原生Find不支持复杂正则，所以采用文本查找+偏移定位方式
             Regex regex = new Regex(pattern);
             string text = range.Text;
 
-            // 记录需要插入空格的相对位置（倒序处理，防止位置错乱）
             var matches = regex.Matches(text);
             for (int i = matches.Count - 1; i >= 0; i--)
             {
@@ -288,7 +200,7 @@ namespace WordMan
                 {
                     Word.Range insertRange = range.Duplicate;
                     insertRange.Start = insertRange.End = insertPos;
-                    insertRange.InsertAfter(" "); // 在数字和单位中间插入空格，样式不变
+                    insertRange.InsertAfter(" ");
                 }
             }
         }
@@ -311,20 +223,274 @@ namespace WordMan
             if (selection != null)
             {
                 var paraFormat = selection.ParagraphFormat;
-
-                // 先清除首行缩进（字符和磅）
                 paraFormat.CharacterUnitFirstLineIndent = 0f;
                 paraFormat.FirstLineIndent = 0f;
-
-                // 再清除段落左缩进（字符和磅）
                 paraFormat.CharacterUnitLeftIndent = 0f;
                 paraFormat.LeftIndent = 0f;
-
-                // 可选：右缩进也清零（防止有些文档右缩进影响排版）
                 paraFormat.CharacterUnitRightIndent = 0f;
                 paraFormat.RightIndent = 0f;
             }
         }
         #endregion
+
+        #region 字体替换功能
+        /// <summary>
+        /// 替换指定字体
+        /// </summary>
+        /// <param name="originalFont">原字体名称</param>
+        /// <param name="newFont">新字体名称</param>
+        public void ReplaceFont(string originalFont, string newFont)
+        {
+            var app = Globals.ThisAddIn.Application;
+            var sel = app.Selection;
+            Word.Range rng;
+
+            if (sel != null && sel.Range != null && sel.Range.Start != sel.Range.End)
+            {
+                rng = sel.Range.Duplicate;
+            }
+            else
+            {
+                rng = app.ActiveDocument.Range();
+            }
+
+            rng.Find.ClearFormatting();
+            rng.Find.Replacement.ClearFormatting();
+            rng.Find.Font.Name = originalFont;
+            rng.Find.Replacement.Font.Name = newFont;
+            rng.Find.Text = "";
+            rng.Find.Replacement.Text = "";
+            rng.Find.Forward = true;
+            rng.Find.Wrap = Word.WdFindWrap.wdFindStop;
+            rng.Find.Format = true;
+            rng.Find.MatchCase = false;
+            rng.Find.MatchWholeWord = false;
+            rng.Find.MatchWildcards = false;
+            rng.Find.MatchSoundsLike = false;
+            rng.Find.MatchAllWordForms = false;
+            rng.Find.Execute(Replace: Word.WdReplace.wdReplaceAll);
+        }
+
+        /// <summary>
+        /// 将仿宋GB2312字体替换为仿宋字体
+        /// </summary>
+        public void ReplaceFangSongGB2312ToFangSong()
+        {
+            ReplaceFont("仿宋_GB2312", "仿宋");
+        }
+
+        /// <summary>
+        /// 将楷体GB2312字体替换为楷体字体
+        /// </summary>
+        public void ReplaceKaiTiGB2312ToKaiTi()
+        {
+            ReplaceFont("楷体_GB2312", "楷体");
+        }
+
+        /// <summary>
+        /// 将方正小标宋简体字体替换为黑体字体
+        /// </summary>
+        public void ReplaceFZXBSToHeiTi()
+        {
+            ReplaceFont("方正小标宋简体", "黑体");
+        }
+
+        /// <summary>
+        /// 将数字、英文大小写字母等替换为Times New Roman字体
+        /// </summary>
+        public void ReplaceAllToTimesNewRoman()
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                var sel = app.Selection;
+                Word.Range rng;
+
+                if (sel != null && sel.Range != null && sel.Range.Start != sel.Range.End)
+                {
+                    rng = sel.Range.Duplicate;
+                }
+                else
+                {
+                    rng = app.ActiveDocument.Range();
+                }
+
+                if (rng == null)
+                {
+                    return;
+                }
+
+                app.ScreenUpdating = false;
+
+                rng.Find.ClearFormatting();
+                rng.Find.Replacement.ClearFormatting();
+                rng.Find.Replacement.Font.Name = "Times New Roman";
+                rng.Find.Text = "[0-9A-Za-z]";
+                rng.Find.Replacement.Text = "^&";
+                rng.Find.Forward = true;
+                rng.Find.Wrap = Word.WdFindWrap.wdFindStop;
+                rng.Find.Format = true;
+                rng.Find.MatchCase = false;
+                rng.Find.MatchWholeWord = false;
+                rng.Find.MatchWildcards = true;
+                rng.Find.MatchSoundsLike = false;
+                rng.Find.MatchAllWordForms = false;
+                rng.Find.Execute(Replace: Word.WdReplace.wdReplaceAll);
+            }
+            finally
+            {
+                Globals.ThisAddIn.Application.ScreenUpdating = true;
+            }
+        }
+
+        #endregion
+
+        #region Word 内置功能
+        /// <summary>
+        /// 清除格式
+        /// </summary>
+        public void ClearFormatting()
+        {
+            try
+            {
+                Globals.ThisAddIn.Application.CommandBars.ExecuteMso("ClearFormatting");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"执行清除格式失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 格式刷点击处理
+        /// </summary>
+        /// <param name="toggleButton">格式刷切换按钮</param>
+        public void FormatPainter_Click(Microsoft.Office.Tools.Ribbon.RibbonToggleButton toggleButton)
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                
+                if (toggleButton.Checked)
+                {
+                    // 如果之前有事件处理器，先移除
+                    if (formatPainterSelectionChangeHandler != null)
+                    {
+                        app.WindowSelectionChange -= formatPainterSelectionChangeHandler;
+                    }
+                    
+                    // 激活格式刷
+                    app.CommandBars.ExecuteMso("FormatPainter");
+                    
+                    // 保存当前按钮引用
+                    currentFormatPainterButton = toggleButton;
+                    
+                    // 创建并保存事件处理器
+                    formatPainterSelectionChangeHandler = new Word.ApplicationEvents4_WindowSelectionChangeEventHandler(FormatPainter_SelectionChange);
+                    
+                    // 监听选择变化，当格式应用后自动取消选中
+                    app.WindowSelectionChange += formatPainterSelectionChangeHandler;
+                }
+                else
+                {
+                    // 取消格式刷模式
+                    if (formatPainterSelectionChangeHandler != null)
+                    {
+                        app.WindowSelectionChange -= formatPainterSelectionChangeHandler;
+                        formatPainterSelectionChangeHandler = null;
+                        currentFormatPainterButton = null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"执行格式刷失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 格式刷选择变化处理
+        /// </summary>
+        /// <param name="sel">当前选择</param>
+        private void FormatPainter_SelectionChange(Word.Selection sel)
+        {
+            try
+            {
+                // 当选择变化时，如果格式刷已经应用，自动取消选中
+                if (currentFormatPainterButton != null && currentFormatPainterButton.Checked)
+                {
+                    var app = Globals.ThisAddIn.Application;
+                    // 使用 Timer 延迟检查，避免立即触发
+                    System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
+                    timer.Interval = 200;
+                    timer.Tick += (s, args) =>
+                    {
+                        timer.Stop();
+                        timer.Dispose();
+                        if (currentFormatPainterButton != null && currentFormatPainterButton.Checked)
+                        {
+                            currentFormatPainterButton.Checked = false;
+                            if (formatPainterSelectionChangeHandler != null)
+                            {
+                                app.WindowSelectionChange -= formatPainterSelectionChangeHandler;
+                                formatPainterSelectionChangeHandler = null;
+                                currentFormatPainterButton = null;
+                            }
+                        }
+                    };
+                    timer.Start();
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// 只留文本（粘贴为纯文本或清除格式）
+        /// </summary>
+        public void PasteTextOnly()
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                var sel = app.Selection;
+                
+                // 方法1：优先尝试使用 Word 内置的"只粘贴文本"命令
+                try
+                {
+                    app.CommandBars.ExecuteMso("PasteTextOnly");
+                    return;
+                }
+                catch
+                {
+                    // 如果命令不存在，使用 PasteSpecial 方法
+                }
+                
+                // 方法2：使用 Word 的 PasteSpecial 方法粘贴为纯文本
+                try
+                {
+                    sel.PasteSpecial(DataType: Word.WdPasteDataType.wdPasteText);
+                    return;
+                }
+                catch (Exception pasteEx)
+                {
+                    // 如果 PasteSpecial 也失败，提示用户
+                    if (sel != null && sel.Type != Word.WdSelectionType.wdSelectionIP)
+                    {
+                        // 如果已选中文本，清除格式
+                        sel.ClearFormatting();
+                    }
+                    else
+                    {
+                        MessageBox.Show($"无法执行只粘贴文本操作：{pasteEx.Message}\n\n请确保剪贴板中有文本内容。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"执行只留文本失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        #endregion
+
     }
 }

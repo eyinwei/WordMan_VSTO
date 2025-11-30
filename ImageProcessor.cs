@@ -1,4 +1,8 @@
 using System;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using Word = Microsoft.Office.Interop.Word;
 using Microsoft.Office.Tools.Ribbon;
@@ -450,6 +454,182 @@ namespace WordMan
                        wordShape.PictureFormat != null;
             }
             return false;
+        }
+        #endregion
+
+        #region 导出图片相关方法
+        public void ExportImage_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                var selection = app.Selection;
+
+                Word.InlineShape inlineShape = null;
+                Word.Shape wordShape = null;
+
+                // 检查是否选中了图片
+                if (selection.InlineShapes.Count == 1)
+                {
+                    inlineShape = selection.InlineShapes[1];
+                }
+                else if (selection.ShapeRange.Count == 1)
+                {
+                    wordShape = selection.ShapeRange[1];
+                }
+                else
+                {
+                    MessageBox.Show("请选中一个图片进行导出。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                // 获取当前文档路径作为默认保存位置
+                string defaultPath = GetDefaultExportPath(app);
+                string defaultFileName = GetDefaultFileName(inlineShape, wordShape);
+
+                // 使用保存文件对话框
+                using (SaveFileDialog saveDialog = new SaveFileDialog())
+                {
+                    saveDialog.Filter = "PNG图片|*.png|JPEG图片|*.jpg|所有文件|*.*";
+                    saveDialog.FileName = defaultFileName;
+                    saveDialog.InitialDirectory = defaultPath;
+                    saveDialog.DefaultExt = "png";
+                    saveDialog.AddExtension = true;
+                    saveDialog.Title = "导出图片";
+
+                    if (saveDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        ExportImageToFile(inlineShape, wordShape, saveDialog.FileName);
+                        MessageBox.Show($"图片已成功导出到：\n{saveDialog.FileName}", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"导出图片失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private string GetDefaultExportPath(Word.Application app)
+        {
+            try
+            {
+                var doc = app.ActiveDocument;
+                if (doc != null && !string.IsNullOrEmpty(doc.FullName))
+                {
+                    return Path.GetDirectoryName(doc.FullName);
+                }
+            }
+            catch { }
+            return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        }
+
+        private string GetDefaultFileName(Word.InlineShape inlineShape, Word.Shape wordShape)
+        {
+            string baseName = "导出图片";
+            try
+            {
+                if (inlineShape != null)
+                {
+                    // 尝试从图片的链接路径获取文件名
+                    if (inlineShape.LinkFormat != null && !string.IsNullOrEmpty(inlineShape.LinkFormat.SourceFullName))
+                    {
+                        string originalName = Path.GetFileNameWithoutExtension(inlineShape.LinkFormat.SourceFullName);
+                        if (!string.IsNullOrEmpty(originalName))
+                            baseName = originalName;
+                    }
+                }
+                else if (wordShape != null)
+                {
+                    // 尝试从图片的链接路径获取文件名
+                    if (wordShape.LinkFormat != null && !string.IsNullOrEmpty(wordShape.LinkFormat.SourceFullName))
+                    {
+                        string originalName = Path.GetFileNameWithoutExtension(wordShape.LinkFormat.SourceFullName);
+                        if (!string.IsNullOrEmpty(originalName))
+                            baseName = originalName;
+                    }
+                }
+            }
+            catch { }
+
+            return $"{baseName}_{DateTime.Now:yyyyMMdd_HHmmss}";
+        }
+
+        private void ExportImageToFile(Word.InlineShape inlineShape, Word.Shape wordShape, string filePath)
+        {
+            var app = Globals.ThisAddIn.Application;
+            Image image = null;
+
+            try
+            {
+                // 选择图片并复制到剪贴板
+                if (inlineShape != null)
+                {
+                    inlineShape.Select();
+                }
+                else if (wordShape != null)
+                {
+                    wordShape.Select();
+                }
+
+                app.Selection.Copy();
+
+                // 从剪贴板获取图片
+                if (Clipboard.ContainsImage())
+                {
+                    image = Clipboard.GetImage();
+                }
+                else
+                {
+                    throw new Exception("无法从剪贴板获取图片数据。");
+                }
+
+                // 确定保存格式
+                ImageFormat format = ImageFormat.Png;
+                string extension = Path.GetExtension(filePath).ToLower();
+                if (extension == ".jpg" || extension == ".jpeg")
+                {
+                    format = ImageFormat.Jpeg;
+                }
+                else if (extension == ".bmp")
+                {
+                    format = ImageFormat.Bmp;
+                }
+                else if (extension == ".gif")
+                {
+                    format = ImageFormat.Gif;
+                }
+
+                // 保存图片（高质量）
+                if (format == ImageFormat.Jpeg)
+                {
+                    // JPEG 格式使用高质量编码
+                    var encoder = ImageCodecInfo.GetImageEncoders().FirstOrDefault(c => c.FormatID == ImageFormat.Jpeg.Guid);
+                    if (encoder != null)
+                    {
+                        var encoderParams = new EncoderParameters(1);
+                        encoderParams.Param[0] = new EncoderParameter(Encoder.Quality, 100L);
+                        image.Save(filePath, encoder, encoderParams);
+                    }
+                    else
+                    {
+                        image.Save(filePath, format);
+                    }
+                }
+                else
+                {
+                    // PNG 等格式直接保存（无损）
+                    image.Save(filePath, format);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"导出图片时发生错误：{ex.Message}", ex);
+            }
+            finally
+            {
+                image?.Dispose();
+            }
         }
         #endregion
 

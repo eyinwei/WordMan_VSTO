@@ -301,6 +301,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="CaptionManager.cs" />
+    <Compile Include="DocumentProcessor.cs" />
     <Compile Include="ImageProcessor.cs" />
     <Compile Include="TextProcessor.cs" />
     <Compile Include="TableProcessor.cs" />

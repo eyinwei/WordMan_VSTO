@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿namespace WordMan
+﻿namespace WordMan
 {
     partial class MainRibbon : Microsoft.Office.Tools.Ribbon.RibbonBase
     {
@@ -37,6 +37,9 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainRibbon));
             this.WordMan = this.Factory.CreateRibbonTab();
             this.文本处理 = this.Factory.CreateRibbonGroup();
+            this.清除格式 = this.Factory.CreateRibbonButton();
+            this.格式刷 = this.Factory.CreateRibbonToggleButton();
+            this.只留文本 = this.Factory.CreateRibbonButton();
             this.去除断行 = this.Factory.CreateRibbonButton();
             this.去除空格 = this.Factory.CreateRibbonButton();
             this.去除空行 = this.Factory.CreateRibbonButton();
@@ -49,21 +52,28 @@
             this.separator2 = this.Factory.CreateRibbonSeparator();
             this.希腊字母 = this.Factory.CreateRibbonButton();
             this.常用符号 = this.Factory.CreateRibbonButton();
+            this.separator3 = this.Factory.CreateRibbonSeparator();
+            this.字体替换 = this.Factory.CreateRibbonMenu();
+            this.仿宋替换 = this.Factory.CreateRibbonButton();
+            this.楷体替换 = this.Factory.CreateRibbonButton();
+            this.方正小标宋替换 = this.Factory.CreateRibbonButton();
+            this.数字替换 = this.Factory.CreateRibbonButton();
             this.表格处理 = this.Factory.CreateRibbonGroup();
             this.创建三线表 = this.Factory.CreateRibbonButton();
             this.设为三线 = this.Factory.CreateRibbonButton();
             this.插入N行 = this.Factory.CreateRibbonButton();
             this.插入N列 = this.Factory.CreateRibbonButton();
+            this.重复标题行 = this.Factory.CreateRibbonToggleButton();
             this.题注与引用 = this.Factory.CreateRibbonGroup();
-            this.图片编号 = this.Factory.CreateRibbonSplitButton();
+            this.图编号 = this.Factory.CreateRibbonSplitButton();
             this.图注样式1 = this.Factory.CreateRibbonToggleButton();
             this.图注样式2 = this.Factory.CreateRibbonToggleButton();
             this.图注样式3 = this.Factory.CreateRibbonToggleButton();
-            this.表格编号 = this.Factory.CreateRibbonSplitButton();
+            this.表编号 = this.Factory.CreateRibbonSplitButton();
             this.表注样式1 = this.Factory.CreateRibbonToggleButton();
             this.表注样式2 = this.Factory.CreateRibbonToggleButton();
             this.表注样式3 = this.Factory.CreateRibbonToggleButton();
-            this.公式编号 = this.Factory.CreateRibbonSplitButton();
+            this.式编号 = this.Factory.CreateRibbonSplitButton();
             this.公式样式1 = this.Factory.CreateRibbonToggleButton();
             this.公式样式2 = this.Factory.CreateRibbonToggleButton();
             this.公式样式3 = this.Factory.CreateRibbonToggleButton();
@@ -72,6 +82,7 @@
             this.宽度刷 = this.Factory.CreateRibbonToggleButton();
             this.高度刷 = this.Factory.CreateRibbonToggleButton();
             this.位图化 = this.Factory.CreateRibbonButton();
+            this.导出图片 = this.Factory.CreateRibbonButton();
             this.全文处理 = this.Factory.CreateRibbonGroup();
             this.排版工具 = this.Factory.CreateRibbonButton();
             this.样式设置 = this.Factory.CreateRibbonButton();
@@ -92,6 +103,7 @@
             this.公开 = this.Factory.CreateRibbonButton();
             this.内部 = this.Factory.CreateRibbonButton();
             this.移除密级 = this.Factory.CreateRibbonButton();
+            this.字母替换 = this.Factory.CreateRibbonButton();
             this.WordMan.SuspendLayout();
             this.文本处理.SuspendLayout();
             this.表格处理.SuspendLayout();
@@ -112,6 +124,9 @@
             // 
             // 文本处理
             // 
+            this.文本处理.Items.Add(this.清除格式);
+            this.文本处理.Items.Add(this.格式刷);
+            this.文本处理.Items.Add(this.只留文本);
             this.文本处理.Items.Add(this.去除断行);
             this.文本处理.Items.Add(this.去除空格);
             this.文本处理.Items.Add(this.去除空行);
@@ -124,8 +139,37 @@
             this.文本处理.Items.Add(this.separator2);
             this.文本处理.Items.Add(this.希腊字母);
             this.文本处理.Items.Add(this.常用符号);
+            this.文本处理.Items.Add(this.separator3);
+            this.文本处理.Items.Add(this.字体替换);
             this.文本处理.Label = "文本处理";
             this.文本处理.Name = "文本处理";
+            // 
+            // 清除格式
+            // 
+            this.清除格式.Label = "清除格式";
+            this.清除格式.Name = "清除格式";
+            this.清除格式.OfficeImageId = "ClearFormatting";
+            this.清除格式.ScreenTip = "清除选中文本的所有格式";
+            this.清除格式.ShowImage = true;
+            this.清除格式.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.清除格式_Click);
+            // 
+            // 格式刷
+            // 
+            this.格式刷.Label = "格式刷";
+            this.格式刷.Name = "格式刷";
+            this.格式刷.OfficeImageId = "FormatPainter";
+            this.格式刷.ScreenTip = "复制格式并应用到其他文本";
+            this.格式刷.ShowImage = true;
+            this.格式刷.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.格式刷_Click);
+            // 
+            // 只留文本
+            // 
+            this.只留文本.Label = "只留文本";
+            this.只留文本.Name = "只留文本";
+            this.只留文本.OfficeImageId = "PasteTextOnly";
+            this.只留文本.ScreenTip = "清除格式，只保留纯文本";
+            this.只留文本.ShowImage = true;
+            this.只留文本.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.只留文本_Click);
             // 
             // 去除断行
             // 
@@ -238,12 +282,61 @@
             this.常用符号.ShowImage = true;
             this.常用符号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.常用符号_Click);
             // 
+            // separator3
+            // 
+            this.separator3.Name = "separator3";
+            // 
+            // 字体替换
+            // 
+            this.字体替换.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.字体替换.Image = global::WordMan.Properties.Resources.字体替换;
+            this.字体替换.Items.Add(this.仿宋替换);
+            this.字体替换.Items.Add(this.楷体替换);
+            this.字体替换.Items.Add(this.方正小标宋替换);
+            this.字体替换.Items.Add(this.数字替换);
+            this.字体替换.Label = "字体替换";
+            this.字体替换.Name = "字体替换";
+            this.字体替换.ShowImage = true;
+            // 
+            // 仿宋替换
+            // 
+            this.仿宋替换.Label = "仿宋GB2312→仿宋";
+            this.仿宋替换.Name = "仿宋替换";
+            this.仿宋替换.ScreenTip = "将选中文本或全文中的仿宋GB2312字体替换为仿宋字体";
+            this.仿宋替换.ShowImage = true;
+            this.仿宋替换.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.仿宋替换_Click);
+            // 
+            // 楷体替换
+            // 
+            this.楷体替换.Label = "楷体GB2312→楷体";
+            this.楷体替换.Name = "楷体替换";
+            this.楷体替换.ScreenTip = "将选中文本或全文中的楷体GB2312字体替换为楷体字体";
+            this.楷体替换.ShowImage = true;
+            this.楷体替换.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.楷体替换_Click);
+            // 
+            // 方正小标宋替换
+            // 
+            this.方正小标宋替换.Label = "方正小标宋→黑体";
+            this.方正小标宋替换.Name = "方正小标宋替换";
+            this.方正小标宋替换.ScreenTip = "将选中文本或全文中的方正小标宋字体替换为黑体字体";
+            this.方正小标宋替换.ShowImage = true;
+            this.方正小标宋替换.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.方正小标宋替换_Click);
+            // 
+            // 数字替换
+            // 
+            this.数字替换.Label = "数字字母→Times New Roman";
+            this.数字替换.Name = "数字替换";
+            this.数字替换.ScreenTip = "将选中文本或全文中的数字、英文及希腊字母替换为Times New Roman字体";
+            this.数字替换.ShowImage = true;
+            this.数字替换.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.数字替换_Click);
+            // 
             // 表格处理
             // 
             this.表格处理.Items.Add(this.创建三线表);
             this.表格处理.Items.Add(this.设为三线);
             this.表格处理.Items.Add(this.插入N行);
             this.表格处理.Items.Add(this.插入N列);
+            this.表格处理.Items.Add(this.重复标题行);
             this.表格处理.Label = "表格处理";
             this.表格处理.Name = "表格处理";
             // 
@@ -288,28 +381,38 @@
             this.插入N列.ShowImage = true;
             this.插入N列.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.插入N列_Click);
             // 
+            // 重复标题行
+            // 
+            this.重复标题行.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.重复标题行.Label = "重复标题行";
+            this.重复标题行.Name = "重复标题行";
+            this.重复标题行.OfficeImageId = "TableRepeatHeaderRows";
+            this.重复标题行.ScreenTip = "在表格的每一页顶部重复标题行";
+            this.重复标题行.ShowImage = true;
+            this.重复标题行.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.重复标题行_Click);
+            // 
             // 题注与引用
             // 
-            this.题注与引用.Items.Add(this.图片编号);
-            this.题注与引用.Items.Add(this.表格编号);
-            this.题注与引用.Items.Add(this.公式编号);
+            this.题注与引用.Items.Add(this.图编号);
+            this.题注与引用.Items.Add(this.表编号);
+            this.题注与引用.Items.Add(this.式编号);
             this.题注与引用.Items.Add(this.交叉引用);
             this.题注与引用.Label = "题注与引用";
             this.题注与引用.Name = "题注与引用";
             // 
-            // 图片编号
+            // 图编号
             // 
-            this.图片编号.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.图片编号.Image = global::WordMan.Properties.Resources.图片;
-            this.图片编号.Items.Add(this.图注样式1);
-            this.图片编号.Items.Add(this.图注样式2);
-            this.图片编号.Items.Add(this.图注样式3);
-            this.图片编号.Label = "图片编号";
-            this.图片编号.Name = "图片编号";
-            this.图片编号.OfficeImageId = "ContentControlPicture";
-            this.图片编号.ScreenTip = "在选中图片下方插入带编号的图题";
-            this.图片编号.SuperTip = "选中图片或将光标放于图片后";
-            this.图片编号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.图片编号_Click);
+            this.图编号.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.图编号.Image = global::WordMan.Properties.Resources.图片;
+            this.图编号.Items.Add(this.图注样式1);
+            this.图编号.Items.Add(this.图注样式2);
+            this.图编号.Items.Add(this.图注样式3);
+            this.图编号.Label = "图编号";
+            this.图编号.Name = "图编号";
+            this.图编号.OfficeImageId = "ContentControlPicture";
+            this.图编号.ScreenTip = "在选中图片下方插入带编号的图题";
+            this.图编号.SuperTip = "选中图片或将光标放于图片后";
+            this.图编号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.图编号_Click);
             // 
             // 图注样式1
             // 
@@ -318,7 +421,7 @@
             this.图注样式1.Label = "图 1  ";
             this.图注样式1.Name = "图注样式1";
             this.图注样式1.OfficeImageId = "GroupOrganizationChartStyleClassic";
-            this.图注样式1.ScreenTip = "设置图片编号格式为\'图 1\'样式";
+            this.图注样式1.ScreenTip = "设置图编号格式为\'图 1\'样式";
             this.图注样式1.ShowImage = true;
             this.图注样式1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.图注样式1_Click);
             // 
@@ -328,7 +431,7 @@
             this.图注样式2.Label = "图 1-1";
             this.图注样式2.Name = "图注样式2";
             this.图注样式2.OfficeImageId = "GroupOrganizationChartStyleClassic";
-            this.图注样式2.ScreenTip = "设置图片编号格式为\'图 1-1\'样式，第一个数字来源于一级标题编号";
+            this.图注样式2.ScreenTip = "设置图编号格式为\'图 1-1\'样式，第一个数字来源于一级标题编号";
             this.图注样式2.ShowImage = true;
             this.图注样式2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.图注样式2_Click);
             // 
@@ -338,66 +441,66 @@
             this.图注样式3.Label = "图 1.1";
             this.图注样式3.Name = "图注样式3";
             this.图注样式3.OfficeImageId = "GroupOrganizationChartStyleClassic";
-            this.图注样式3.ScreenTip = "设置图片编号格式为\'图 1.1\'样式，第一个数字来源于一级标题编号";
+            this.图注样式3.ScreenTip = "设置图编号格式为\'图 1.1\'样式，第一个数字来源于一级标题编号";
             this.图注样式3.ShowImage = true;
             this.图注样式3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.图注样式3_Click);
             // 
-            // 表格编号
+            // 表编号
             // 
-            this.表格编号.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.表格编号.Image = global::WordMan.Properties.Resources.表前插入行;
-            this.表格编号.Items.Add(this.表注样式1);
-            this.表格编号.Items.Add(this.表注样式2);
-            this.表格编号.Items.Add(this.表注样式3);
-            this.表格编号.Label = "表格编号";
-            this.表格编号.Name = "表格编号";
-            this.表格编号.OfficeImageId = "TableDesign";
-            this.表格编号.ScreenTip = "在选中表格上方插入带编号的表题";
-            this.表格编号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.表格编号_Click);
+            this.表编号.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.表编号.Image = global::WordMan.Properties.Resources.表前插入行;
+            this.表编号.Items.Add(this.表注样式1);
+            this.表编号.Items.Add(this.表注样式2);
+            this.表编号.Items.Add(this.表注样式3);
+            this.表编号.Label = "表编号";
+            this.表编号.Name = "表编号";
+            this.表编号.OfficeImageId = "TableDesign";
+            this.表编号.ScreenTip = "在选中表格上方插入带编号的表题";
+            this.表编号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.表编号_Click);
             // 
             // 表注样式1
             // 
             this.表注样式1.Checked = true;
-            this.表注样式1.Image = global::WordMan.Properties.Resources.表格编号;
+            this.表注样式1.Image = global::WordMan.Properties.Resources.表编号;
             this.表注样式1.Label = "表 1  ";
             this.表注样式1.Name = "表注样式1";
             this.表注样式1.OfficeImageId = "AdpDiagramNewTable";
-            this.表注样式1.ScreenTip = "设置表格编号格式为\'表 1\'样式";
+            this.表注样式1.ScreenTip = "设置表编号格式为\'表 1\'样式";
             this.表注样式1.ShowImage = true;
             this.表注样式1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.表注样式1_Click);
             // 
             // 表注样式2
             // 
-            this.表注样式2.Image = global::WordMan.Properties.Resources.表格编号;
+            this.表注样式2.Image = global::WordMan.Properties.Resources.表编号;
             this.表注样式2.Label = "表 1-1";
             this.表注样式2.Name = "表注样式2";
             this.表注样式2.OfficeImageId = "AdpDiagramNewTable";
-            this.表注样式2.ScreenTip = "设置表格编号格式为\'表 1-1\'样式";
+            this.表注样式2.ScreenTip = "设置表编号格式为\'表 1-1\'样式";
             this.表注样式2.ShowImage = true;
             this.表注样式2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.表注样式2_Click);
             // 
             // 表注样式3
             // 
-            this.表注样式3.Image = global::WordMan.Properties.Resources.表格编号;
+            this.表注样式3.Image = global::WordMan.Properties.Resources.表编号;
             this.表注样式3.Label = "表 1.1";
             this.表注样式3.Name = "表注样式3";
             this.表注样式3.OfficeImageId = "AdpDiagramNewTable";
-            this.表注样式3.ScreenTip = "设置表格编号格式为\'表 1.1\'样式";
+            this.表注样式3.ScreenTip = "设置表编号格式为\'表 1.1\'样式";
             this.表注样式3.ShowImage = true;
             this.表注样式3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.表注样式3_Click);
             // 
-            // 公式编号
+            // 式编号
             // 
-            this.公式编号.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.公式编号.Image = global::WordMan.Properties.Resources.公式;
-            this.公式编号.Items.Add(this.公式样式1);
-            this.公式编号.Items.Add(this.公式样式2);
-            this.公式编号.Items.Add(this.公式样式3);
-            this.公式编号.Label = "公式编号";
-            this.公式编号.Name = "公式编号";
-            this.公式编号.OfficeImageId = "FormulaEvaluate";
-            this.公式编号.ScreenTip = "对公式所在行进行编号（使用表格法）";
-            this.公式编号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.公式编号_Click);
+            this.式编号.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.式编号.Image = global::WordMan.Properties.Resources.公式;
+            this.式编号.Items.Add(this.公式样式1);
+            this.式编号.Items.Add(this.公式样式2);
+            this.式编号.Items.Add(this.公式样式3);
+            this.式编号.Label = "式编号";
+            this.式编号.Name = "式编号";
+            this.式编号.OfficeImageId = "FormulaEvaluate";
+            this.式编号.ScreenTip = "对公式所在行进行编号（使用表格法）";
+            this.式编号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.式编号_Click);
             // 
             // 公式样式1
             // 
@@ -405,7 +508,7 @@
             this.公式样式1.Label = "（ 1 ）";
             this.公式样式1.Name = "公式样式1";
             this.公式样式1.OfficeImageId = "Numbering";
-            this.公式样式1.ScreenTip = "设置公式编号格式为\'(1)\'样式";
+            this.公式样式1.ScreenTip = "设置式编号格式为\'(1)\'样式";
             this.公式样式1.ShowImage = true;
             this.公式样式1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.公式样式1_Click);
             // 
@@ -414,7 +517,7 @@
             this.公式样式2.Label = "（1-1）";
             this.公式样式2.Name = "公式样式2";
             this.公式样式2.OfficeImageId = "Numbering";
-            this.公式样式2.ScreenTip = "设置公式编号格式为\'(1-1)\'样式，第一个数字来源于一级标题编号";
+            this.公式样式2.ScreenTip = "设置式编号格式为\'(1-1)\'样式，第一个数字来源于一级标题编号";
             this.公式样式2.ShowImage = true;
             this.公式样式2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.公式样式2_Click);
             // 
@@ -423,7 +526,7 @@
             this.公式样式3.Label = "（1.1）";
             this.公式样式3.Name = "公式样式3";
             this.公式样式3.OfficeImageId = "Numbering";
-            this.公式样式3.ScreenTip = "设置公式编号格式为\'(1.1)\'样式，第一个数字来源于一级标题编号";
+            this.公式样式3.ScreenTip = "设置式编号格式为\'(1.1)\'样式，第一个数字来源于一级标题编号";
             this.公式样式3.ShowImage = true;
             this.公式样式3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.公式样式3_Click);
             // 
@@ -442,6 +545,7 @@
             this.图片处理.Items.Add(this.宽度刷);
             this.图片处理.Items.Add(this.高度刷);
             this.图片处理.Items.Add(this.位图化);
+            this.图片处理.Items.Add(this.导出图片);
             this.图片处理.Label = "图片处理";
             this.图片处理.Name = "图片处理";
             // 
@@ -474,6 +578,17 @@
             this.位图化.ScreenTip = "将选中图形转换为位图";
             this.位图化.ShowImage = true;
             this.位图化.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.位图化_Click);
+            // 
+            // 导出图片
+            // 
+            this.导出图片.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.导出图片.Image = global::WordMan.Properties.Resources.照片管理;
+            this.导出图片.Label = "导出图片";
+            this.导出图片.Name = "导出图片";
+            this.导出图片.OfficeImageId = "FileSaveAs";
+            this.导出图片.ScreenTip = "将选中的图片高清导出到指定位置";
+            this.导出图片.ShowImage = true;
+            this.导出图片.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.导出图片_Click);
             // 
             // 全文处理
             // 
@@ -653,6 +768,11 @@
             this.移除密级.ShowImage = true;
             this.移除密级.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.移除密级_Click);
             // 
+            // 字母替换
+            // 
+            this.字母替换.Label = "";
+            this.字母替换.Name = "字母替换";
+            // 
             // MainRibbon
             // 
             this.Name = "MainRibbon";
@@ -678,6 +798,9 @@
 
         private Microsoft.Office.Tools.Ribbon.RibbonTab WordMan;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup 文本处理;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 清除格式;
+        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 格式刷;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 只留文本;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 去除断行;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 去除空格;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 去除空行;
@@ -695,23 +818,25 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 设为三线;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 插入N行;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 插入N列;
-        internal Microsoft.Office.Tools.Ribbon.RibbonSplitButton 表格编号;
+        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 重复标题行;
+        internal Microsoft.Office.Tools.Ribbon.RibbonSplitButton 表编号;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 表注样式1;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 表注样式2;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 表注样式3;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup 题注与引用;
-        internal Microsoft.Office.Tools.Ribbon.RibbonSplitButton 公式编号;
+        internal Microsoft.Office.Tools.Ribbon.RibbonSplitButton 式编号;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 公式样式1;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 公式样式2;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 公式样式3;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup 图片处理;
-        internal Microsoft.Office.Tools.Ribbon.RibbonSplitButton 图片编号;
+        internal Microsoft.Office.Tools.Ribbon.RibbonSplitButton 图编号;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 图注样式1;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 图注样式2;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 图注样式3;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 宽度刷;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 高度刷;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 位图化;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 导出图片;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup 全文处理;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton 交叉引用;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 排版工具;
@@ -733,6 +858,13 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 公开;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 内部;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 移除密级;
+        internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator3;
+        internal Microsoft.Office.Tools.Ribbon.RibbonMenu 字体替换;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 仿宋替换;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 楷体替换;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 方正小标宋替换;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 数字替换;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton 字母替换;
     }
 
     partial class ThisRibbonCollection

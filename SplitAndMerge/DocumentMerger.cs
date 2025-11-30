@@ -134,27 +134,34 @@ namespace WordMan.SplitAndMerge
 
         public void ShowMergeDialog()
         {
-            var openFileDialog = new OpenFileDialog
+            try
             {
-                Title = "选择要合并的Word文档",
-                Filter = "Word文档 (*.docx)|*.docx|Word文档 (*.doc)|*.doc|所有文件 (*.*)|*.*",
-                Multiselect = true
-            };
+                var openFileDialog = new OpenFileDialog
+                {
+                    Title = "选择要合并的Word文档",
+                    Filter = "Word文档 (*.docx)|*.docx|Word文档 (*.doc)|*.doc|所有文件 (*.*)|*.*",
+                    Multiselect = true
+                };
 
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    var filePaths = ValidateFiles(openFileDialog.FileNames.ToList());
+                    if (filePaths.Count < 2)
+                    {
+                        MessageBox.Show("请至少选择2个有效文档进行合并。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
+                    }
+
+                    var mergeForm = new DocumentMergeForm(filePaths);
+                    if (mergeForm.ShowDialog() == DialogResult.OK)
+                    {
+                        MergeDocuments(mergeForm.SelectedFiles, mergeForm.MergeOptions);
+                    }
+                }
+            }
+            catch (Exception ex)
             {
-                var filePaths = ValidateFiles(openFileDialog.FileNames.ToList());
-                if (filePaths.Count < 2)
-                {
-                    MessageBox.Show("请至少选择2个有效文档进行合并。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-                var mergeForm = new DocumentMergeForm(filePaths);
-                if (mergeForm.ShowDialog() == DialogResult.OK)
-                {
-                    MergeDocuments(mergeForm.SelectedFiles, mergeForm.MergeOptions);
-                }
+                MessageBox.Show($"文档合并失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

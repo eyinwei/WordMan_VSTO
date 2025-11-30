@@ -233,6 +233,16 @@ namespace WordMan.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        public static System.Drawing.Bitmap 字体替换 {
+            get {
+                object obj = ResourceManager.GetObject("字体替换", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         public static System.Drawing.Bitmap 希腊 {
             get {
                 object obj = ResourceManager.GetObject("希腊", resourceCulture);
@@ -313,9 +323,9 @@ namespace WordMan.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
-        public static System.Drawing.Bitmap 表格编号 {
+        public static System.Drawing.Bitmap 表编号 {
             get {
-                object obj = ResourceManager.GetObject("表格编号", resourceCulture);
+                object obj = ResourceManager.GetObject("表编号", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -30,23 +30,29 @@ namespace WordMan
         /// </summary>
         public void ShowSplitDialog()
         {
-
-            var openFileDialog = new OpenFileDialog
+            try
             {
-                Title = "选择要拆分的Word文档",
-                Filter = "Word文档 (*.docx)|*.docx|Word文档 (*.doc)|*.doc|所有文件 (*.*)|*.*",
-                Multiselect = false
-            };
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                var filePath = openFileDialog.FileName;
-                var result = MessageBox.Show("确认进行逐页拆分？", "文档拆分", 
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (result == DialogResult.Yes)
+                var openFileDialog = new OpenFileDialog
                 {
-                    ExecuteSplit(filePath);
+                    Title = "选择要拆分的Word文档",
+                    Filter = "Word文档 (*.docx)|*.docx|Word文档 (*.doc)|*.doc|所有文件 (*.*)|*.*",
+                    Multiselect = false
+                };
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    var filePath = openFileDialog.FileName;
+                    var result = MessageBox.Show("确认进行逐页拆分？", "文档拆分", 
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result == DialogResult.Yes)
+                    {
+                        ExecuteSplit(filePath);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"文档拆分失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

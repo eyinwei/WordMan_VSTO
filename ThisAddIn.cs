@@ -13,10 +13,49 @@ namespace WordMan
     {
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
+            // 监听选择变化，自动更新重复标题行按钮状态
+            Application.WindowSelectionChange += Application_WindowSelectionChange;
+        }
+
+        private void Application_WindowSelectionChange(Word.Selection Sel)
+        {
+            try
+            {
+                // 无论是否在表格中，都更新重复标题行按钮状态
+                // 当光标移出表格时，按钮状态会自动更新为未选中
+                var ribbon = Globals.Ribbons.GetRibbon<MainRibbon>();
+                if (ribbon != null)
+                {
+                    ribbon.UpdateRepeatHeaderRowsButtonState();
+                }
+            }
+            catch
+            {
+                // 忽略错误，避免影响正常使用
+            }
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
+            // 清理资源
+            try
+            {
+                // 移除事件监听
+                if (Application != null)
+                {
+                    Application.WindowSelectionChange -= Application_WindowSelectionChange;
+                }
+
+                var ribbon = Globals.Ribbons.GetRibbon<MainRibbon>();
+                if (ribbon != null)
+                {
+                    ribbon.Cleanup();
+                }
+            }
+            catch
+            {
+                // 忽略清理时的错误，避免影响正常关闭
+            }
         }
 
         #region VSTO 生成的代码

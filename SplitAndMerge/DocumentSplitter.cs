@@ -95,7 +95,12 @@ namespace WordMan
             for (int pageNumber = 1; pageNumber <= totalPages; pageNumber++)
             {
                 SplitSinglePageWithRetry(document, pageNumber, outputFolder, baseFileName);
-                if (pageNumber % 3 == 0) { GC.Collect(); GC.WaitForPendingFinalizers(); GC.Collect(); }
+                // 每处理5页进行一次垃圾回收，减少内存占用
+                if (pageNumber % 5 == 0)
+                {
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                }
             }
 
             ShowSplitResult(totalPages, outputFolder);
@@ -108,7 +113,23 @@ namespace WordMan
         /// </summary>
         private void ShowSplitResult(int fileCount, string outputFolder)
         {
-            MessageBox.Show($"文档已成功拆分为 {fileCount} 个文件，保存在：{outputFolder}", "拆分完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var result = MessageBox.Show(
+                $"文档已成功拆分为 {fileCount} 个文件，保存在：\n{outputFolder}\n\n是否打开文件夹？",
+                "拆分完成",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Information);
+            
+            if (result == DialogResult.Yes)
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start("explorer.exe", outputFolder);
+                }
+                catch
+                {
+                    // 忽略打开文件夹的错误
+                }
+            }
         }
 
 
@@ -361,12 +382,15 @@ namespace WordMan
         {
             try
             {
-                if (comObject != null)
+                if (comObject != null && Marshal.IsComObject(comObject))
                 {
                     Marshal.ReleaseComObject(comObject);
                 }
             }
-            catch { }
+            catch
+            {
+                // 忽略释放错误，避免影响主流程
+            }
             finally
             {
                 comObject = null;

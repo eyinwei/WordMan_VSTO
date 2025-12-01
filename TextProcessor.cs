@@ -49,46 +49,76 @@ namespace WordMan
         #region 去除空格功能
         public void RemoveSpaces()
         {
-            var app = Globals.ThisAddIn.Application;
-            var sel = app.Selection;
-            Word.Range rng;
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                var sel = app.Selection;
+                if (sel == null)
+                {
+                    MessageBox.Show("未检测到可操作的文本或段落。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
 
-            if (sel != null && sel.Range != null &&
-                !string.IsNullOrWhiteSpace(sel.Range.Text) &&
-                sel.Range.Start != sel.Range.End)
-            {
-                rng = sel.Range;
+                Word.Range rng;
+
+                if (sel.Range != null &&
+                    !string.IsNullOrWhiteSpace(sel.Range.Text) &&
+                    sel.Range.Start != sel.Range.End)
+                {
+                    rng = sel.Range;
+                }
+                else if (sel.Paragraphs != null && sel.Paragraphs.Count > 0)
+                {
+                    rng = sel.Paragraphs[1].Range;
+                }
+                else
+                {
+                    MessageBox.Show("未检测到可操作的文本或段落。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                rng.Find.Execute(" ", ReplaceWith: "", Replace: Word.WdReplace.wdReplaceAll);
+                rng.Find.Execute("　", ReplaceWith: "", Replace: Word.WdReplace.wdReplaceAll);
             }
-            else if (sel != null && sel.Paragraphs != null && sel.Paragraphs.Count > 0)
+            catch (Exception ex)
             {
-                rng = sel.Paragraphs[1].Range;
+                MessageBox.Show($"去除空格失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            else
-            {
-                MessageBox.Show("未检测到可操作的文本或段落。");
-                return;
-            }
-            rng.Find.Execute(" ", ReplaceWith: "", Replace: Word.WdReplace.wdReplaceAll);
-            rng.Find.Execute("　", ReplaceWith: "", Replace: Word.WdReplace.wdReplaceAll);
         }
         #endregion
 
         #region 去除空行功能
         public void RemoveEmptyLines()
         {
-            var app = Globals.ThisAddIn.Application;
-            Word.Range rng = app.Selection.Range;
-
-            // 从后往前遍历选区内的所有段落
-            for (int i = rng.Paragraphs.Count; i >= 1; i--)
+            try
             {
-                Word.Paragraph para = rng.Paragraphs[i];
-                // 去除回车、换行、空格、全角空格、Tab等
-                string text = para.Range.Text.Trim('\r', '\n', ' ', '\t', '　');
-                if (string.IsNullOrEmpty(text))
+                var app = Globals.ThisAddIn.Application;
+                var sel = app.Selection;
+                if (sel == null || sel.Range == null)
                 {
-                    para.Range.Delete();
+                    MessageBox.Show("未检测到可操作的文本。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
                 }
+
+                Word.Range rng = sel.Range;
+
+                // 从后往前遍历选区内的所有段落
+                for (int i = rng.Paragraphs.Count; i >= 1; i--)
+                {
+                    Word.Paragraph para = rng.Paragraphs[i];
+                    if (para == null || para.Range == null)
+                        continue;
+
+                    // 去除回车、换行、空格、全角空格、Tab等
+                    string text = para.Range.Text.Trim('\r', '\n', ' ', '\t', '　');
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        para.Range.Delete();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"去除空行失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         #endregion
@@ -105,7 +135,7 @@ namespace WordMan
 
                 if (string.IsNullOrWhiteSpace(rng.Text))
                 {
-                    MessageBox.Show("未检测到可操作的文本或段落。");
+                    MessageBox.Show("未检测到可操作的文本或段落。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 

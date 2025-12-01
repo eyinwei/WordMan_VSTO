@@ -31,10 +31,17 @@ namespace WordMan
                 throw new ArgumentException("文件路径不能为空", "filePath");
             }
             
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(T));
-            using (StreamWriter textWriter = new StreamWriter(filePath, false, System.Text.Encoding.UTF8))
+            try
             {
-                xmlSerializer.Serialize(textWriter, obj);
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(T));
+                using (StreamWriter textWriter = new StreamWriter(filePath, false, System.Text.Encoding.UTF8))
+                {
+                    xmlSerializer.Serialize(textWriter, obj);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"序列化对象到XML文件失败：{ex.Message}", ex);
             }
         }
 
@@ -55,10 +62,17 @@ namespace WordMan
                 throw new ArgumentException("文件路径不能为空", "filePath");
             }
             
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<T>));
-            using (StreamWriter textWriter = new StreamWriter(filePath, false, System.Text.Encoding.UTF8))
+            try
             {
-                xmlSerializer.Serialize(textWriter, list);
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<T>));
+                using (StreamWriter textWriter = new StreamWriter(filePath, false, System.Text.Encoding.UTF8))
+                {
+                    xmlSerializer.Serialize(textWriter, list);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"序列化列表到XML文件失败：{ex.Message}", ex);
             }
         }
 
@@ -70,15 +84,31 @@ namespace WordMan
         /// <returns>反序列化后的对象</returns>
         public static T DeserializeFromXml<T>(string filePath) where T : class
         {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                throw new ArgumentException("文件路径不能为空", "filePath");
+            }
             if (!File.Exists(filePath))
             {
                 throw new FileNotFoundException("找不到指定的文件", filePath);
             }
             
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(T));
-            using (StreamReader textReader = new StreamReader(filePath, System.Text.Encoding.UTF8))
+            try
             {
-                return xmlSerializer.Deserialize(textReader) as T;
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(T));
+                using (StreamReader textReader = new StreamReader(filePath, System.Text.Encoding.UTF8))
+                {
+                    var result = xmlSerializer.Deserialize(textReader) as T;
+                    if (result == null)
+                    {
+                        throw new InvalidOperationException("反序列化结果为空");
+                    }
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"从XML文件反序列化对象失败：{ex.Message}", ex);
             }
         }
 
@@ -90,15 +120,27 @@ namespace WordMan
         /// <returns>反序列化后的列表</returns>
         public static List<T> DeserializeListFromXml<T>(string filePath) where T : class
         {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                throw new ArgumentException("文件路径不能为空", "filePath");
+            }
             if (!File.Exists(filePath))
             {
                 throw new FileNotFoundException("找不到指定的文件", filePath);
             }
             
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<T>));
-            using (StreamReader textReader = new StreamReader(filePath, System.Text.Encoding.UTF8))
+            try
             {
-                return xmlSerializer.Deserialize(textReader) as List<T>;
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(List<T>));
+                using (StreamReader textReader = new StreamReader(filePath, System.Text.Encoding.UTF8))
+                {
+                    var result = xmlSerializer.Deserialize(textReader) as List<T>;
+                    return result ?? new List<T>();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"从XML文件反序列化列表失败：{ex.Message}", ex);
             }
         }
 

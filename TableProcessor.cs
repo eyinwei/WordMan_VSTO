@@ -13,9 +13,35 @@ namespace WordMan
         /// </summary>
         public void CreateThreeLineTable()
         {
-            var sel = Globals.ThisAddIn.Application.Selection;
-            Word.Table table = sel.Tables.Add(sel.Range, 3, 3);
-            table.Select();
+            try
+            {
+                var sel = Globals.ThisAddIn.Application.Selection;
+                if (sel == null || sel.Range == null)
+                {
+                    MessageBox.Show("无法创建表格，请检查文档状态。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                Word.Table table = sel.Tables.Add(sel.Range, 3, 3);
+                table.Select();
+                SetThreeLineTable(table);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"创建三线表失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 将当前选中的表格设为三线表格式
+        /// </summary>
+        public void SetCurrentTableToThreeLine()
+        {
+            var app = Globals.ThisAddIn.Application;
+            var sel = app.Selection;
+            if (sel == null || sel.Tables.Count == 0)
+                return;
+
+            Word.Table table = sel.Tables[1];
             SetThreeLineTable(table);
         }
 
@@ -126,7 +152,7 @@ namespace WordMan
             }
             catch (Exception ex)
             {
-                MessageBox.Show("插入失败：" + ex.Message, "错误");
+                MessageBox.Show("插入失败：" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -164,7 +190,7 @@ namespace WordMan
             }
             catch (Exception ex)
             {
-                MessageBox.Show("插入失败：" + ex.Message, "错误");
+                MessageBox.Show("插入失败：" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -173,7 +199,7 @@ namespace WordMan
         {
             if (sel == null || sel.Tables.Count == 0)
             {
-                MessageBox.Show("请将光标放在表格内！", "提示");
+                MessageBox.Show("请将光标放在表格内！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return false;
             }
             return true;
@@ -187,7 +213,7 @@ namespace WordMan
 
             if (!int.TryParse(input, out int n) || n <= 0)
             {
-                MessageBox.Show("请输入有效的正整数！", "提示");
+                MessageBox.Show("请输入有效的正整数！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return 0;
             }
             return n;
@@ -218,10 +244,9 @@ namespace WordMan
         #endregion
 
         /// <summary>
-        /// 重复标题行
+        /// 重复标题行 - 执行切换命令
         /// </summary>
-        /// <param name="toggleButton">重复标题行切换按钮</param>
-        public void RepeatHeaderRows(Microsoft.Office.Tools.Ribbon.RibbonToggleButton toggleButton)
+        public void RepeatHeaderRows()
         {
             try
             {
@@ -230,57 +255,40 @@ namespace WordMan
                 
                 if (sel == null || sel.Tables.Count == 0)
                 {
-                    toggleButton.Checked = false;
                     MessageBox.Show("请将光标放在表格中。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
                 
-                Word.Table table = sel.Tables[1];
-                
-                // 检查当前状态
-                bool currentState = false;
-                try
-                {
-                    // 检查第一行是否设置为标题行
-                    currentState = table.Rows[1].HeadingFormat != 0;
-                }
-                catch
-                {
-                    currentState = false;
-                }
-                
-                // 如果当前状态与按钮状态不一致，执行切换
-                if (currentState != toggleButton.Checked)
-                {
-                    // 执行重复标题行命令（这会切换状态）
-                    app.CommandBars.ExecuteMso("TableRepeatHeaderRows");
-                    
-                    // 延迟更新按钮状态
-                    System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
-                    timer.Interval = 100;
-                    timer.Tick += (s, args) =>
-                    {
-                        timer.Stop();
-                        timer.Dispose();
-                        try
-                        {
-                            bool newState = table.Rows[1].HeadingFormat != 0;
-                            toggleButton.Checked = newState;
-                        }
-                        catch { }
-                    };
-                    timer.Start();
-                }
-                else
-                {
-                    // 状态已经一致，直接执行命令切换
-                    app.CommandBars.ExecuteMso("TableRepeatHeaderRows");
-                    toggleButton.Checked = !toggleButton.Checked;
-                }
+                // 直接执行Word内置命令，Word会自动管理按钮状态
+                app.CommandBars.ExecuteMso("TableRepeatHeaderRows");
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"执行重复标题行失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 获取当前表格的重复标题行状态
+        /// </summary>
+        public bool GetRepeatHeaderRowsState()
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                var sel = app.Selection;
+                
+                if (sel == null || sel.Tables.Count == 0)
+                    return false;
+                
+                Word.Table table = sel.Tables[1];
+                
+                // 检查第一行是否设置为标题行
+                return table.Rows[1].HeadingFormat != 0;
+            }
+            catch
+            {
+                return false;
             }
         }
     }

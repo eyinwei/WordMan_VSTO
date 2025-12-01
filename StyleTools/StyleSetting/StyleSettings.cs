@@ -11,6 +11,7 @@ using WordMan;
 using WordMan.MultiLevel;
 using Color = System.Drawing.Color;
 using Point = System.Drawing.Point;
+using Rectangle = System.Drawing.Rectangle;
 using Font = System.Drawing.Font;
 using CheckBox = System.Windows.Forms.CheckBox;
 using Word = Microsoft.Office.Interop.Word;
@@ -28,6 +29,7 @@ namespace WordMan
 
         private BindingList<string> StyleNames;
         private readonly List<CustomStyle> Styles = new List<CustomStyle>(17);
+        private readonly Dictionary<string, CustomStyle> _styleNameMap = new Dictionary<string, CustomStyle>(); // 样式名称到样式的映射，提升查找性能
         private bool _isLoadingStyle = false;
         private bool _isLoadingPresetStyle = false; // 标志：是否正在加载样式到控件
         private int _currentStyleIndex = -1; // 当前选中的样式索引
@@ -52,6 +54,9 @@ namespace WordMan
         /// </summary>
         private void SetComboBoxSelection(StandardComboBox comboBox, string value, IEnumerable<string> items)
         {
+            if (comboBox == null || items == null)
+                return;
+
             var itemList = items.ToList();
             int selectedIndex = itemList.IndexOf(value);
 
@@ -65,17 +70,12 @@ namespace WordMan
                 if (comboBox.DropDownStyle == ComboBoxStyle.DropDown)
                 {
                     // 临时禁用TextChanged事件，避免在加载样式时触发保存
-                    if (comboBox.Name == "Cmb_LineSpacing")
+                    EventHandler textChangedHandler = GetTextChangedHandler(comboBox.Name);
+                    if (textChangedHandler != null)
                     {
-                        comboBox.TextChanged -= Cmb_LineSpacing_TextChanged;
+                        comboBox.TextChanged -= textChangedHandler;
                         comboBox.Text = value;
-                        comboBox.TextChanged += Cmb_LineSpacing_TextChanged;
-                    }
-                    else if (comboBox.Name == "Cmb_BefreSpacing" || comboBox.Name == "Cmb_AfterSpacing")
-                    {
-                        comboBox.TextChanged -= Cmb_Spacing_TextChanged;
-                        comboBox.Text = value;
-                        comboBox.TextChanged += Cmb_Spacing_TextChanged;
+                        comboBox.TextChanged += textChangedHandler;
                     }
                     else
                     {
@@ -86,6 +86,23 @@ namespace WordMan
                 {
                     comboBox.SelectedIndex = -1;
                 }
+            }
+        }
+
+        /// <summary>
+        /// 获取下拉框的TextChanged事件处理器
+        /// </summary>
+        private EventHandler GetTextChangedHandler(string comboBoxName)
+        {
+            switch (comboBoxName)
+            {
+                case "Cmb_LineSpacing":
+                    return Cmb_LineSpacing_TextChanged;
+                case "Cmb_BefreSpacing":
+                case "Cmb_AfterSpacing":
+                    return Cmb_Spacing_TextChanged;
+                default:
+                    return null;
             }
         }
 
@@ -111,24 +128,23 @@ namespace WordMan
         /// </summary>
         private object GetControlValue(Control control)
         {
+            if (control == null)
+                return null;
+
             if (control is StandardComboBox comboBox)
                 return comboBox.Text;
+            
             if (control is StandardTextBox textBox)
                 return textBox.Text;
+            
             if (control is StandardNumericUpDown numericUpDown)
             {
-                // 根据控件名称确定单位
-                if (control.Name == "Nud_LeftIndent" || control.Name == "Nud_RightIndent" || control.Name == "Nud_FirstLineIndent")
-                {
-                    return $"{numericUpDown.GetValueInCentimeters():0.0} 厘米";
-                }
-                else
-                {
-                    return $"{numericUpDown.GetValueInCentimeters():0.0} 厘米";
-                }
+                return $"{numericUpDown.GetValueInCentimeters():0.0} 厘米";
             }
+            
             if (control is ToggleButton toggleButton)
                 return toggleButton.Pressed;
+            
             return null;
         }
 
@@ -225,11 +241,18 @@ namespace WordMan
                 Styles.Clear();
                 StyleNames.Clear();
 
+                // 清空样式名称映射
+                _styleNameMap.Clear();
+
                 // 添加预设样式到样式列表
                 foreach (var presetStyle in presetStyles)
                 {
-                    Styles.Add(presetStyle);
-                    StyleNames.Add(presetStyle.Name);
+                    if (presetStyle != null && !string.IsNullOrEmpty(presetStyle.Name))
+                    {
+                        Styles.Add(presetStyle);
+                        StyleNames.Add(presetStyle.Name);
+                        _styleNameMap[presetStyle.Name] = presetStyle;
+                    }
                 }
 
                 // 刷新样式列表显示
@@ -333,6 +356,59 @@ namespace WordMan
             // 初始化默认样式，不自动读取文档样式
             InitializeDefaultStyles();
             FilterStylesByTitleCount();
+
+            // 优化列表配色
+            SetupListBoxStyling();
+        }
+
+        /// <summary>
+        /// 设置列表框的样式和配色
+        /// </summary>
+        private void SetupListBoxStyling()
+        {
+            if (Lst_Styles != null)
+            {
+                Lst_Styles.DrawMode = DrawMode.OwnerDrawFixed;
+                Lst_Styles.DrawItem += Lst_Styles_DrawItem;
+            }
+        }
+
+        /// <summary>
+        /// 列表项绘制事件处理
+        /// </summary>
+        private void Lst_Styles_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            if (e.Index < 0 || Lst_Styles == null || e.Index >= Lst_Styles.Items.Count)
+                return;
+
+            e.DrawBackground();
+
+            // 现代化配色
+            Color selectedBg = Color.FromArgb(70, 130, 230);  // 柔和的蓝色
+            Color alternatingRow = Color.FromArgb(249, 250, 252);  // 浅灰色
+            Color textDark = Color.FromArgb(33, 37, 41);  // 深灰色文本
+
+            // 绘制背景（交替行颜色和选中状态）
+            Color backColor = (e.State & DrawItemState.Selected) == DrawItemState.Selected
+                ? selectedBg
+                : (e.Index % 2 == 0 ? Color.White : alternatingRow);
+            
+            e.Graphics.FillRectangle(new SolidBrush(backColor), e.Bounds);
+
+            // 绘制文本
+            string text = Lst_Styles.Items[e.Index].ToString();
+            Color textColor = (e.State & DrawItemState.Selected) == DrawItemState.Selected 
+                ? Color.White 
+                : textDark;
+            
+            var textRect = new Rectangle(e.Bounds.X + 10, e.Bounds.Y, e.Bounds.Width - 10, e.Bounds.Height);
+            
+            using (var brush = new SolidBrush(textColor))
+            {
+                e.Graphics.DrawString(text, Lst_Styles.Font, brush, textRect, StringFormat.GenericDefault);
+            }
+
+            e.DrawFocusRectangle();
         }
 
         /// <summary>
@@ -467,6 +543,7 @@ namespace WordMan
         private void InitializeDefaultStyles()
         {
             Styles.Clear();
+            _styleNameMap.Clear();
             var defaultStyles = new CustomStyle[]
             {
                 new CustomStyle(name: "正文", fontName: "宋体", engFontName: "宋体", fontSize: 10.5f, bold: false, italic: false, underline: false, fontColor: Color.Black, paraAlignment: 0, leftIndent: 0f, rightIndent: 0f, firstLineIndent: 2f, firstLineIndentByChar: 2, lineSpacing: 1.0f, beforeBreak: false, beforeSpacing: 0f, afterSpacing: 0f, numberStyle: 0, numberFormat: null, userDefined: false),
@@ -482,11 +559,15 @@ namespace WordMan
 
             Styles.AddRange(defaultStyles);
 
-            // 添加调试信息
+            // 添加调试信息并更新字典
             foreach (var style in Styles)
             {
-                System.Diagnostics.Debug.WriteLine($"创建默认样式：{style.Name}，字号：{style.FontSize}，对象ID：{style.GetHashCode()}");
-                StyleNames.Add(style.Name);
+                if (style != null && !string.IsNullOrEmpty(style.Name))
+                {
+                    System.Diagnostics.Debug.WriteLine($"创建默认样式：{style.Name}，字号：{style.FontSize}，对象ID：{style.GetHashCode()}");
+                    StyleNames.Add(style.Name);
+                    _styleNameMap[style.Name] = style;
+                }
             }
         }
 
@@ -529,14 +610,30 @@ namespace WordMan
 
         private void Lst_Styles_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (Lst_Styles == null)
+                return;
+
             _isLoadingStyle = true; // 设置加载标志，防止触发保存事件
 
             try
             {
-                if (Lst_Styles.SelectedIndex >= 0)
+                if (Lst_Styles.SelectedIndex >= 0 && Lst_Styles.SelectedItem != null)
                 {
                     string selectedStyle = Lst_Styles.SelectedItem.ToString();
-                    var style = Styles.FirstOrDefault(s => s.Name == selectedStyle);
+                    if (string.IsNullOrEmpty(selectedStyle))
+                        return;
+
+                    // 使用字典查找，提升性能
+                    CustomStyle style;
+                    if (!_styleNameMap.TryGetValue(selectedStyle, out style))
+                    {
+                        style = Styles.FirstOrDefault(s => s.Name == selectedStyle);
+                        if (style != null)
+                        {
+                            _styleNameMap[selectedStyle] = style;
+                        }
+                    }
+
                     if (style != null)
                     {
                         // 找到样式在列表中的索引
@@ -602,8 +699,10 @@ namespace WordMan
                 switch (comboBox.Name)
                 {
                     case "Cmb_ChnFontName":
-                    case "Cmb_EngFontName":
                         currentStyle.FontName = comboBox.SelectedItem?.ToString() ?? comboBox.Text;
+                        break;
+                    case "Cmb_EngFontName":
+                        currentStyle.EngFontName = comboBox.SelectedItem?.ToString() ?? comboBox.Text;
                         break;
                     case "Cmb_FontSize":
                         if (comboBox.SelectedIndex >= 0)
@@ -666,18 +765,23 @@ namespace WordMan
                         break;
                 }
             }
+            else if (sender is StandardButton button && button.Name == "Btn_FontColor")
+            {
+                // 处理字体颜色变化
+                currentStyle.FontColor = button.BackColor;
+            }
             else if (sender is StandardComboBox && ((StandardComboBox)sender).Name == "首行缩进方式下拉框")
             {
                 // 首行缩进方式改变时，重新设置首行缩进值
-                if (首行缩进方式下拉框.SelectedIndex == 0) // 无
+                if (首行缩进方式下拉框?.SelectedIndex == 0) // 无
                 {
                     currentStyle.FirstLineIndent = 0f;
                 }
-                else if (首行缩进方式下拉框.SelectedIndex == 1) // 悬挂缩进
+                else if (首行缩进方式下拉框?.SelectedIndex == 1 && Nud_FirstLineIndent != null) // 悬挂缩进
                 {
                     currentStyle.FirstLineIndent = -(float)Nud_FirstLineIndent.GetValueInCentimeters();
                 }
-                else if (首行缩进方式下拉框.SelectedIndex == 2) // 首行缩进
+                else if (首行缩进方式下拉框?.SelectedIndex == 2 && Nud_FirstLineIndent != null) // 首行缩进
                 {
                     currentStyle.FirstLineIndent = (float)Nud_FirstLineIndent.GetValueInCentimeters();
                 }
@@ -760,6 +864,16 @@ namespace WordMan
             // 刷新列表显示
             Lst_Styles.DataSource = null;
             Lst_Styles.DataSource = StyleNames;
+
+            // 如果当前选中的样式不在过滤后的列表中，重置当前样式索引
+            if (_currentStyleIndex >= 0 && _currentStyleIndex < Styles.Count)
+            {
+                var currentStyle = Styles[_currentStyleIndex];
+                if (currentStyle != null && !StyleNames.Contains(currentStyle.Name))
+                {
+                    _currentStyleIndex = -1;
+                }
+            }
         }
 
         /// <summary>
@@ -813,9 +927,17 @@ namespace WordMan
 
             // 创建新样式
             var newStyle = CreateStyleFromControls(styleName);
-            Styles.Add(newStyle);
-            StyleNames.Add(styleName);
-            Lst_Styles.SelectedItem = styleName;
+            if (newStyle != null)
+            {
+                Styles.Add(newStyle);
+                StyleNames.Add(styleName);
+                _styleNameMap[styleName] = newStyle;
+                
+                // 更新当前样式索引
+                _currentStyleIndex = Styles.Count - 1;
+                
+                Lst_Styles.SelectedItem = styleName;
+            }
 
             // 清空输入框并恢复提示文本
             Txt_AddStyleName.Text = "请输入需要增加的样式名称";
@@ -824,41 +946,66 @@ namespace WordMan
 
         private void 删除_Click(object sender, EventArgs e)
         {
-            if (Lst_Styles.SelectedIndex >= 0)
-            {
-                string selectedStyle = Lst_Styles.SelectedItem.ToString();
-                var style = Styles.FirstOrDefault(s => s.Name == selectedStyle);
-
-                if (style != null)
-                {
-                    // 检查是否为内置样式
-                    if (!style.UserDefined)
-                    {
-                        MessageBox.Show("不能删除内置样式", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return;
-                    }
-
-                    // 确认删除
-                    var result = MessageBox.Show($"确定要删除样式 '{selectedStyle}' 吗？", "确认删除",
-                        MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                    if (result == DialogResult.Yes)
-                    {
-                        Styles.Remove(style);
-                        StyleNames.Remove(selectedStyle);
-                        ResetControlsToDefault();
-
-                        // 刷新样式列表显示
-                        Lst_Styles.DataSource = null;
-                        Lst_Styles.DataSource = StyleNames;
-
-                        MessageBox.Show("样式删除成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                }
-            }
-            else
+            if (Lst_Styles == null || Lst_Styles.SelectedIndex < 0 || Lst_Styles.SelectedItem == null)
             {
                 MessageBox.Show("请先选择要删除的样式", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string selectedStyle = Lst_Styles.SelectedItem.ToString();
+            if (string.IsNullOrEmpty(selectedStyle))
+            {
+                MessageBox.Show("请先选择要删除的样式", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 使用字典查找，提升性能
+            CustomStyle style;
+            if (!_styleNameMap.TryGetValue(selectedStyle, out style))
+            {
+                style = Styles.FirstOrDefault(s => s.Name == selectedStyle);
+            }
+
+            if (style == null)
+            {
+                MessageBox.Show("找不到指定的样式", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 检查是否为内置样式
+            if (!style.UserDefined)
+            {
+                MessageBox.Show("不能删除内置样式", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 确认删除
+            var result = MessageBox.Show($"确定要删除样式 '{selectedStyle}' 吗？", "确认删除",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                // 如果删除的是当前选中的样式，重置当前样式索引
+                if (_currentStyleIndex == Styles.IndexOf(style))
+                {
+                    _currentStyleIndex = -1;
+                }
+                else if (_currentStyleIndex > Styles.IndexOf(style))
+                {
+                    // 如果删除的样式在当前样式之前，需要调整索引
+                    _currentStyleIndex--;
+                }
+
+                Styles.Remove(style);
+                StyleNames.Remove(selectedStyle);
+                _styleNameMap.Remove(selectedStyle);
+                ResetControlsToDefault();
+
+                // 刷新样式列表显示
+                Lst_Styles.DataSource = null;
+                Lst_Styles.DataSource = StyleNames;
+
+                MessageBox.Show("样式删除成功", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
@@ -869,8 +1016,8 @@ namespace WordMan
                 // 样式已经实时保存，直接应用到文档
                 ApplyStylesToDocument();
 
-                // 显示成功信息，包含应用的样式数量
-                int appliedCount = Styles.Count(s => StyleNames.Contains(s.Name));
+                // 显示成功信息，包含应用的样式数量（只计算当前显示的样式）
+                int appliedCount = StyleNames.Count;
                 MessageBox.Show($"样式设置已成功应用到文档\n共应用了 {appliedCount} 个样式",
                     "应用成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -930,9 +1077,19 @@ namespace WordMan
                     {
                         // 更新样式列表
                         StyleNames.Clear();
+                        _styleNameMap.Clear();
                         foreach (var selectedStyle in styleSelectionForm.SelectedStyles)
                         {
-                            StyleNames.Add(selectedStyle);
+                            if (!string.IsNullOrEmpty(selectedStyle))
+                            {
+                                StyleNames.Add(selectedStyle);
+                                // 从现有样式中查找并添加到字典
+                                var style = Styles.FirstOrDefault(s => s.Name == selectedStyle);
+                                if (style != null)
+                                {
+                                    _styleNameMap[selectedStyle] = style;
+                                }
+                            }
                         }
 
                         // 刷新样式列表显示
@@ -1009,12 +1166,20 @@ namespace WordMan
                             // 清空现有样式
                             Styles.Clear();
                             StyleNames.Clear();
+                            _styleNameMap.Clear();
 
                             // 加载导入的样式
-                            Styles.AddRange(exportData.Styles);
-                            foreach (var style in exportData.Styles)
+                            if (exportData.Styles != null)
                             {
-                                StyleNames.Add(style.Name);
+                                Styles.AddRange(exportData.Styles);
+                                foreach (var style in exportData.Styles)
+                                {
+                                    if (style != null && !string.IsNullOrEmpty(style.Name))
+                                    {
+                                        StyleNames.Add(style.Name);
+                                        _styleNameMap[style.Name] = style;
+                                    }
+                                }
                             }
 
                             // 恢复显示标题数
@@ -1047,12 +1212,20 @@ namespace WordMan
                             // 清空现有样式
                             Styles.Clear();
                             StyleNames.Clear();
+                            _styleNameMap.Clear();
 
                             // 加载导入的样式
-                            Styles.AddRange(importedStyles);
-                            foreach (var style in importedStyles)
+                            if (importedStyles != null)
                             {
-                                StyleNames.Add(style.Name);
+                                Styles.AddRange(importedStyles);
+                                foreach (var style in importedStyles)
+                                {
+                                    if (style != null && !string.IsNullOrEmpty(style.Name))
+                                    {
+                                        StyleNames.Add(style.Name);
+                                        _styleNameMap[style.Name] = style;
+                                    }
+                                }
                             }
 
                             // 根据导入的样式更新显示标题数
@@ -1183,6 +1356,9 @@ namespace WordMan
 
         private void LoadStyleToControls(CustomStyle style)
         {
+            if (style == null)
+                return;
+
             // 设置加载标志，防止触发保存事件
             _isLoadingStyle = true;
             _isLoadingPresetStyle = false;
@@ -1269,55 +1445,73 @@ namespace WordMan
 
         private void UpdateCurrentStyle()
         {
-            if (Lst_Styles.SelectedIndex >= 0)
+            if (Lst_Styles == null || Lst_Styles.SelectedIndex < 0 || Lst_Styles.SelectedItem == null)
+                return;
+
+            string selectedStyle = Lst_Styles.SelectedItem.ToString();
+            if (string.IsNullOrEmpty(selectedStyle))
+                return;
+
+            // 使用字典查找，提升性能
+            CustomStyle style;
+            if (!_styleNameMap.TryGetValue(selectedStyle, out style))
             {
-                string selectedStyle = Lst_Styles.SelectedItem.ToString();
-                var style = Styles.FirstOrDefault(s => s.Name == selectedStyle);
+                style = Styles.FirstOrDefault(s => s.Name == selectedStyle);
                 if (style != null)
                 {
-                    UpdateStyleFromControls(style);
-                    UpdateStyleInfo(style);
+                    _styleNameMap[selectedStyle] = style;
                 }
+            }
+
+            if (style != null)
+            {
+                UpdateStyleFromControls(style);
+                UpdateStyleInfo(style);
             }
         }
 
 
         private void UpdateStyleFromControls(CustomStyle style)
         {
+            if (style == null)
+                return;
+
             // 分别获取中文字体和英文字体（与 LevelStyleSettingsForm 保持一致）
-            style.FontName = Cmb_ChnFontName.SelectedItem?.ToString() ?? "宋体";
-            style.EngFontName = Cmb_EngFontName.SelectedItem?.ToString() ?? style.FontName;
+            style.FontName = Cmb_ChnFontName?.SelectedItem?.ToString() ?? Cmb_ChnFontName?.Text ?? "宋体";
+            style.EngFontName = Cmb_EngFontName?.SelectedItem?.ToString() ?? Cmb_EngFontName?.Text ?? style.FontName;
             if (Cmb_FontSize.SelectedIndex >= 0)
             {
                 style.FontSize = MultiLevelDataManager.ConvertFontSize(Cmb_FontSize.SelectedItem?.ToString());
             }
-            style.Bold = Btn_Bold.Pressed;
-            style.Italic = Btn_Italic.Pressed;
-            style.Underline = Btn_UnderLine.Pressed;
-            style.FontColor = Btn_FontColor.BackColor;
-            style.ParaAlignment = Cmb_ParaAligment.SelectedIndex;
+            style.Bold = Btn_Bold?.Pressed ?? false;
+            style.Italic = Btn_Italic?.Pressed ?? false;
+            style.Underline = Btn_UnderLine?.Pressed ?? false;
+            style.FontColor = Btn_FontColor?.BackColor ?? Color.Black;
+            style.ParaAlignment = Cmb_ParaAligment?.SelectedIndex ?? 0;
             // 从控件读取缩进值，直接使用厘米单位
-            style.LeftIndent = (float)Nud_LeftIndent.GetValueInCentimeters();
-            style.RightIndent = (float)Nud_RightIndent.GetValueInCentimeters();
+            style.LeftIndent = Nud_LeftIndent != null ? (float)Nud_LeftIndent.GetValueInCentimeters() : 0f;
+            style.RightIndent = Nud_RightIndent != null ? (float)Nud_RightIndent.GetValueInCentimeters() : 0f;
 
             // 根据首行缩进方式设置首行缩进值
-            if (首行缩进方式下拉框.SelectedIndex == 0) // 无
+            int firstLineIndentType = 首行缩进方式下拉框?.SelectedIndex ?? 0;
+            if (firstLineIndentType == 0) // 无
             {
                 style.FirstLineIndent = 0f;
             }
-            else if (首行缩进方式下拉框.SelectedIndex == 1) // 悬挂缩进
+            else if (firstLineIndentType == 1 && Nud_FirstLineIndent != null) // 悬挂缩进
             {
                 style.FirstLineIndent = -(float)Nud_FirstLineIndent.GetValueInCentimeters(); // 悬挂缩进为负值
             }
-            else if (首行缩进方式下拉框.SelectedIndex == 2) // 首行缩进
+            else if (firstLineIndentType == 2 && Nud_FirstLineIndent != null) // 首行缩进
             {
                 style.FirstLineIndent = (float)Nud_FirstLineIndent.GetValueInCentimeters();
             }
 
             // 处理行距设置
-            if (!string.IsNullOrEmpty(Cmb_LineSpacing.Text))
+            string lineSpacingText = Cmb_LineSpacing?.Text ?? string.Empty;
+            if (!string.IsNullOrEmpty(lineSpacingText))
             {
-                style.LineSpacing = ConvertLineSpacingToFloat(Cmb_LineSpacing.Text);
+                style.LineSpacing = ConvertLineSpacingToFloat(lineSpacingText);
             }
             else
             {
@@ -1325,40 +1519,51 @@ namespace WordMan
             }
 
             // 从控件读取段落间距值，直接使用磅单位
-            style.BeforeSpacing = ConvertSpacingToPoints(Cmb_BefreSpacing.Text);
-            style.AfterSpacing = ConvertSpacingToPoints(Cmb_AfterSpacing.Text);
+            style.BeforeSpacing = ConvertSpacingToPoints(Cmb_BefreSpacing?.Text ?? string.Empty);
+            style.AfterSpacing = ConvertSpacingToPoints(Cmb_AfterSpacing?.Text ?? string.Empty);
         }
 
         private CustomStyle CreateStyleFromControls(string name)
         {
+            if (string.IsNullOrEmpty(name))
+                return null;
+
             // 分别获取中文字体和英文字体（与 LevelStyleSettingsForm 保持一致）
-            string fontName = !string.IsNullOrEmpty(Cmb_ChnFontName.Text) ? Cmb_ChnFontName.Text : Cmb_EngFontName.Text;
+            string fontName = !string.IsNullOrEmpty(Cmb_ChnFontName?.Text) ? Cmb_ChnFontName.Text : (Cmb_EngFontName?.Text ?? "宋体");
 
             // 处理行距设置
             float lineSpacing = 1.0f; // 默认单倍行距
-            if (!string.IsNullOrEmpty(Cmb_LineSpacing.Text))
+            string lineSpacingText = Cmb_LineSpacing?.Text ?? string.Empty;
+            if (!string.IsNullOrEmpty(lineSpacingText))
             {
-                lineSpacing = ConvertLineSpacingToFloat(Cmb_LineSpacing.Text);
+                lineSpacing = ConvertLineSpacingToFloat(lineSpacingText);
+            }
+
+            int firstLineIndentType = 首行缩进方式下拉框?.SelectedIndex ?? 0;
+            float firstLineIndent = 0f;
+            if (firstLineIndentType != 0 && Nud_FirstLineIndent != null)
+            {
+                firstLineIndent = (float)Nud_FirstLineIndent.GetValueInCentimeters();
             }
 
             return new CustomStyle(
                 name: name,
                 fontName: fontName,
-                engFontName: Cmb_EngFontName.SelectedItem?.ToString() ?? fontName,
-                fontSize: Cmb_FontSize.SelectedIndex >= 0 ? MultiLevelDataManager.ConvertFontSize(Cmb_FontSize.SelectedItem?.ToString()) : 0f,
-                bold: Btn_Bold.Pressed,
-                italic: Btn_Italic.Pressed,
-                underline: Btn_UnderLine.Pressed,
-                fontColor: Btn_FontColor.BackColor,
-                paraAlignment: Cmb_ParaAligment.SelectedIndex,
-                leftIndent: (float)Nud_LeftIndent.GetValueInCentimeters(),
-                rightIndent: (float)Nud_RightIndent.GetValueInCentimeters(),
-                firstLineIndent: 首行缩进方式下拉框.SelectedIndex == 0 ? 0f : (float)Nud_FirstLineIndent.GetValueInCentimeters(),
+                engFontName: Cmb_EngFontName?.SelectedItem?.ToString() ?? Cmb_EngFontName?.Text ?? fontName,
+                fontSize: Cmb_FontSize?.SelectedIndex >= 0 ? MultiLevelDataManager.ConvertFontSize(Cmb_FontSize.SelectedItem?.ToString()) : 0f,
+                bold: Btn_Bold?.Pressed ?? false,
+                italic: Btn_Italic?.Pressed ?? false,
+                underline: Btn_UnderLine?.Pressed ?? false,
+                fontColor: Btn_FontColor?.BackColor ?? Color.Black,
+                paraAlignment: Cmb_ParaAligment?.SelectedIndex ?? 0,
+                leftIndent: Nud_LeftIndent != null ? (float)Nud_LeftIndent.GetValueInCentimeters() : 0f,
+                rightIndent: Nud_RightIndent != null ? (float)Nud_RightIndent.GetValueInCentimeters() : 0f,
+                firstLineIndent: firstLineIndent,
                 firstLineIndentByChar: 0,
                 lineSpacing: lineSpacing,
                 beforeBreak: false,
-                beforeSpacing: ConvertSpacingToPoints(Cmb_BefreSpacing.Text),
-                afterSpacing: ConvertSpacingToPoints(Cmb_AfterSpacing.Text),
+                beforeSpacing: ConvertSpacingToPoints(Cmb_BefreSpacing?.Text ?? string.Empty),
+                afterSpacing: ConvertSpacingToPoints(Cmb_AfterSpacing?.Text ?? string.Empty),
                 numberStyle: 0,
                 numberFormat: null,
                 userDefined: true
@@ -1379,6 +1584,16 @@ namespace WordMan
             System.Diagnostics.Debug.WriteLine($"==================");
         }
 
+        // 行距文本到数值的映射字典（提升查找性能）
+        private static readonly Dictionary<string, float> LineSpacingMap = new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "单倍行距", 1.0f },
+            { "1.2倍行距", 1.2f },
+            { "1.25倍行距", 1.25f },
+            { "1.5倍行距", 1.5f },
+            { "双倍行距", 2.0f }
+        };
+
         /// <summary>
         /// 将行距文本转换为数值（复用多级段落设置的方法）
         /// </summary>
@@ -1389,52 +1604,34 @@ namespace WordMan
 
             try
             {
-                // 复用多级段落设置的转换逻辑
-                if (lineSpacingText == "单倍行距")
+                // 首先查找预定义的行距值
+                if (LineSpacingMap.ContainsKey(lineSpacingText))
                 {
-                    return 1.0f;
+                    return LineSpacingMap[lineSpacingText];
                 }
-                else if (lineSpacingText == "1.2倍行距")
+
+                // 处理多倍行距格式（如 "2.5倍行距"）
+                if (lineSpacingText.EndsWith("倍行距"))
                 {
-                    return 1.2f;
-                }
-                else if (lineSpacingText == "1.25倍行距")
-                {
-                    return 1.25f;
-                }
-                else if (lineSpacingText == "1.5倍行距")
-                {
-                    return 1.5f;
-                }
-                else if (lineSpacingText == "双倍行距")
-                {
-                    return 2.0f;
-                }
-                else if (lineSpacingText.EndsWith("倍行距"))
-                {
-                    // 处理多倍行距，提取倍数值
                     string valueText = lineSpacingText.Replace("倍行距", "").Trim();
                     if (float.TryParse(valueText, out float multipleValue))
                     {
                         return multipleValue;
                     }
                 }
+                // 处理固定行距格式（如 "12磅"）
                 else if (lineSpacingText.EndsWith("磅"))
                 {
-                    // 处理固定行距，直接使用磅值
                     string valueText = lineSpacingText.Replace("磅", "").Trim();
                     if (float.TryParse(valueText, out float exactValue))
                     {
                         return exactValue;
                     }
                 }
-                else
+                // 尝试直接解析为数值（可能是用户输入的自定义值）
+                else if (float.TryParse(lineSpacingText, out float directValue))
                 {
-                    // 尝试直接解析为数值（可能是用户输入的自定义值）
-                    if (float.TryParse(lineSpacingText, out float directValue))
-                    {
-                        return directValue;
-                    }
+                    return directValue;
                 }
             }
             catch (Exception ex)
@@ -1495,38 +1692,39 @@ namespace WordMan
 
             try
             {
-                // 复用多级段落设置的转换逻辑
-                if (spacingText.EndsWith("磅"))
+                string trimmedText = spacingText.Trim();
+                
+                // 处理"磅"单位
+                if (trimmedText.EndsWith("磅"))
                 {
-                    string s = spacingText.TrimEnd(' ', '磅');
-                    if (float.TryParse(s, out float result))
+                    string valueText = trimmedText.Replace("磅", "").Trim();
+                    if (float.TryParse(valueText, out float result))
                     {
                         return result;
                     }
                 }
-                else if (spacingText.EndsWith("行"))
+                // 处理"行"单位
+                else if (trimmedText.EndsWith("行"))
                 {
-                    string s = spacingText.TrimEnd(' ', '行');
-                    if (float.TryParse(s, out float result))
+                    string valueText = trimmedText.Replace("行", "").Trim();
+                    if (float.TryParse(valueText, out float result))
                     {
                         return MultiLevelDataManager.LinesToPoints(result);
                     }
                 }
-                else if (spacingText.EndsWith("厘米"))
+                // 处理"厘米"单位
+                else if (trimmedText.EndsWith("厘米"))
                 {
-                    string s = spacingText.TrimEnd(' ', '厘', '米');
-                    if (float.TryParse(s, out float result))
+                    string valueText = trimmedText.Replace("厘米", "").Trim();
+                    if (float.TryParse(valueText, out float result))
                     {
                         return MultiLevelDataManager.CentimetersToPoints(result);
                     }
                 }
-                else
+                // 尝试直接解析为数值（可能是用户输入的自定义值）
+                else if (float.TryParse(trimmedText, out float directValue))
                 {
-                    // 尝试直接解析为数值（可能是用户输入的自定义值）
-                    if (float.TryParse(spacingText, out float directValue))
-                    {
-                        return directValue;
-                    }
+                    return directValue;
                 }
             }
             catch (Exception ex)
@@ -1543,16 +1741,27 @@ namespace WordMan
             var app = Globals.ThisAddIn.Application;
             var doc = app.ActiveDocument;
 
-            foreach (var style in Styles)
+            // 只应用当前显示的样式（StyleNames中的样式）
+            foreach (var styleName in StyleNames)
             {
                 try
                 {
-                    // 应用样式到文档
-                    ApplyStyleToDocument(doc, style);
+                    // 从字典或列表中查找样式
+                    CustomStyle style;
+                    if (!_styleNameMap.TryGetValue(styleName, out style))
+                    {
+                        style = Styles.FirstOrDefault(s => s.Name == styleName);
+                    }
+
+                    if (style != null)
+                    {
+                        // 应用样式到文档
+                        ApplyStyleToDocument(doc, style);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"应用样式 {style.Name} 时出错：{ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"应用样式 {styleName} 时出错：{ex.Message}");
                 }
             }
         }
@@ -1575,10 +1784,18 @@ namespace WordMan
 
                 if (wordStyle != null)
                 {
-                    // 设置字体
+                    // 设置字体（分别设置中文字体和英文字体）
                     if (!string.IsNullOrEmpty(style.FontName))
                     {
                         wordStyle.Font.NameFarEast = style.FontName;
+                    }
+                    if (!string.IsNullOrEmpty(style.EngFontName))
+                    {
+                        wordStyle.Font.NameAscii = style.EngFontName;
+                    }
+                    else if (!string.IsNullOrEmpty(style.FontName))
+                    {
+                        // 如果英文字体为空，使用中文字体
                         wordStyle.Font.NameAscii = style.FontName;
                     }
 
@@ -1591,14 +1808,18 @@ namespace WordMan
                     wordStyle.Font.Italic = style.Italic ? -1 : 0;
                     wordStyle.Font.Underline = style.Underline ? WdUnderline.wdUnderlineSingle : WdUnderline.wdUnderlineNone;
 
-                    // 设置字体颜色
+                    // 设置字体颜色（使用ColorTranslator.ToOle方法，更可靠）
                     try
                     {
-                        int r = style.FontColor.R;
-                        int g = style.FontColor.G;
-                        int b = style.FontColor.B;
-                        int wordRgb = (b << 16) | (g << 8) | r; // Word 使用 BGR 格式
-                        wordStyle.Font.Color = (WdColor)wordRgb;
+                        if (style.FontColor != null)
+                        {
+                            int oleColor = ColorTranslator.ToOle(style.FontColor);
+                            wordStyle.Font.Color = (WdColor)oleColor;
+                        }
+                        else
+                        {
+                            wordStyle.Font.Color = WdColor.wdColorAutomatic;
+                        }
                     }
                     catch
                     {
@@ -1767,10 +1988,11 @@ namespace WordMan
                         if (wordStyle != null && wordStyle.Type == WdStyleType.wdStyleTypeParagraph)
                         {
                             var customStyle = CreateCustomStyleFromWordStyle(wordStyle, app);
-                            if (customStyle != null)
+                            if (customStyle != null && !string.IsNullOrEmpty(customStyle.Name))
                             {
                                 Styles.Add(customStyle);
                                 StyleNames.Add(customStyle.Name);
+                                _styleNameMap[customStyle.Name] = customStyle;
                             }
                         }
                     }
@@ -1947,6 +2169,9 @@ namespace WordMan
         /// </summary>
         private void Btn_FontColor_Click(object sender, EventArgs e)
         {
+            if (Btn_FontColor == null)
+                return;
+
             ColorDialog colorDialog = new ColorDialog
             {
                 Color = Btn_FontColor.BackColor,
@@ -1960,8 +2185,8 @@ namespace WordMan
             {
                 Btn_FontColor.BackColor = colorDialog.Color;
 
-                // 移除实时更新，样式设置只在点击应用设置按钮时生效
-                // 字体颜色设置将在点击应用设置按钮时生效
+                // 实时更新样式数据（与其他控件保持一致）
+                OnStyleChanged(sender, e);
             }
         }
 
@@ -2014,7 +2239,24 @@ namespace WordMan
         public string FontColorString
         {
             get { return FontColor.ToArgb().ToString(); }
-            set { FontColor = Color.FromArgb(int.Parse(value)); }
+            set 
+            { 
+                try
+                {
+                    if (!string.IsNullOrEmpty(value) && int.TryParse(value, out int argb))
+                    {
+                        FontColor = Color.FromArgb(argb);
+                    }
+                    else
+                    {
+                        FontColor = Color.Black; // 默认黑色
+                    }
+                }
+                catch
+                {
+                    FontColor = Color.Black; // 解析失败时使用默认黑色
+                }
+            }
         }
         public int ParaAlignment { get; set; }
         public float LeftIndent { get; set; }

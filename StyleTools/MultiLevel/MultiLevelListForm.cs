@@ -531,28 +531,53 @@ namespace WordMan
                 throw new InvalidOperationException("Word文档不可用，无法创建多级列表模板。");
             }
             
-            ListTemplate listTemplate;
-            object Index;
+            ListTemplate listTemplate = null;
+            ListTemplates listTemplates = null;
+            object Index = 7;
             
-            // 检查当前选区是否已有列表模板
-            if (app.Selection.Range.ListFormat.ListTemplate != null)
+            try
             {
-                listTemplate = app.Selection.Range.ListFormat.ListTemplate;
+                // 检查当前选区是否已有列表模板
+                var selectionRange = app.Selection.Range;
+                var listFormat = selectionRange.ListFormat;
+                
+                if (listFormat.ListTemplate != null)
+                {
+                    listTemplate = listFormat.ListTemplate;
+                }
+                else
+                {
+                    // 从ListGalleries获取模板
+                    listTemplates = app.ListGalleries[WdListGalleryType.wdOutlineNumberGallery].ListTemplates;
+                    listTemplate = listTemplates[ref Index];
+                }
+                
+                ConfigureListLevels(listTemplate, levelCount, numberStyles, numberFormats, 
+                    numberIndents, textIndents, afterNumberTypes, tabPositions, linkedStyles);
+                
+                ApplyListTemplate(listTemplate, levelCount);
+                
+                // 应用样式设置（如果有的话）
+                ApplyLevelStyleSettings();
             }
-            else
+            finally
             {
-                // 从ListGalleries获取模板
-                ListTemplates listTemplates = app.ListGalleries[WdListGalleryType.wdOutlineNumberGallery].ListTemplates;
-                Index = 7;
-                listTemplate = listTemplates[ref Index];
+                // 清理COM对象引用（注意：不要释放仍在使用的对象）
+                // listTemplate 和 listTemplates 由Word管理，不需要手动释放
             }
-            
-            ListTemplate listTemplate2 = listTemplate;
-            
+        }
+
+        /// <summary>
+        /// 配置列表级别属性
+        /// </summary>
+        private void ConfigureListLevels(ListTemplate listTemplate, int levelCount, int[] numberStyles, 
+            string[] numberFormats, float[] numberIndents, float[] textIndents, 
+            string[] afterNumberTypes, float[] tabPositions, string[] linkedStyles)
+        {
             // 设置各级属性
             for (int i = 1; i <= levelCount; i++)
             {
-                ListLevel listLevel = listTemplate2.ListLevels[i];
+                ListLevel listLevel = listTemplate.ListLevels[i];
                 
                 if (numberStyles[i - 1] != -1)
                 {
@@ -561,105 +586,126 @@ namespace WordMan
                 
                 listLevel.NumberFormat = numberFormats[i - 1];
                 
-                // 设置链接样式 - 直接使用Word样式对象
-                if (linkedStyles[i - 1] != "无" && !string.IsNullOrEmpty(linkedStyles[i - 1]))
+                // 设置链接样式
+                SetLinkedStyle(listLevel, linkedStyles[i - 1]);
+                
+                listLevel.NumberPosition = app.CentimetersToPoints(numberIndents[i - 1]);
+                listLevel.TextPosition = app.CentimetersToPoints(textIndents[i - 1]);
+                
+                // 设置编号之后的字符类型和制表位位置
+                SetTrailingCharacter(listLevel, afterNumberTypes[i - 1], tabPositions[i - 1]);
+                
+                listLevel.StartAt = 1;
+                listLevel.ResetOnHigher = i - 1;
+            }
+            
+            // 清空未使用的级别
+            for (int j = levelCount + 1; j <= 9; j++)
+            {
+                ListLevel listLevel = listTemplate.ListLevels[j];
+                listLevel.NumberFormat = "";
+                listLevel.NumberStyle = WdListNumberStyle.wdListNumberStyleNone;
+            }
+        }
+
+        /// <summary>
+        /// 设置链接样式
+        /// </summary>
+        private void SetLinkedStyle(ListLevel listLevel, string linkedStyleName)
+        {
+            if (string.IsNullOrEmpty(linkedStyleName) || linkedStyleName == "无")
+            {
+                listLevel.LinkedStyle = "";
+                return;
+            }
+            
+            try
+            {
+                // 提取级别数字
+                int level = 0;
+                if (int.TryParse(linkedStyleName.Replace("标题 ", "").Replace("标题", ""), out level) && level >= 1 && level <= 9)
                 {
-                    try
+                    // 使用WdBuiltinStyle枚举引用内置样式
+                    WdBuiltinStyle builtInStyleEnum = GetBuiltinStyleEnum(level);
+                    var style = app.ActiveDocument.Styles[builtInStyleEnum];
+                    
+                    if (style != null)
                     {
-                        // 提取级别数字
-                        int level = 0;
-                        if (int.TryParse(linkedStyles[i - 1].Replace("标题 ", "").Replace("标题", ""), out level) && level >= 1 && level <= 9)
-                        {
-                            // 直接使用WdBuiltinStyle枚举引用内置样式
-                            WdBuiltinStyle builtInStyleEnum;
-                            switch (level)
-                            {
-                                case 1: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading1; break;
-                                case 2: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading2; break;
-                                case 3: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading3; break;
-                                case 4: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading4; break;
-                                case 5: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading5; break;
-                                case 6: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading6; break;
-                                case 7: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading7; break;
-                                case 8: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading8; break;
-                                case 9: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading9; break;
-                                default: builtInStyleEnum = WdBuiltinStyle.wdStyleHeading1; break;
-                            }
-                            
-                            var style = app.ActiveDocument.Styles[builtInStyleEnum];
-                            
-                            if (style != null)
-                            {
-                                listLevel.LinkedStyle = style.NameLocal;
-                            }
-                            else
-                            {
-                                listLevel.LinkedStyle = "";
-                            }
-                        }
-                        else
-                        {
-                            // 如果不是标题样式，尝试通过名称查找
-                            string styleName = GetWordStyleName(linkedStyles[i - 1]);
-                            listLevel.LinkedStyle = styleName;
-                        }
+                        listLevel.LinkedStyle = style.NameLocal;
                     }
-                    catch (Exception)
+                    else
                     {
                         listLevel.LinkedStyle = "";
                     }
                 }
                 else
                 {
-                    listLevel.LinkedStyle = "";
+                    // 如果不是标题样式，尝试通过名称查找
+                    string styleName = GetWordStyleName(linkedStyleName);
+                    listLevel.LinkedStyle = styleName;
                 }
-                
-                listLevel.NumberPosition = app.CentimetersToPoints(numberIndents[i - 1]);
-                listLevel.TextPosition = app.CentimetersToPoints(textIndents[i - 1]);
-                
-                // 设置编号之后的字符类型和制表位位置
-                if (afterNumberTypes[i - 1] == "制表位" && tabPositions[i - 1] > 0f)
-                {
-                    listLevel.TrailingCharacter = WdTrailingCharacter.wdTrailingTab;
-                    listLevel.TabPosition = app.CentimetersToPoints(tabPositions[i - 1]);
-                }
-                else if (afterNumberTypes[i - 1] == "空格")
-                {
-                    listLevel.TrailingCharacter = WdTrailingCharacter.wdTrailingSpace;
-                }
-                else
-                {
-                    listLevel.TrailingCharacter = WdTrailingCharacter.wdTrailingNone;
-                }
-                
-                listLevel.StartAt = 1;
-
-
-                listLevel.ResetOnHigher = i - 1;
-
             }
-            
-            // 清空未使用的级别
-            for (int j = levelCount + 1; j <= 9; j++)
+            catch
             {
-                ListLevel listLevel2 = listTemplate2.ListLevels[j];
-                listLevel2.NumberFormat = "";
-                listLevel2.NumberStyle = WdListNumberStyle.wdListNumberStyleNone;
+                listLevel.LinkedStyle = "";
             }
-            
+        }
+
+        /// <summary>
+        /// 获取内置样式枚举
+        /// </summary>
+        private WdBuiltinStyle GetBuiltinStyleEnum(int level)
+        {
+            switch (level)
+            {
+                case 1: return WdBuiltinStyle.wdStyleHeading1;
+                case 2: return WdBuiltinStyle.wdStyleHeading2;
+                case 3: return WdBuiltinStyle.wdStyleHeading3;
+                case 4: return WdBuiltinStyle.wdStyleHeading4;
+                case 5: return WdBuiltinStyle.wdStyleHeading5;
+                case 6: return WdBuiltinStyle.wdStyleHeading6;
+                case 7: return WdBuiltinStyle.wdStyleHeading7;
+                case 8: return WdBuiltinStyle.wdStyleHeading8;
+                case 9: return WdBuiltinStyle.wdStyleHeading9;
+                default: return WdBuiltinStyle.wdStyleHeading1;
+            }
+        }
+
+        /// <summary>
+        /// 设置尾随字符
+        /// </summary>
+        private void SetTrailingCharacter(ListLevel listLevel, string afterNumberType, float tabPosition)
+        {
+            if (afterNumberType == "制表位" && tabPosition > 0f)
+            {
+                listLevel.TrailingCharacter = WdTrailingCharacter.wdTrailingTab;
+                listLevel.TabPosition = app.CentimetersToPoints(tabPosition);
+            }
+            else if (afterNumberType == "空格")
+            {
+                listLevel.TrailingCharacter = WdTrailingCharacter.wdTrailingSpace;
+            }
+            else
+            {
+                listLevel.TrailingCharacter = WdTrailingCharacter.wdTrailingNone;
+            }
+        }
+
+        /// <summary>
+        /// 应用列表模板到选区
+        /// </summary>
+        private void ApplyListTemplate(ListTemplate listTemplate, int levelCount)
+        {
             // 先清除现有的列表格式
             app.Selection.Range.ListFormat.RemoveNumbers();
             
             // 应用多级列表到当前选区
             ListFormat listFormat = app.Selection.Range.ListFormat;
-            Index = false;
+            object Index = false;
             object ApplyTo = WdListApplyTo.wdListApplyToWholeList;
             object DefaultListBehavior = WdDefaultListBehavior.wdWord9ListBehavior;
             object ApplyLevel2 = levelCount;
-            listFormat.ApplyListTemplateWithLevel(listTemplate2, ref Index, ref ApplyTo, ref DefaultListBehavior, ref ApplyLevel2);
-            
-            // 应用样式设置（如果有的话）
-            ApplyLevelStyleSettings();
+            listFormat.ApplyListTemplateWithLevel(listTemplate, ref Index, ref ApplyTo, ref DefaultListBehavior, ref ApplyLevel2);
         }
 
         /// <summary>

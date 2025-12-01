@@ -118,9 +118,9 @@
             this.ClientSize = new System.Drawing.Size(584, 561);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.btnClose);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             this.Name = "CommonSymbolForm";
-            this.Opacity = 0.9D;
-            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "CommonSymbolForm";
             this.Load += new System.EventHandler(this.CommonSymbolForm_Load);

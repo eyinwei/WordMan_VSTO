@@ -19,9 +19,20 @@ namespace WordMan.SplitAndMerge
 
         private void ReleaseComObject(object comObject)
         {
-            if (comObject != null && Marshal.IsComObject(comObject))
+            try
             {
-                Marshal.ReleaseComObject(comObject);
+                if (comObject != null && Marshal.IsComObject(comObject))
+                {
+                    Marshal.ReleaseComObject(comObject);
+                }
+            }
+            catch
+            {
+                // 忽略释放错误
+            }
+            finally
+            {
+                comObject = null;
             }
         }
 
@@ -82,13 +93,14 @@ namespace WordMan.SplitAndMerge
         private void ProcessDocument(string filePath, Microsoft.Office.Interop.Word.Document mergedDoc, int index, MergeOptions options)
         {
             Microsoft.Office.Interop.Word.Document sourceDoc = null;
+            Microsoft.Office.Interop.Word.Range targetRange = null;
             
             try
             {
                 sourceDoc = app.Documents.Open(filePath, ReadOnly: true, AddToRecentFiles: false);
                 sourceDoc.Windows[1].Visible = false;
                 
-                var targetRange = mergedDoc.Range();
+                targetRange = mergedDoc.Range();
                 targetRange.Collapse(WdCollapseDirection.wdCollapseEnd);
                 
                 if (index > 0 && options.AddPageBreaks)
@@ -96,6 +108,7 @@ namespace WordMan.SplitAndMerge
                     if (options.UseSectionBreak)
                     {
                         targetRange.InsertBreak(WdBreakType.wdSectionBreakNextPage);
+                        ReleaseComObject(targetRange);
                         targetRange = mergedDoc.Range();
                         targetRange.Collapse(WdCollapseDirection.wdCollapseEnd);
                         
@@ -105,6 +118,7 @@ namespace WordMan.SplitAndMerge
                     else
                     {
                         targetRange.InsertBreak(WdBreakType.wdPageBreak);
+                        ReleaseComObject(targetRange);
                         targetRange = mergedDoc.Range();
                         targetRange.Collapse(WdCollapseDirection.wdCollapseEnd);
                     }
@@ -118,15 +132,22 @@ namespace WordMan.SplitAndMerge
                 
                 if (index > 0 && options.AddPageBreaks && options.UseSectionBreak)
                 {
-                    mergedDoc.Range().Collapse(WdCollapseDirection.wdCollapseEnd);
+                    ReleaseComObject(targetRange);
+                    targetRange = mergedDoc.Range();
+                    targetRange.Collapse(WdCollapseDirection.wdCollapseEnd);
                     ReplaceHeaderFooterAfterInsert(sourceDoc, mergedDoc, mergedDoc.Sections.Count);
                 }
             }
             finally
             {
+                ReleaseComObject(targetRange);
                 if (sourceDoc != null)
                 {
-                    sourceDoc.Close(SaveChanges: false);
+                    try
+                    {
+                        sourceDoc.Close(SaveChanges: false);
+                    }
+                    catch { }
                     ReleaseComObject(sourceDoc);
                 }
             }
@@ -211,7 +232,8 @@ namespace WordMan.SplitAndMerge
                 mergedDoc.Windows[1].Visible = true;
                 mergedDoc.Activate();
                 
-                MessageBox.Show("文档合并完成！", "合并完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"文档合并完成！\n已合并 {filePaths.Count} 个文档。\n请保存合并后的文档。", 
+                    "合并完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {

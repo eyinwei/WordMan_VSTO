@@ -16,6 +16,9 @@ namespace WordMan
         private TableProcessor tableProcessor = new TableProcessor();
         private CaptionManager captionManager = new CaptionManager();
         private DocumentProcessor documentProcessor = new DocumentProcessor();
+        private SplitAndMerge.DocumentMerger documentMerger;
+        private DocumentSplitter documentSplitter;
+        private MultiLevelListForm multiLevelListForm;
 
         #region 文本处理组
         // Word 内置功能
@@ -77,14 +80,28 @@ namespace WordMan
 
         private void 希腊字母_Click(object sender, RibbonControlEventArgs e)
         {
-            GreekLetterForm form = new GreekLetterForm();
-            form.Show();
+            ShowForm<GreekLetterForm>("希腊字母");
         }
 
         private void 常用符号_Click(object sender, RibbonControlEventArgs e)
         {
-            CommonSymbolForm form = new CommonSymbolForm();
-            form.Show();
+            ShowForm<CommonSymbolForm>("常用符号");
+        }
+
+        /// <summary>
+        /// 统一显示表单的辅助方法
+        /// </summary>
+        private void ShowForm<T>(string formName) where T : Form, new()
+        {
+            try
+            {
+                T form = new T();
+                form.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"打开{formName}窗口失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void 仿宋替换_Click(object sender, RibbonControlEventArgs e)
@@ -116,13 +133,7 @@ namespace WordMan
 
         private void 设为三线_Click(object sender, Microsoft.Office.Tools.Ribbon.RibbonControlEventArgs e)
         {
-            var app = Globals.ThisAddIn.Application;
-            var sel = app.Selection;
-            if (sel == null || sel.Tables.Count == 0)
-                return;
-
-            Word.Table table = sel.Tables[1];
-            tableProcessor.SetThreeLineTable(table);
+            tableProcessor.SetCurrentTableToThreeLine();
         }
 
         private void 插入N行_Click(object sender, RibbonControlEventArgs e)
@@ -138,7 +149,32 @@ namespace WordMan
         private void 重复标题行_Click(object sender, RibbonControlEventArgs e)
         {
             var toggleButton = sender as Microsoft.Office.Tools.Ribbon.RibbonToggleButton;
-            tableProcessor.RepeatHeaderRows(toggleButton);
+            // 直接执行Word内置命令
+            tableProcessor.RepeatHeaderRows();
+            // 执行命令后，延迟更新按钮状态以反映实际状态
+            System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
+            timer.Interval = 50;
+            timer.Tick += (s, args) =>
+            {
+                timer.Stop();
+                timer.Dispose();
+                if (toggleButton != null)
+                {
+                    toggleButton.Checked = tableProcessor.GetRepeatHeaderRowsState();
+                }
+            };
+            timer.Start();
+        }
+
+        /// <summary>
+        /// 更新重复标题行按钮状态（供外部调用）
+        /// </summary>
+        public void UpdateRepeatHeaderRowsButtonState()
+        {
+            if (重复标题行 != null)
+            {
+                重复标题行.Checked = tableProcessor.GetRepeatHeaderRowsState();
+            }
         }
         #endregion
 
@@ -260,8 +296,12 @@ namespace WordMan
         {
             try
             {
-                var multiLevelForm = new MultiLevelListForm();
-                multiLevelForm.ShowDialog();
+                // 如果表单已存在但已关闭，重新创建
+                if (multiLevelListForm == null || multiLevelListForm.IsDisposed)
+                {
+                    multiLevelListForm = new MultiLevelListForm();
+                }
+                multiLevelListForm.ShowDialog();
             }
             catch (Exception ex)
             {
@@ -301,14 +341,34 @@ namespace WordMan
 
         private void 文档合并_Click(object sender, RibbonControlEventArgs e)
         {
-            var merger = new DocumentMerger((Word.Application)Globals.ThisAddIn.Application);
-            merger.ShowMergeDialog();
+            try
+            {
+                if (documentMerger == null)
+                {
+                    documentMerger = new SplitAndMerge.DocumentMerger((Word.Application)Globals.ThisAddIn.Application);
+                }
+                documentMerger.ShowMergeDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"文档合并失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void 文档拆分_Click(object sender, RibbonControlEventArgs e)
         {
-            var splitter = new DocumentSplitter(Globals.ThisAddIn.Application);
-            splitter.ShowSplitDialog();
+            try
+            {
+                if (documentSplitter == null)
+                {
+                    documentSplitter = new DocumentSplitter(Globals.ThisAddIn.Application);
+                }
+                documentSplitter.ShowSplitDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"文档拆分失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void 公开_Click(object sender, RibbonControlEventArgs e)

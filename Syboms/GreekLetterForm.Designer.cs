@@ -124,9 +124,9 @@
             this.Controls.Add(this.chkBold);
             this.Controls.Add(this.chkUppercase);
             this.Controls.Add(this.chkItalic);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             this.Name = "GreekLetterForm";
-            this.Opacity = 0.9D;
-            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "GreekLetterForm";
             this.Load += new System.EventHandler(this.GreekLetterForm_Load);

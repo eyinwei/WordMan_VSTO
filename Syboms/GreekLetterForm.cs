@@ -17,6 +17,7 @@ namespace WordMan
         public GreekLetterForm()
         {
             InitializeComponent();
+            
             // 绑定事件
             chkBold.CheckedChanged += CheckBox_StyleChanged;
             chkItalic.CheckedChanged += CheckBox_StyleChanged;

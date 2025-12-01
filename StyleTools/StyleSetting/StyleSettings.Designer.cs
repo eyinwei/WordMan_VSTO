@@ -330,10 +330,11 @@ namespace WordMan
             // 
             // 导入
             // 
-            this.导入.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.导入.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(130)))), ((int)(((byte)(230)))));
             this.导入.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.导入.FlatAppearance.BorderSize = 0;
             this.导入.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
-            this.导入.ForeColor = System.Drawing.Color.Black;
+            this.导入.ForeColor = System.Drawing.Color.White;
             this.导入.Location = new System.Drawing.Point(278, 334);
             this.导入.Name = "导入";
             this.导入.Size = new System.Drawing.Size(50, 31);
@@ -343,11 +344,12 @@ namespace WordMan
             // 
             // 加载
             // 
-            this.加载.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.加载.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(130)))), ((int)(((byte)(230)))));
             this.加载.Enabled = false;
             this.加载.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.加载.FlatAppearance.BorderSize = 0;
             this.加载.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
-            this.加载.ForeColor = System.Drawing.Color.Black;
+            this.加载.ForeColor = System.Drawing.Color.White;
             this.加载.Location = new System.Drawing.Point(14, 334);
             this.加载.Name = "加载";
             this.加载.Size = new System.Drawing.Size(50, 31);
@@ -357,10 +359,11 @@ namespace WordMan
             // 
             // 关闭
             // 
-            this.关闭.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.关闭.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(247)))));
             this.关闭.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.关闭.FlatAppearance.BorderSize = 0;
             this.关闭.Font = new System.Drawing.Font("微软雅黑", 10F, System.Drawing.FontStyle.Bold);
-            this.关闭.ForeColor = System.Drawing.Color.Black;
+            this.关闭.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(37)))), ((int)(((byte)(41)))));
             this.关闭.Location = new System.Drawing.Point(536, 334);
             this.关闭.Name = "关闭";
             this.关闭.Size = new System.Drawing.Size(120, 31);
@@ -370,7 +373,7 @@ namespace WordMan
             // 
             // Txt_AddStyleName
             // 
-            this.Txt_AddStyleName.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.Txt_AddStyleName.BackColor = System.Drawing.Color.White;
             this.Txt_AddStyleName.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.Txt_AddStyleName.Font = new System.Drawing.Font("微软雅黑", 9F);
             this.Txt_AddStyleName.Location = new System.Drawing.Point(14, 305);
@@ -381,10 +384,11 @@ namespace WordMan
             // 
             // Btn_ApplySet
             // 
-            this.Btn_ApplySet.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.Btn_ApplySet.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(130)))), ((int)(((byte)(230)))));
             this.Btn_ApplySet.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.Btn_ApplySet.FlatAppearance.BorderSize = 0;
             this.Btn_ApplySet.Font = new System.Drawing.Font("微软雅黑", 10F, System.Drawing.FontStyle.Bold);
-            this.Btn_ApplySet.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(123)))), ((int)(((byte)(255)))));
+            this.Btn_ApplySet.ForeColor = System.Drawing.Color.White;
             this.Btn_ApplySet.Location = new System.Drawing.Point(407, 334);
             this.Btn_ApplySet.Name = "Btn_ApplySet";
             this.Btn_ApplySet.Size = new System.Drawing.Size(120, 31);
@@ -394,11 +398,12 @@ namespace WordMan
             // 
             // 删除
             // 
-            this.删除.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.删除.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(53)))), ((int)(((byte)(69)))));
             this.删除.Enabled = false;
             this.删除.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.删除.FlatAppearance.BorderSize = 0;
             this.删除.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
-            this.删除.ForeColor = System.Drawing.Color.Black;
+            this.删除.ForeColor = System.Drawing.Color.White;
             this.删除.Location = new System.Drawing.Point(122, 334);
             this.删除.Name = "删除";
             this.删除.Size = new System.Drawing.Size(50, 31);
@@ -409,7 +414,7 @@ namespace WordMan
             // 显示标题数下拉框
             // 
             this.显示标题数下拉框.AllowInput = false;
-            this.显示标题数下拉框.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.显示标题数下拉框.BackColor = System.Drawing.Color.White;
             this.显示标题数下拉框.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.显示标题数下拉框.Font = new System.Drawing.Font("微软雅黑", 9F);
             this.显示标题数下拉框.FormattingEnabled = true;
@@ -432,7 +437,7 @@ namespace WordMan
             // 风格下拉框
             // 
             this.风格下拉框.AllowInput = false;
-            this.风格下拉框.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.风格下拉框.BackColor = System.Drawing.Color.White;
             this.风格下拉框.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.风格下拉框.Font = new System.Drawing.Font("微软雅黑", 9F);
             this.风格下拉框.FormattingEnabled = true;
@@ -449,7 +454,7 @@ namespace WordMan
             // Cmb_ChnFontName
             // 
             this.Cmb_ChnFontName.AllowInput = false;
-            this.Cmb_ChnFontName.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.Cmb_ChnFontName.BackColor = System.Drawing.Color.White;
             this.Cmb_ChnFontName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.Cmb_ChnFontName.Font = new System.Drawing.Font("微软雅黑", 9F);
             this.Cmb_ChnFontName.FormattingEnabled = true;
@@ -461,7 +466,7 @@ namespace WordMan
             // Cmb_EngFontName
             // 
             this.Cmb_EngFontName.AllowInput = false;
-            this.Cmb_EngFontName.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.Cmb_EngFontName.BackColor = System.Drawing.Color.White;
             this.Cmb_EngFontName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.Cmb_EngFontName.Font = new System.Drawing.Font("微软雅黑", 9F);
             this.Cmb_EngFontName.FormattingEnabled = true;
@@ -473,7 +478,7 @@ namespace WordMan
             // Cmb_FontSize
             // 
             this.Cmb_FontSize.AllowInput = false;
-            this.Cmb_FontSize.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.Cmb_FontSize.BackColor = System.Drawing.Color.White;
             this.Cmb_FontSize.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.Cmb_FontSize.Font = new System.Drawing.Font("微软雅黑", 9F);
             this.Cmb_FontSize.FormattingEnabled = true;
@@ -530,7 +535,7 @@ namespace WordMan
             // Cmb_LineSpacing
             // 
             this.Cmb_LineSpacing.AllowInput = true;
-            this.Cmb_LineSpacing.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.Cmb_LineSpacing.BackColor = System.Drawing.Color.White;
             this.Cmb_LineSpacing.Font = new System.Drawing.Font("微软雅黑", 9F);
             this.Cmb_LineSpacing.FormattingEnabled = true;
             this.Cmb_LineSpacing.Items.AddRange(new object[] {
@@ -550,7 +555,7 @@ namespace WordMan
             this.Cmb_BefreSpacing.AllowInput = true;
             this.Cmb_BefreSpacing.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
             this.Cmb_BefreSpacing.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
-            this.Cmb_BefreSpacing.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.Cmb_BefreSpacing.BackColor = System.Drawing.Color.White;
             this.Cmb_BefreSpacing.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDown;
             this.Cmb_BefreSpacing.Font = new System.Drawing.Font("微软雅黑", 9F);
             this.Cmb_BefreSpacing.FormattingEnabled = true;
@@ -564,7 +569,7 @@ namespace WordMan
             this.Cmb_AfterSpacing.AllowInput = true;
             this.Cmb_AfterSpacing.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
             this.Cmb_AfterSpacing.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
-            this.Cmb_AfterSpacing.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.Cmb_AfterSpacing.BackColor = System.Drawing.Color.White;
             this.Cmb_AfterSpacing.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDown;
             this.Cmb_AfterSpacing.Font = new System.Drawing.Font("微软雅黑", 9F);
             this.Cmb_AfterSpacing.FormattingEnabled = true;
@@ -576,7 +581,7 @@ namespace WordMan
             // Cmb_ParaAligment
             // 
             this.Cmb_ParaAligment.AllowInput = false;
-            this.Cmb_ParaAligment.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.Cmb_ParaAligment.BackColor = System.Drawing.Color.White;
             this.Cmb_ParaAligment.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.Cmb_ParaAligment.Font = new System.Drawing.Font("微软雅黑", 9F);
             this.Cmb_ParaAligment.FormattingEnabled = true;
@@ -593,7 +598,7 @@ namespace WordMan
             // 
             // Nud_LeftIndent
             // 
-            this.Nud_LeftIndent.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.Nud_LeftIndent.BackColor = System.Drawing.Color.White;
             this.Nud_LeftIndent.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.Nud_LeftIndent.DecimalPlaces = 1;
             this.Nud_LeftIndent.Increment = new decimal(new int[] {
@@ -619,7 +624,7 @@ namespace WordMan
             // 
             // Nud_RightIndent
             // 
-            this.Nud_RightIndent.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.Nud_RightIndent.BackColor = System.Drawing.Color.White;
             this.Nud_RightIndent.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.Nud_RightIndent.DecimalPlaces = 1;
             this.Nud_RightIndent.Increment = new decimal(new int[] {
@@ -646,7 +651,7 @@ namespace WordMan
             // 首行缩进方式下拉框
             // 
             this.首行缩进方式下拉框.AllowInput = false;
-            this.首行缩进方式下拉框.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.首行缩进方式下拉框.BackColor = System.Drawing.Color.White;
             this.首行缩进方式下拉框.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.首行缩进方式下拉框.Font = new System.Drawing.Font("微软雅黑", 9F);
             this.首行缩进方式下拉框.FormattingEnabled = true;
@@ -661,7 +666,7 @@ namespace WordMan
             // 
             // Nud_FirstLineIndent
             // 
-            this.Nud_FirstLineIndent.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.Nud_FirstLineIndent.BackColor = System.Drawing.Color.White;
             this.Nud_FirstLineIndent.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.Nud_FirstLineIndent.DecimalPlaces = 1;
             this.Nud_FirstLineIndent.Increment = new decimal(new int[] {
@@ -687,10 +692,11 @@ namespace WordMan
             // 
             // 导出
             // 
-            this.导出.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.导出.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(130)))), ((int)(((byte)(230)))));
+            this.导出.FlatAppearance.BorderSize = 0;
             this.导出.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.导出.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
-            this.导出.ForeColor = System.Drawing.Color.Black;
+            this.导出.ForeColor = System.Drawing.Color.White;
             this.导出.Location = new System.Drawing.Point(348, 334);
             this.导出.Name = "导出";
             this.导出.Size = new System.Drawing.Size(50, 31);
@@ -700,11 +706,12 @@ namespace WordMan
             // 
             // 添加
             // 
-            this.添加.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.添加.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(130)))), ((int)(((byte)(230)))));
             this.添加.Enabled = false;
             this.添加.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.添加.FlatAppearance.BorderSize = 0;
             this.添加.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
-            this.添加.ForeColor = System.Drawing.Color.Black;
+            this.添加.ForeColor = System.Drawing.Color.White;
             this.添加.Location = new System.Drawing.Point(68, 334);
             this.添加.Name = "添加";
             this.添加.Size = new System.Drawing.Size(50, 31);
@@ -714,10 +721,11 @@ namespace WordMan
             // 
             // 读取文档样式
             // 
-            this.读取文档样式.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.读取文档样式.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(70)))), ((int)(((byte)(130)))), ((int)(((byte)(230)))));
+            this.读取文档样式.FlatAppearance.BorderSize = 0;
             this.读取文档样式.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.读取文档样式.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
-            this.读取文档样式.ForeColor = System.Drawing.Color.Black;
+            this.读取文档样式.ForeColor = System.Drawing.Color.White;
             this.读取文档样式.Location = new System.Drawing.Point(180, 334);
             this.读取文档样式.Name = "读取文档样式";
             this.读取文档样式.Size = new System.Drawing.Size(90, 31);
@@ -730,10 +738,12 @@ namespace WordMan
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(233)))), ((int)(((byte)(247)))));
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(252)))));
             this.ClientSize = new System.Drawing.Size(678, 374);
             this.Controls.Add(this.groupBox3);
             this.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             this.MinimumSize = new System.Drawing.Size(400, 300);
             this.Name = "StyleSettings";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;

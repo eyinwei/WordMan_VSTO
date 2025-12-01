@@ -17,6 +17,54 @@ namespace WordMan
     {
         private Form _form;
         private Dictionary<string, Control> _controls;
+        
+        // 字体常量
+        private static readonly Font DefaultFont = new Font("微软雅黑", 9.5F);
+        private static readonly Font ListBoxFont = new Font("微软雅黑", 10.5F);
+        private static readonly Font BoldFont = new Font("微软雅黑", 9F, FontStyle.Bold);
+        private static readonly Font SmallFont = new Font("微软雅黑", 8F);
+        private static readonly Font NormalFont = new Font("微软雅黑", 9F);
+        private static readonly Font LargeFont = new Font("微软雅黑", 10F);
+        private static readonly Font LargeBoldFont = new Font("微软雅黑", 10.5F, FontStyle.Bold);
+        private static readonly Font BoldDefaultFont = new Font("微软雅黑", 9.5F, FontStyle.Bold);
+        
+        // 颜色常量 - 现代化配色方案
+        // 主背景色：柔和的米白色
+        private static readonly Color FormBackground = Color.FromArgb(250, 250, 252);
+        // 面板背景：浅灰色，有层次感
+        private static readonly Color PanelBackground = Color.FromArgb(245, 247, 250);
+        // 编辑面板：纯白色，突出编辑区域
+        private static readonly Color EditPanelBackground = Color.FromArgb(255, 255, 255);
+        // 按钮灰色：柔和的浅灰色
+        private static readonly Color ButtonGray = Color.FromArgb(245, 245, 247);
+        // 按钮蓝色：现代柔和的蓝色（更柔和）
+        private static readonly Color ButtonBlue = Color.FromArgb(70, 130, 230);
+        // 按钮悬停蓝色：稍深的蓝色
+        private static readonly Color ButtonBlueHover = Color.FromArgb(50, 110, 210);
+        // 按钮红色：柔和的红色
+        private static readonly Color ButtonRed = Color.FromArgb(220, 53, 69);
+        // 按钮悬停红色：稍深的红色
+        private static readonly Color ButtonRedHover = Color.FromArgb(200, 33, 49);
+        // 选中背景：柔和的蓝色
+        private static readonly Color SelectedBackground = Color.FromArgb(70, 130, 230);
+        // 选中背景悬停：稍深的蓝色
+        private static readonly Color SelectedBackgroundHover = Color.FromArgb(60, 120, 220);
+        // 交替行：非常浅的灰色
+        private static readonly Color AlternatingRow = Color.FromArgb(249, 250, 252);
+        // 主要文本：深灰色，更好的可读性
+        private static readonly Color TextDark = Color.FromArgb(33, 37, 41);
+        // 次要文本：中等灰色
+        private static readonly Color TextGray = Color.FromArgb(108, 117, 125);
+        // 辅助文本：浅灰色
+        private static readonly Color TextSecondary = Color.FromArgb(134, 142, 150);
+        // 边框：柔和的灰色
+        private static readonly Color BorderGray = Color.FromArgb(222, 226, 230);
+        // 输入框背景：纯白色
+        private static readonly Color InputBackground = Color.FromArgb(255, 255, 255);
+        // 输入框边框：浅灰色
+        private static readonly Color InputBorder = Color.FromArgb(206, 212, 218);
+        // 输入框焦点边框：蓝色
+        private static readonly Color InputBorderFocus = Color.FromArgb(70, 130, 230);
 
         public StyleSettingsUIDesigner(Form form)
         {
@@ -36,11 +84,10 @@ namespace WordMan
             _form.Size = new Size(920, 630); 
             _form.Text = "样式设置";
             _form.StartPosition = FormStartPosition.CenterScreen;
-            _form.BackColor = Color.FromArgb(240, 248, 255); // 浅蓝色背景
-            _form.FormBorderStyle = FormBorderStyle.FixedDialog;
+            _form.BackColor = FormBackground;
+            _form.FormBorderStyle = FormBorderStyle.FixedSingle;
             _form.MaximizeBox = false;
-            _form.MinimizeBox = false;
-            _form.Icon = SystemIcons.Information; // 使用信息图标，与其他窗体保持一致
+            _form.Icon = SystemIcons.Information;
 
             // 1. 第一块：左上角样式列表区域
             var leftPanel = CreateLeftStyleListPanel();
@@ -68,7 +115,7 @@ namespace WordMan
             {
                 Location = new Point(10, 10),
                 Size = new Size(200, 500),
-                BackColor = Color.FromArgb(248, 250, 252), // 浅灰蓝色
+                BackColor = PanelBackground,
                 BorderStyle = BorderStyle.FixedSingle
             };
             
@@ -83,24 +130,31 @@ namespace WordMan
             {
                 Name = "btnSelectBuiltIn",
                 Text = "选择内置样式",
-                Location = new Point(10, 390), // 向上平移10像素
+                Location = new Point(10, 390),
                 Size = new Size(180, 30),
-                Font = new Font("微软雅黑", 9.5F), // 字体稍微增大
-                BackColor = Color.FromArgb(240, 240, 240),
+                Font = DefaultFont,
+                BackColor = ButtonGray,
+                ForeColor = TextDark,
                 FlatStyle = FlatStyle.Flat,
+                FlatAppearance = { BorderSize = 0 },
                 Cursor = Cursors.Hand
             };
+            // 添加悬停效果
+            btnSelectBuiltIn.MouseEnter += (s, e) => btnSelectBuiltIn.BackColor = Color.FromArgb(235, 237, 240);
+            btnSelectBuiltIn.MouseLeave += (s, e) => btnSelectBuiltIn.BackColor = ButtonGray;
             _controls["btnSelectBuiltIn"] = btnSelectBuiltIn;
 
             // 输入添加样式的名称文本框
             var txtNewStyleName = new TextBox
             {
                 Name = "txtNewStyleName",
-                Location = new Point(10, 430), // 向上平移10像素，保持10像素间隔
+                Location = new Point(10, 430),
                 Size = new Size(180, 25),
-                Font = new Font("微软雅黑", 9.5F), // 字体稍微增大
+                Font = DefaultFont,
                 Text = "输入添加样式的名称",
-                ForeColor = Color.Gray,
+                ForeColor = TextGray,
+                BackColor = InputBackground,
+                BorderStyle = BorderStyle.FixedSingle,
                 TextAlign = HorizontalAlignment.Center
             };
             
@@ -110,7 +164,7 @@ namespace WordMan
                 if (txtNewStyleName.Text == "输入添加样式的名称")
                 {
                     txtNewStyleName.Text = "";
-                    txtNewStyleName.ForeColor = Color.Black;
+                    txtNewStyleName.ForeColor = TextDark;
                 }
             };
             
@@ -119,7 +173,7 @@ namespace WordMan
                 if (string.IsNullOrWhiteSpace(txtNewStyleName.Text))
                 {
                     txtNewStyleName.Text = "输入添加样式的名称";
-                    txtNewStyleName.ForeColor = Color.Gray;
+                    txtNewStyleName.ForeColor = TextGray;
                 }
             };
             
@@ -130,14 +184,18 @@ namespace WordMan
             {
                 Name = "btnAddStyle",
                 Text = "添加样式",
-                Location = new Point(10, 460), // 再向上平移5像素
+                Location = new Point(10, 460),
                 Size = new Size(85, 30),
-                Font = new Font("微软雅黑", 9.5F), // 字体稍微增大
-                BackColor = Color.FromArgb(0, 120, 215),
+                Font = DefaultFont,
+                BackColor = ButtonBlue,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
+                FlatAppearance = { BorderSize = 0 },
                 Cursor = Cursors.Hand
             };
+            // 添加悬停效果
+            btnAddStyle.MouseEnter += (s, e) => btnAddStyle.BackColor = ButtonBlueHover;
+            btnAddStyle.MouseLeave += (s, e) => btnAddStyle.BackColor = ButtonBlue;
             _controls["btnAddStyle"] = btnAddStyle;
 
             // 删除样式按钮
@@ -145,14 +203,18 @@ namespace WordMan
             {
                 Name = "btnDeleteStyle",
                 Text = "删除样式",
-                Location = new Point(105, 460), // 再向上平移5像素
+                Location = new Point(105, 460),
                 Size = new Size(85, 30),
-                Font = new Font("微软雅黑", 9.5F), // 字体稍微增大
-                BackColor = Color.FromArgb(196, 43, 28),
+                Font = DefaultFont,
+                BackColor = ButtonRed,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
+                FlatAppearance = { BorderSize = 0 },
                 Cursor = Cursors.Hand
             };
+            // 添加悬停效果
+            btnDeleteStyle.MouseEnter += (s, e) => btnDeleteStyle.BackColor = ButtonRedHover;
+            btnDeleteStyle.MouseLeave += (s, e) => btnDeleteStyle.BackColor = ButtonRed;
             _controls["btnDeleteStyle"] = btnDeleteStyle;
 
             panel.Controls.Add(styleList);
@@ -176,8 +238,8 @@ namespace WordMan
             {
                 Name = "lstStyleList",
                 Location = new Point(10, 10),
-                Size = new Size(180, 380), // 增大高度
-                Font = new Font("微软雅黑", 10.5F), // 字体稍微增大
+                Size = new Size(180, 380),
+                Font = ListBoxFont,
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle,
                 SelectionMode = SelectionMode.MultiExtended,
@@ -192,19 +254,15 @@ namespace WordMan
 
                 e.DrawBackground();
                 
-                // 设置选中状态的背景色
-                if ((e.State & DrawItemState.Selected) == DrawItemState.Selected)
-                {
-                    e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(0, 120, 215)), e.Bounds);
-                }
-                else
-                {
-                    e.Graphics.FillRectangle(new SolidBrush(e.Index % 2 == 0 ? Color.White : Color.FromArgb(248, 249, 250)), e.Bounds);
-                }
+                // 绘制背景（交替行颜色和选中状态）
+                var backColor = (e.State & DrawItemState.Selected) == DrawItemState.Selected 
+                    ? SelectedBackground 
+                    : (e.Index % 2 == 0 ? Color.White : AlternatingRow);
+                e.Graphics.FillRectangle(new SolidBrush(backColor), e.Bounds);
 
                 // 绘制文本
                 var text = listBox.Items[e.Index].ToString();
-                var textColor = (e.State & DrawItemState.Selected) == DrawItemState.Selected ? Color.White : Color.FromArgb(64, 64, 64);
+                var textColor = (e.State & DrawItemState.Selected) == DrawItemState.Selected ? Color.White : TextDark;
                 var textRect = new Rectangle(e.Bounds.X + 10, e.Bounds.Y, e.Bounds.Width - 10, e.Bounds.Height);
                 
                 using (var brush = new SolidBrush(textColor))
@@ -242,7 +300,7 @@ namespace WordMan
             {
                 Location = new Point(220, 10),
                 Size = new Size(670, 500),
-                BackColor = Color.FromArgb(252, 254, 255), // 更浅的蓝色
+                BackColor = EditPanelBackground,
                 BorderStyle = BorderStyle.FixedSingle
             };
             
@@ -255,8 +313,8 @@ namespace WordMan
                 Text = "样式设置",
                 Location = new Point(10, 10),
                 Size = new Size(100, 20),
-                Font = new Font("微软雅黑", 9F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(64, 64, 64)
+                Font = BoldFont,
+                ForeColor = TextDark
             };
             panel.Controls.Add(lblStyleSetup);
 
@@ -280,8 +338,8 @@ namespace WordMan
             var groupBox = new GroupBox
             {
                 Text = "样式设置",
-                Font = new Font("微软雅黑", 9F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(64, 64, 64)
+                Font = BoldFont,
+                ForeColor = TextDark
             };
 
             // 字体设置区域
@@ -318,10 +376,10 @@ namespace WordMan
                 Name = "btnFontColor",
                 Location = new Point(200, 102),
                 Size = new Size(25, 25),
-                BackColor = Color.Black,
+                BackColor = TextDark,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                FlatAppearance = { BorderSize = 1, BorderColor = Color.FromArgb(200, 200, 200) },
+                FlatAppearance = { BorderSize = 1, BorderColor = BorderGray },
                 Cursor = Cursors.Hand
             };
             _controls["btnFontColor"] = btnFontColor;
@@ -333,7 +391,7 @@ namespace WordMan
                 Text = "粗体",
                 Location = new Point(350, 105),
                 Size = new Size(60, 20),
-                Font = new Font("微软雅黑", 9.5F) // 字体稍微增大
+                Font = DefaultFont
             };
             _controls["chkBold"] = chkBold;
 
@@ -343,7 +401,7 @@ namespace WordMan
                 Text = "斜体",
                 Location = new Point(420, 105),
                 Size = new Size(60, 20),
-                Font = new Font("微软雅黑", 9.5F) // 字体稍微增大
+                Font = DefaultFont
             };
             _controls["chkItalic"] = chkItalic;
 
@@ -353,7 +411,7 @@ namespace WordMan
                 Text = "下划线",
                 Location = new Point(490, 105),
                 Size = new Size(70, 20),
-                Font = new Font("微软雅黑", 9.5F) // 字体稍微增大
+                Font = DefaultFont
             };
             _controls["chkUnderline"] = chkUnderline;
 
@@ -379,7 +437,7 @@ namespace WordMan
                 Text = "段前分页",
                 Location = new Point(350, 150),
                 Size = new Size(80, 20),
-                Font = new Font("微软雅黑", 9.5F) // 字体稍微增大
+                Font = DefaultFont
             };
             _controls["chkPageBreakBefore"] = chkPageBreakBefore;
 
@@ -396,7 +454,7 @@ namespace WordMan
                 Name = "txtLineSpaceValue",
                 Location = new Point(560, 182),
                 Size = new Size(80, 25),
-                Font = new Font("微软雅黑", 9.5F),
+                Font = DefaultFont,
                 Text = "12磅",
                 Visible = false // 默认隐藏
             };
@@ -459,7 +517,7 @@ namespace WordMan
                 Location = new Point(100, 287),
                 Size = new Size(120, 25),
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("微软雅黑", 9F)
+                Font = NormalFont
             };
             cmbDisplayOrder.Items.AddRange(new string[] { "1", "2", "3", "4", "5", "6", "7", "8", "9" });
             cmbDisplayOrder.SelectedIndex = 0;
@@ -472,7 +530,7 @@ namespace WordMan
                 Location = new Point(430, 287),
                 Size = new Size(120, 25),
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("微软雅黑", 9F)
+                Font = NormalFont
             };
             cmbVisibilityStatus.Items.AddRange(new string[] { "显示", "隐藏", "使用前隐藏" });
             cmbVisibilityStatus.SelectedIndex = 0;
@@ -494,14 +552,14 @@ namespace WordMan
         {
             // 样式预览标签
             var lblPreview = CreateLabel("样式预览", 20, 320);
-            lblPreview.Font = new Font("微软雅黑", 9.5F, FontStyle.Bold);
+            lblPreview.Font = BoldDefaultFont;
 
             // 第一段样式预览（5个连续的预览框）
             var firstRowPanel = new Panel
             {
                 Location = new Point(20, 345),
                 Size = new Size(610, 30),
-                BackColor = Color.FromArgb(250, 250, 250),
+                BackColor = InputBackground,
                 BorderStyle = BorderStyle.FixedSingle
             };
             _controls["firstRowPanel"] = firstRowPanel;
@@ -516,8 +574,8 @@ namespace WordMan
                     Size = new Size(120, 28),
                     Multiline = false,
                     ReadOnly = true,
-                    Font = new Font("微软雅黑", 10F),
-                    BackColor = Color.FromArgb(255, 255, 255),
+                    Font = LargeFont,
+                    BackColor = Color.White,
                     BorderStyle = BorderStyle.FixedSingle,
                     TextAlign = HorizontalAlignment.Center
                 };
@@ -527,15 +585,15 @@ namespace WordMan
 
             // 间隔标签
             var lblSeparator = CreateLabel("─────────────────────────────────────", 20, 380);
-            lblSeparator.Font = new Font("微软雅黑", 8F);
-            lblSeparator.ForeColor = Color.FromArgb(150, 150, 150);
+            lblSeparator.Font = SmallFont;
+            lblSeparator.ForeColor = TextGray;
 
             // 第二段样式预览（5个连续的预览框）
             var secondRowPanel = new Panel
             {
                 Location = new Point(20, 400),
                 Size = new Size(610, 30),
-                BackColor = Color.FromArgb(250, 250, 250),
+                BackColor = InputBackground,
                 BorderStyle = BorderStyle.FixedSingle
             };
             _controls["secondRowPanel"] = secondRowPanel;
@@ -550,8 +608,8 @@ namespace WordMan
                     Size = new Size(120, 28),
                     Multiline = false,
                     ReadOnly = true,
-                    Font = new Font("微软雅黑", 10F),
-                    BackColor = Color.FromArgb(255, 255, 255),
+                    Font = LargeFont,
+                    BackColor = Color.White,
                     BorderStyle = BorderStyle.FixedSingle,
                     TextAlign = HorizontalAlignment.Center
                 };
@@ -576,8 +634,8 @@ namespace WordMan
                 Text = text,
                 Location = new Point(x, y),
                 Size = new Size(80, 20),
-                Font = new Font("微软雅黑", 9F),
-                ForeColor = Color.FromArgb(73, 80, 87),
+                Font = NormalFont,
+                ForeColor = TextSecondary,
                 TextAlign = ContentAlignment.MiddleLeft
             };
         }
@@ -613,8 +671,8 @@ namespace WordMan
                 DropDownStyle = ComboBoxStyle.DropDown, // 改为DropDown以支持键入匹配
                 Font = new Font("微软雅黑", 9.5F), // 字体稍微增大
                 FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White,
-                ForeColor = Color.FromArgb(64, 64, 64),
+                BackColor = InputBackground,
+                ForeColor = TextDark,
                 Cursor = Cursors.Hand,
                 DrawMode = DrawMode.OwnerDrawFixed,
                 ItemHeight = 20,
@@ -668,7 +726,7 @@ namespace WordMan
                 // 设置选中状态的背景色
                 if ((e.State & DrawItemState.Selected) == DrawItemState.Selected)
                 {
-                    e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(0, 120, 215)), e.Bounds);
+                    e.Graphics.FillRectangle(new SolidBrush(SelectedBackground), e.Bounds);
                 }
 
                 // 获取字体名称
@@ -682,11 +740,13 @@ namespace WordMan
                 }
                 catch
                 {
-                    previewFont = new Font("微软雅黑", 9F);
+                    previewFont = NormalFont;
                 }
 
                 // 绘制文本
-                var textColor = (e.State & DrawItemState.Selected) == DrawItemState.Selected ? Color.White : Color.FromArgb(64, 64, 64);
+                    var textColor = (e.State & DrawItemState.Selected) == DrawItemState.Selected ? Color.White : TextDark;
+                    var backColor = (e.State & DrawItemState.Selected) == DrawItemState.Selected ? SelectedBackground : (e.Index % 2 == 0 ? Color.White : AlternatingRow);
+                    e.Graphics.FillRectangle(new SolidBrush(backColor), e.Bounds);
                 var textRect = new Rectangle(e.Bounds.X + 5, e.Bounds.Y, e.Bounds.Width - 5, e.Bounds.Height);
                 
                 using (var brush = new SolidBrush(textColor))
@@ -731,8 +791,8 @@ namespace WordMan
                 DropDownStyle = ComboBoxStyle.DropDown, // 支持键入匹配
                 Font = new Font("微软雅黑", 9.5F),
                 FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White,
-                ForeColor = Color.FromArgb(64, 64, 64),
+                BackColor = InputBackground,
+                ForeColor = TextDark,
                 Cursor = Cursors.Hand,
                 AutoCompleteMode = AutoCompleteMode.SuggestAppend,
                 AutoCompleteSource = AutoCompleteSource.ListItems
@@ -794,8 +854,8 @@ namespace WordMan
                 DropDownStyle = ComboBoxStyle.DropDownList, // 改回DropDownList，因为选项固定
                 Font = new Font("微软雅黑", 9.5F), // 字体稍微增大
                 FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White,
-                ForeColor = Color.FromArgb(64, 64, 64),
+                BackColor = InputBackground,
+                ForeColor = TextDark,
                 Cursor = Cursors.Hand
             };
             string[] lineSpaces = { "单倍行距", "1.5倍行距", "2倍行距", "最小值", "固定值", "多倍行距" };
@@ -818,8 +878,8 @@ namespace WordMan
                 DropDownStyle = ComboBoxStyle.DropDown, // 改为DropDown以支持键入匹配
                 Font = new Font("微软雅黑", 9.5F), // 字体稍微增大
                 FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White,
-                ForeColor = Color.FromArgb(64, 64, 64),
+                BackColor = InputBackground,
+                ForeColor = TextDark,
                 Cursor = Cursors.Hand,
                 AutoCompleteMode = AutoCompleteMode.SuggestAppend, // 启用自动完成
                 AutoCompleteSource = AutoCompleteSource.ListItems // 使用列表项作为自动完成源
@@ -844,8 +904,8 @@ namespace WordMan
                 DropDownStyle = ComboBoxStyle.DropDownList, // 改回DropDownList，因为选项固定
                 Font = new Font("微软雅黑", 9.5F), // 字体稍微增大
                 FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White,
-                ForeColor = Color.FromArgb(64, 64, 64),
+                BackColor = InputBackground,
+                ForeColor = TextDark,
                 Cursor = Cursors.Hand
             };
             comboBox.Items.AddRange(new string[] { "左对齐", "居中", "右对齐", "两端对齐" });
@@ -867,8 +927,8 @@ namespace WordMan
                 DropDownStyle = ComboBoxStyle.DropDownList, // 改回DropDownList，因为选项固定
                 Font = new Font("微软雅黑", 9.5F), // 字体稍微增大
                 FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White,
-                ForeColor = Color.FromArgb(64, 64, 64),
+                BackColor = InputBackground,
+                ForeColor = TextDark,
                 Cursor = Cursors.Hand
             };
             comboBox.Items.AddRange(new string[] { "正文文本", "级别 1", "级别 2", "级别 3", "级别 4", "级别 5", "级别 6", "级别 7", "级别 8", "级别 9" });
@@ -890,8 +950,8 @@ namespace WordMan
                 DropDownStyle = ComboBoxStyle.DropDownList, // 改回DropDownList，因为选项固定
                 Font = new Font("微软雅黑", 9.5F), // 字体稍微增大
                 FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White,
-                ForeColor = Color.FromArgb(64, 64, 64),
+                BackColor = InputBackground,
+                ForeColor = TextDark,
                 Cursor = Cursors.Hand
             };
             comboBox.Items.AddRange(new string[] { "无", "首行缩进", "悬挂缩进" });
@@ -915,7 +975,7 @@ namespace WordMan
                 BackColor = Color.FromArgb(240, 240, 240),
                 ForeColor = Color.FromArgb(64, 64, 64),
                 FlatStyle = FlatStyle.Flat,
-                FlatAppearance = { BorderSize = 1, BorderColor = Color.FromArgb(200, 200, 200) },
+                FlatAppearance = { BorderSize = 1, BorderColor = BorderGray },
                 Cursor = Cursors.Hand
             };
             _controls[name] = button;
@@ -932,10 +992,10 @@ namespace WordMan
                 Name = name,
                 Location = new Point(x, y),
                 Size = new Size(50, 28),
-                BackColor = Color.Black,
+                BackColor = TextDark,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                FlatAppearance = { BorderSize = 1, BorderColor = Color.FromArgb(200, 200, 200) },
+                FlatAppearance = { BorderSize = 1, BorderColor = BorderGray },
                 Cursor = Cursors.Hand,
                 Text = "颜色"
             };
@@ -966,7 +1026,7 @@ namespace WordMan
                 Text = "预设样式：",
                 Location = new Point(20, 20),
                 Size = new Size(80, 20),
-                Font = new Font("微软雅黑", 9.5F, FontStyle.Bold), // 字体稍微增大
+                Font = BoldDefaultFont,
                 ForeColor = Color.FromArgb(64, 64, 64)
             };
 
@@ -993,11 +1053,15 @@ namespace WordMan
                 Location = new Point(250, 18),
                 Size = new Size(80, 25),
                 Font = new Font("微软雅黑", 9.5F), // 字体稍微增大
-                BackColor = Color.FromArgb(52, 144, 220),
+                BackColor = ButtonBlue,
                 ForeColor = Color.White,
+                FlatAppearance = { BorderSize = 0 },
                 FlatStyle = FlatStyle.Flat,
                 Cursor = Cursors.Hand
             };
+            // 添加悬停效果
+            btnLoadStyle.MouseEnter += (s, e) => btnLoadStyle.BackColor = ButtonBlueHover;
+            btnLoadStyle.MouseLeave += (s, e) => btnLoadStyle.BackColor = ButtonBlue;
             _controls["btnLoadStyle"] = btnLoadStyle;
 
             // 保存样式按钮
@@ -1008,11 +1072,15 @@ namespace WordMan
                 Location = new Point(350, 18),
                 Size = new Size(80, 25),
                 Font = new Font("微软雅黑", 9.5F), // 字体稍微增大
-                BackColor = Color.FromArgb(52, 144, 220),
+                BackColor = ButtonBlue,
                 ForeColor = Color.White,
+                FlatAppearance = { BorderSize = 0 },
                 FlatStyle = FlatStyle.Flat,
                 Cursor = Cursors.Hand
             };
+            // 添加悬停效果
+            btnSaveStyle.MouseEnter += (s, e) => btnSaveStyle.BackColor = ButtonBlueHover;
+            btnSaveStyle.MouseLeave += (s, e) => btnSaveStyle.BackColor = ButtonBlue;
             _controls["btnSaveStyle"] = btnSaveStyle;
 
             // 应用样式按钮（最右下角）
@@ -1022,12 +1090,16 @@ namespace WordMan
                 Text = "应用样式",
                 Location = new Point(760, 15),
                 Size = new Size(100, 30),
-                Font = new Font("微软雅黑", 10.5F, FontStyle.Bold), // 字体稍微增大
-                BackColor = Color.FromArgb(0, 120, 215),
+                Font = LargeBoldFont,
+                BackColor = ButtonBlue,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
+                FlatAppearance = { BorderSize = 0 },
                 Cursor = Cursors.Hand
             };
+            // 添加悬停效果
+            btnApplyStyle.MouseEnter += (s, e) => btnApplyStyle.BackColor = ButtonBlueHover;
+            btnApplyStyle.MouseLeave += (s, e) => btnApplyStyle.BackColor = ButtonBlue;
             _controls["btnApplyStyle"] = btnApplyStyle;
 
             panel.Controls.Add(lblPreset);

@@ -10,6 +10,19 @@ using Color = System.Drawing.Color;
 
 namespace WordMan
 {
+    #region 常量定义
+    /// <summary>
+    /// UI 颜色常量
+    /// </summary>
+    internal static class UIColors
+    {
+        public static readonly Color PrimaryBlue = Color.FromArgb(0, 123, 255);
+        public static readonly Color DarkGray = Color.FromArgb(10, 10, 10);
+        public static readonly Color LightGray = Color.FromArgb(245, 245, 245);
+        public static readonly Color BackgroundGray = Color.FromArgb(250, 250, 250);
+    }
+    #endregion
+
     #region 数据结构定义
 
     /// <summary>
@@ -235,21 +248,21 @@ namespace WordMan
         private void SetButtonStyle(ButtonType type)
         {
             // 通用样式
-            this.BackColor = Color.FromArgb(245, 245, 245);
+            this.BackColor = UIColors.LightGray;
             this.FlatAppearance.BorderSize = 1;
 
             switch (type)
             {
                 case ButtonType.Primary:
-                    this.FlatAppearance.BorderColor = Color.FromArgb(0, 123, 255);
-                    this.ForeColor = Color.FromArgb(0, 123, 255);
+                    this.FlatAppearance.BorderColor = UIColors.PrimaryBlue;
+                    this.ForeColor = UIColors.PrimaryBlue;
                     break;
                 case ButtonType.Secondary:
-                    this.FlatAppearance.BorderColor = Color.FromArgb(10, 10, 10);
+                    this.FlatAppearance.BorderColor = UIColors.DarkGray;
                     this.ForeColor = Color.Black;
                     break;
                 case ButtonType.Small:
-                    this.FlatAppearance.BorderColor = Color.FromArgb(10, 10, 10);
+                    this.FlatAppearance.BorderColor = UIColors.DarkGray;
                     this.ForeColor = Color.Black;
                     this.Size = new Size(50, 35);
                     break;
@@ -266,6 +279,8 @@ namespace WordMan
         private Label _unitLabel;
         private string _currentUnit = "厘米";
         private readonly string[] _availableUnits = { "厘米", "磅", "字符", "行" };
+        private Font _normalFont;
+        private Font _hoverFont;
 
         public string Unit
         {
@@ -354,20 +369,24 @@ namespace WordMan
             this.TextAlign = HorizontalAlignment.Left;
             this.Width = 100;
             this.Height = 25;
-            this.BackColor = Color.FromArgb(250, 250, 250);
+            this.BackColor = UIColors.BackgroundGray;
             this.DecimalPlaces = 1;
             this.Increment = 0.1m;
             this.Minimum = decimal.MinValue; // 取消下限
             this.Maximum = decimal.MaxValue; // 取消上限
             this.BorderStyle = BorderStyle.FixedSingle;
             
+            // 创建字体对象（复用，避免资源泄漏）
+            _normalFont = new Font("Microsoft YaHei", 8F, FontStyle.Bold);
+            _hoverFont = new Font("Microsoft YaHei", 8F, FontStyle.Bold | FontStyle.Underline);
+            
             // 创建单位标签
             _unitLabel = new Label
             {
                 Text = _currentUnit,
                 AutoSize = true,
-                Font = new Font("Microsoft YaHei", 8F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(10, 10, 10), 
+                Font = _normalFont,
+                ForeColor = UIColors.DarkGray, 
                 BackColor = Color.Transparent,
                 BorderStyle = BorderStyle.None,
                 Cursor = Cursors.Hand // 鼠标悬停时显示手型光标
@@ -445,10 +464,10 @@ namespace WordMan
         /// <param name="e">事件参数</param>
         private void UnitLabel_MouseEnter(object sender, EventArgs e)
         {
-            if (_unitLabel != null)
+            if (_unitLabel != null && _hoverFont != null)
             {
-                _unitLabel.ForeColor = Color.FromArgb(0, 123, 255); // 蓝色高亮
-                _unitLabel.Font = new Font("Microsoft YaHei", 8F, FontStyle.Bold | FontStyle.Underline);
+                _unitLabel.ForeColor = UIColors.PrimaryBlue; // 蓝色高亮
+                _unitLabel.Font = _hoverFont;
             }
         }
 
@@ -459,11 +478,32 @@ namespace WordMan
         /// <param name="e">事件参数</param>
         private void UnitLabel_MouseLeave(object sender, EventArgs e)
         {
-            if (_unitLabel != null)
+            if (_unitLabel != null && _normalFont != null)
             {
-                _unitLabel.ForeColor = Color.FromArgb(10, 10, 10); // 恢复原色
-                _unitLabel.Font = new Font("Microsoft YaHei", 8F, FontStyle.Bold);
+                _unitLabel.ForeColor = UIColors.DarkGray; // 恢复原色
+                _unitLabel.Font = _normalFont;
             }
+        }
+
+        /// <summary>
+        /// 释放资源
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_normalFont != null)
+                {
+                    _normalFont.Dispose();
+                    _normalFont = null;
+                }
+                if (_hoverFont != null)
+                {
+                    _hoverFont.Dispose();
+                    _hoverFont = null;
+                }
+            }
+            base.Dispose(disposing);
         }
 
         #region ISupportInitialize 实现
@@ -517,7 +557,7 @@ namespace WordMan
         {
             // 基础样式设置
             this.Font = new Font("Microsoft YaHei", 9F);
-            this.BackColor = Color.FromArgb(250, 250, 250);
+            this.BackColor = UIColors.BackgroundGray;
             this.BorderStyle = BorderStyle.FixedSingle;
             this.Size = new Size(100, 25);
             
@@ -617,7 +657,7 @@ namespace WordMan
         {
             // 基础样式设置
             this.Font = new Font("Microsoft YaHei", 9F);
-            this.BackColor = Color.FromArgb(250, 250, 250);
+            this.BackColor = UIColors.BackgroundGray;
             this.DropDownStyle = _allowInput ? ComboBoxStyle.DropDown : ComboBoxStyle.DropDownList;
             this.Size = new Size(100, 25);
             this.FlatStyle = FlatStyle.Standard;
@@ -815,11 +855,11 @@ namespace WordMan
         /// </summary>
         public static StandardComboBox CreateStandardCombo(string name, Point location, string[] items, int defaultIndex = 0, string defaultText = null, bool allowInput = true)
         {
-            var combo = new StandardComboBox(items, defaultIndex, defaultText, allowInput);
-            combo.Name = name;
-            combo.Location = location;
-            // 确保 AllowInput 设置生效
-            combo.AllowInput = allowInput;
+            var combo = new StandardComboBox(items, defaultIndex, defaultText, allowInput)
+            {
+                Name = name,
+                Location = location
+            };
             return combo;
         }
 
@@ -897,11 +937,11 @@ namespace WordMan
         {
             return new Label
             {
-                Text = "第" + level + "级",
+                Text = string.Format("第{0}级", level),
                 Location = location,
                 Size = new Size(50, 20),
                 Font = new Font("Microsoft YaHei", 9F, FontStyle.Bold),
-                ForeColor = Color.FromArgb(0, 123, 255)
+                ForeColor = UIColors.PrimaryBlue
             };
         }
 
@@ -1033,6 +1073,9 @@ namespace WordMan
         /// <returns>输入框值结构体</returns>
         public static InputValues GetInputValues(Control container, int level)
         {
+            if (container == null)
+                return new InputValues();
+
             var numberIndentControl = container.Controls.Find("TxtBoxNumIndent" + level, true).FirstOrDefault() as StandardNumericUpDown;
             var textIndentControl = container.Controls.Find("TxtBoxTextIndent" + level, true).FirstOrDefault() as StandardNumericUpDown;
             var tabPositionControl = container.Controls.Find("TxtBoxTabPosition" + level, true).FirstOrDefault() as StandardNumericUpDown;
@@ -1115,6 +1158,9 @@ namespace WordMan
         /// <param name="comboValues">下拉框值字典</param>
         public static void SetStandardComboBoxValues(Control container, Dictionary<string, string> comboValues)
         {
+            if (container == null || comboValues == null)
+                return;
+
             foreach (var comboValuePair in comboValues)
             {
                 var combo = container.Controls.Find(comboValuePair.Key, true).FirstOrDefault() as StandardComboBox;
@@ -1131,6 +1177,9 @@ namespace WordMan
         public static Dictionary<string, string> GetStandardComboBoxValues(Control container, string[] comboNames)
         {
             var values = new Dictionary<string, string>();
+            
+            if (container == null || comboNames == null)
+                return values;
             
             foreach (string name in comboNames)
             {
@@ -1149,6 +1198,9 @@ namespace WordMan
         /// </summary>
         public static StandardComboBox FindStandardComboBox(Control container, string name)
         {
+            if (container == null || string.IsNullOrEmpty(name))
+                return null;
+
             return container.Controls.Find(name, true).FirstOrDefault() as StandardComboBox;
         }
 
@@ -1158,6 +1210,9 @@ namespace WordMan
         public static Dictionary<string, StandardComboBox> FindStandardComboBoxes(Control container, string[] names)
         {
             var combos = new Dictionary<string, StandardComboBox>();
+            
+            if (container == null || names == null)
+                return combos;
             
             foreach (string name in names)
             {
@@ -1207,6 +1262,9 @@ namespace WordMan
         /// <param name="textValues">文本框值字典</param>
         public static void SetStandardTextBoxValues(Control container, Dictionary<string, string> textValues)
         {
+            if (container == null || textValues == null)
+                return;
+
             foreach (var textValuePair in textValues)
             {
                 var textBox = container.Controls.Find(textValuePair.Key, true).FirstOrDefault() as StandardTextBox;
@@ -1223,6 +1281,9 @@ namespace WordMan
         public static Dictionary<string, string> GetStandardTextBoxValues(Control container, string[] textBoxNames)
         {
             var values = new Dictionary<string, string>();
+            
+            if (container == null || textBoxNames == null)
+                return values;
             
             foreach (string name in textBoxNames)
             {
@@ -1241,6 +1302,9 @@ namespace WordMan
         /// </summary>
         public static StandardTextBox FindStandardTextBox(Control container, string name)
         {
+            if (container == null || string.IsNullOrEmpty(name))
+                return null;
+
             return container.Controls.Find(name, true).FirstOrDefault() as StandardTextBox;
         }
 
@@ -1250,6 +1314,9 @@ namespace WordMan
         public static Dictionary<string, StandardTextBox> FindStandardTextBoxes(Control container, string[] names)
         {
             var textBoxes = new Dictionary<string, StandardTextBox>();
+            
+            if (container == null || names == null)
+                return textBoxes;
             
             foreach (string name in names)
             {

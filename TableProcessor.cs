@@ -13,9 +13,35 @@ namespace WordMan
         /// </summary>
         public void CreateThreeLineTable()
         {
-            var sel = Globals.ThisAddIn.Application.Selection;
-            Word.Table table = sel.Tables.Add(sel.Range, 3, 3);
-            table.Select();
+            try
+            {
+                var sel = Globals.ThisAddIn.Application.Selection;
+                if (sel == null || sel.Range == null)
+                {
+                    MessageBox.Show("无法创建表格，请检查文档状态。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                Word.Table table = sel.Tables.Add(sel.Range, 3, 3);
+                table.Select();
+                SetThreeLineTable(table);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"创建三线表失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 将当前选中的表格设为三线表格式
+        /// </summary>
+        public void SetCurrentTableToThreeLine()
+        {
+            var app = Globals.ThisAddIn.Application;
+            var sel = app.Selection;
+            if (sel == null || sel.Tables.Count == 0)
+                return;
+
+            Word.Table table = sel.Tables[1];
             SetThreeLineTable(table);
         }
 
@@ -126,7 +152,7 @@ namespace WordMan
             }
             catch (Exception ex)
             {
-                MessageBox.Show("插入失败：" + ex.Message, "错误");
+                MessageBox.Show("插入失败：" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -164,7 +190,7 @@ namespace WordMan
             }
             catch (Exception ex)
             {
-                MessageBox.Show("插入失败：" + ex.Message, "错误");
+                MessageBox.Show("插入失败：" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -173,7 +199,7 @@ namespace WordMan
         {
             if (sel == null || sel.Tables.Count == 0)
             {
-                MessageBox.Show("请将光标放在表格内！", "提示");
+                MessageBox.Show("请将光标放在表格内！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return false;
             }
             return true;
@@ -187,7 +213,7 @@ namespace WordMan
 
             if (!int.TryParse(input, out int n) || n <= 0)
             {
-                MessageBox.Show("请输入有效的正整数！", "提示");
+                MessageBox.Show("请输入有效的正整数！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return 0;
             }
             return n;

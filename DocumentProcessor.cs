@@ -11,13 +11,15 @@ namespace WordMan
         #region 域名处理
         public void HighlightFields(bool highlight)
         {
-            var app = Globals.ThisAddIn.Application;
-            var doc = app.ActiveDocument;
-            if (doc == null)
+            try
             {
-                MessageBox.Show("未检测到文档。");
-                return;
-            }
+                var app = Globals.ThisAddIn.Application;
+                var doc = app.ActiveDocument;
+                if (doc == null)
+                {
+                    MessageBox.Show("未检测到文档。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
 
             foreach (Word.Field field in doc.Fields)
             {
@@ -59,7 +61,13 @@ namespace WordMan
                 }
             }
 
-            MessageBox.Show(highlight ? "交叉引用与文献引用已高亮！" : "交叉引用与文献引用已取消高亮！");
+            MessageBox.Show(highlight ? "交叉引用与文献引用已高亮！" : "交叉引用与文献引用已取消高亮！", 
+                "完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"高亮字段失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
         #endregion
 
@@ -73,7 +81,7 @@ namespace WordMan
 
                 if (doc == null || doc.Fields == null)
                 {
-                    MessageBox.Show("未检测到文档或文档没有字段。");
+                    MessageBox.Show("未检测到文档或文档没有字段。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
@@ -144,7 +152,7 @@ namespace WordMan
                 }
                 catch { }
 
-                MessageBox.Show($"处理过程中出现错误：{ex.Message}");
+                MessageBox.Show($"处理过程中出现错误：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         #endregion
@@ -311,29 +319,6 @@ namespace WordMan
             }
         }
 
-        private void RemoveSecurityLevel()
-        {
-            try
-            {
-                var app = Globals.ThisAddIn.Application;
-                var doc = app.ActiveDocument;
-
-                foreach (Word.Shape shape in doc.Shapes)
-                {
-                    if (shape.Type == MsoShapeType.msoTextBox)
-                    {
-                        string text = shape.TextFrame.TextRange.Text.Trim();
-                        if (text == "公开" || text == "内部★" || text.Contains("密级"))
-                        {
-                            shape.Delete();
-                        }
-                    }
-                }
-            }
-            catch
-            {
-            }
-        }
         #endregion
     }
 }

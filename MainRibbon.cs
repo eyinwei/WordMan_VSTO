@@ -77,14 +77,28 @@ namespace WordMan
 
         private void 希腊字母_Click(object sender, RibbonControlEventArgs e)
         {
-            GreekLetterForm form = new GreekLetterForm();
-            form.Show();
+            ShowForm<GreekLetterForm>("希腊字母");
         }
 
         private void 常用符号_Click(object sender, RibbonControlEventArgs e)
         {
-            CommonSymbolForm form = new CommonSymbolForm();
-            form.Show();
+            ShowForm<CommonSymbolForm>("常用符号");
+        }
+
+        /// <summary>
+        /// 统一显示表单的辅助方法
+        /// </summary>
+        private void ShowForm<T>(string formName) where T : Form, new()
+        {
+            try
+            {
+                T form = new T();
+                form.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"打开{formName}窗口失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void 仿宋替换_Click(object sender, RibbonControlEventArgs e)
@@ -116,13 +130,7 @@ namespace WordMan
 
         private void 设为三线_Click(object sender, Microsoft.Office.Tools.Ribbon.RibbonControlEventArgs e)
         {
-            var app = Globals.ThisAddIn.Application;
-            var sel = app.Selection;
-            if (sel == null || sel.Tables.Count == 0)
-                return;
-
-            Word.Table table = sel.Tables[1];
-            tableProcessor.SetThreeLineTable(table);
+            tableProcessor.SetCurrentTableToThreeLine();
         }
 
         private void 插入N行_Click(object sender, RibbonControlEventArgs e)
@@ -301,14 +309,28 @@ namespace WordMan
 
         private void 文档合并_Click(object sender, RibbonControlEventArgs e)
         {
-            var merger = new DocumentMerger((Word.Application)Globals.ThisAddIn.Application);
-            merger.ShowMergeDialog();
+            try
+            {
+                var merger = new DocumentMerger((Word.Application)Globals.ThisAddIn.Application);
+                merger.ShowMergeDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"文档合并失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void 文档拆分_Click(object sender, RibbonControlEventArgs e)
         {
-            var splitter = new DocumentSplitter(Globals.ThisAddIn.Application);
-            splitter.ShowSplitDialog();
+            try
+            {
+                var splitter = new DocumentSplitter(Globals.ThisAddIn.Application);
+                splitter.ShowSplitDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"文档拆分失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void 公开_Click(object sender, RibbonControlEventArgs e)

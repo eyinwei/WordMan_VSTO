@@ -17,6 +17,19 @@ namespace WordMan
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
+            // 清理资源
+            try
+            {
+                var ribbon = Globals.Ribbons.GetRibbon<MainRibbon>();
+                if (ribbon != null)
+                {
+                    ribbon.Cleanup();
+                }
+            }
+            catch
+            {
+                // 忽略清理时的错误，避免影响正常关闭
+            }
         }
 
         #region VSTO 生成的代码

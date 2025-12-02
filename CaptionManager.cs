@@ -295,55 +295,99 @@ namespace WordMan
 
             var doc = picPara.Range.Application.ActiveDocument;
 
+            // 保存图片段落结束位置
+            int originalPicEnd = picPara.Range.End;
+            
+            // 检查图片段落后是否已经有段落
             var nextPara = picPara.Next() as Word.Paragraph;
+            Word.Paragraph captionPara = null;
+            
             if (nextPara != null)
             {
                 string nextText = nextPara.Range.Text.Trim();
-                if (!string.IsNullOrEmpty(nextText))
+                Word.Style nextStyle = null;
+                try
                 {
-                    if ((nextPara.get_Style() is Word.Style style && style.NameLocal == "题注")
-                        || nextText.StartsWith("图"))
-                    {
-                        return;
-                    }
+                    nextStyle = nextPara.get_Style() as Word.Style;
+                }
+                catch { }
+                
+                // 如果下一个段落已经是题注样式，或者已经包含"图"开头的文本，直接返回
+                if ((nextStyle != null && nextStyle.NameLocal == "题注") || nextText.StartsWith("图"))
+                {
+                    return;
+                }
+                
+                // 如果下一个段落紧挨着图片段落（开始位置等于图片段落结束位置），且是空段落，可以使用
+                if (nextPara.Range.Start == originalPicEnd && string.IsNullOrEmpty(nextText))
+                {
+                    captionPara = nextPara;
                 }
             }
-
-            int originalPicPosition = picPara.Range.End;
-
-            var afterPicRange = picPara.Range.Duplicate;
-            afterPicRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
-            afterPicRange.InsertParagraphAfter();
-
-            Word.Paragraph captionPara = null;
-            foreach (Word.Paragraph para in doc.Paragraphs)
+            
+            // 如果没有找到可用的空段落，需要插入新段落
+            if (captionPara == null)
             {
-                if (para.Range.Start == originalPicPosition)
+                // 如果后面有文本段落，在文本段落之前插入新段落，避免合并
+                if (nextPara != null && !string.IsNullOrEmpty(nextPara.Range.Text.Trim()))
                 {
-                    captionPara = para;
-                    break;
+                    int originalTextParaStart = nextPara.Range.Start;
+                    Word.Range beforeTextPara = doc.Range(originalTextParaStart, originalTextParaStart);
+                    beforeTextPara.InsertParagraphBefore();
+                    
+                    // 查找新插入的段落（插入后，新段落的开始位置应该是原文本段落的开始位置）
+                    foreach (Word.Paragraph para in doc.Paragraphs)
+                    {
+                        if (para.Range.Start == originalTextParaStart)
+                        {
+                            captionPara = para;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    // 图片后面没有文本，直接在图片段落后插入新段落
+                    var afterPicRange = picPara.Range.Duplicate;
+                    afterPicRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
+                    afterPicRange.InsertParagraphAfter();
+                    
+                    // 查找新插入的题注段落
+                    foreach (Word.Paragraph para in doc.Paragraphs)
+                    {
+                        if (para.Range.Start == originalPicEnd)
+                        {
+                            captionPara = para;
+                            break;
+                        }
+                    }
                 }
             }
 
             if (captionPara == null) return;
 
+            // 清除段落内容，准备插入题注
             Word.Range captionRange = captionPara.Range.Duplicate;
-            captionRange.End = captionRange.Start + 1;
+            captionRange.End = captionRange.End - 1; // 排除段落标记
             captionRange.Text = "";
-
-            var insertRange = doc.Range(captionRange.Start, captionRange.Start);
-            insertRange.InsertAfter("图 ");
-            insertRange.SetRange(insertRange.Start + 2, insertRange.Start + 2);
+            
+            // 在题注段落中插入内容
+            captionRange = captionPara.Range.Duplicate;
+            captionRange.End = captionRange.End - 1; // 排除段落标记
+            captionRange.Collapse(Word.WdCollapseDirection.wdCollapseStart);
+            
+            captionRange.InsertAfter("图 ");
+            captionRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
 
             switch (numberStyle)
             {
                 case CaptionNumberStyle.Arabic:
-                    insertRange.Fields.Add(insertRange, Word.WdFieldType.wdFieldSequence, "图 \\* ARABIC", false);
+                    captionRange.Fields.Add(captionRange, Word.WdFieldType.wdFieldSequence, "图 \\* ARABIC", false);
                     break;
 
                 case CaptionNumberStyle.Dash:
                 case CaptionNumberStyle.Dot:
-                    InsertNumberWithStyleRef(insertRange, "图", numberStyle == CaptionNumberStyle.Dash ? "-" : ".");
+                    InsertNumberWithStyleRef(captionRange, "图", numberStyle == CaptionNumberStyle.Dash ? "-" : ".");
                     break;
             }
 

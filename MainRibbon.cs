@@ -40,42 +40,66 @@ namespace WordMan
 
         private void 去除断行_Click(object sender, RibbonControlEventArgs e)
         {
-            textProcessor.RemoveLineBreaks();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("去除断行", () =>
+            {
+                textProcessor.RemoveLineBreaks();
+            });
         }
 
         private void 去除空格_Click(object sender, RibbonControlEventArgs e)
         {
-            textProcessor.RemoveSpaces();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("去除空格", () =>
+            {
+                textProcessor.RemoveSpaces();
+            });
         }
 
         private void 去除空行_Click(object sender, RibbonControlEventArgs e)
         {
-            textProcessor.RemoveEmptyLines();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("去除空行", () =>
+            {
+                textProcessor.RemoveEmptyLines();
+            });
         }
 
         private void 英标转中标_Click(object sender, RibbonControlEventArgs e)
         {
-            textProcessor.ConvertEnglishToChinesePunctuation();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("英标转中标", () =>
+            {
+                textProcessor.ConvertEnglishToChinesePunctuation();
+            });
         }
 
         private void 中标转英标_Click(object sender, RibbonControlEventArgs e)
         {
-            textProcessor.ConvertChineseToEnglishPunctuation();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("中标转英标", () =>
+            {
+                textProcessor.ConvertChineseToEnglishPunctuation();
+            });
         }
 
         private void 自动加空格_Click(object sender, RibbonControlEventArgs e)
         {
-            textProcessor.AutoAddSpaces();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("自动加空格", () =>
+            {
+                textProcessor.AutoAddSpaces();
+            });
         }
 
         private void 缩进2字符_Click(object sender, RibbonControlEventArgs e)
         {
-            textProcessor.IndentTwoCharacters();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("缩进2字符", () =>
+            {
+                textProcessor.IndentTwoCharacters();
+            });
         }
 
         private void 去除缩进_Click(object sender, RibbonControlEventArgs e)
         {
-            textProcessor.RemoveIndent();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("去除缩进", () =>
+            {
+                textProcessor.RemoveIndent();
+            });
         }
 
         private void 希腊字母_Click(object sender, RibbonControlEventArgs e)
@@ -106,44 +130,68 @@ namespace WordMan
 
         private void 仿宋替换_Click(object sender, RibbonControlEventArgs e)
         {
-            textProcessor.ReplaceFangSongGB2312ToFangSong();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("字体替换：仿宋", () =>
+            {
+                textProcessor.ReplaceFangSongGB2312ToFangSong();
+            });
         }
 
         private void 楷体替换_Click(object sender, RibbonControlEventArgs e)
         {
-            textProcessor.ReplaceKaiTiGB2312ToKaiTi();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("字体替换：楷体", () =>
+            {
+                textProcessor.ReplaceKaiTiGB2312ToKaiTi();
+            });
         }
 
         private void 方正小标宋替换_Click(object sender, RibbonControlEventArgs e)
         {
-            textProcessor.ReplaceFZXBSToHeiTi();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("字体替换：方正小标宋", () =>
+            {
+                textProcessor.ReplaceFZXBSToHeiTi();
+            });
         }
 
         private void 数字替换_Click(object sender, RibbonControlEventArgs e)
         {
-            textProcessor.ReplaceAllToTimesNewRoman();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("字体替换：数字英文", () =>
+            {
+                textProcessor.ReplaceAllToTimesNewRoman();
+            });
         }
         #endregion
 
         #region 表格处理组
         private void 创建三线表_Click(object sender, RibbonControlEventArgs e)
         {
-            tableProcessor.CreateThreeLineTable();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("创建三线表", () =>
+            {
+                tableProcessor.CreateThreeLineTable();
+            });
         }
 
         private void 设为三线_Click(object sender, Microsoft.Office.Tools.Ribbon.RibbonControlEventArgs e)
         {
-            tableProcessor.SetCurrentTableToThreeLine();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("设为三线表", () =>
+            {
+                tableProcessor.SetCurrentTableToThreeLine();
+            });
         }
 
         private void 插入N行_Click(object sender, RibbonControlEventArgs e)
         {
-            tableProcessor.InsertNRows();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("插入表格行", () =>
+            {
+                tableProcessor.InsertNRows();
+            });
         }
 
         private void 插入N列_Click(object sender, RibbonControlEventArgs e)
         {
-            tableProcessor.InsertNColumns();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("插入表格列", () =>
+            {
+                tableProcessor.InsertNColumns();
+            });
         }
 
         private void 重复标题行_Click(object sender, RibbonControlEventArgs e)
@@ -196,7 +244,10 @@ namespace WordMan
 
         private void 图编号_Click(object sender, RibbonControlEventArgs e)
         {
-            captionManager.InsertPictureNumber();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("插入图编号", () =>
+            {
+                captionManager.InsertPictureNumber();
+            });
         }
 
         private void 表注样式1_Click(object sender, RibbonControlEventArgs e)
@@ -216,7 +267,10 @@ namespace WordMan
 
         private void 表编号_Click(object sender, RibbonControlEventArgs e)
         {
-            captionManager.InsertTableNumber();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("插入表编号", () =>
+            {
+                captionManager.InsertTableNumber();
+            });
         }
 
         private void 公式样式1_Click(object sender, RibbonControlEventArgs e)
@@ -236,7 +290,10 @@ namespace WordMan
 
         private void 式编号_Click(object sender, RibbonControlEventArgs e)
         {
-            captionManager.InsertFormulaNumber();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("插入式编号", () =>
+            {
+                captionManager.InsertFormulaNumber();
+            });
         }
 
         private void 交叉引用_Click(object sender, RibbonControlEventArgs e)
@@ -259,7 +316,10 @@ namespace WordMan
 
         private void 位图化_Click(object sender, RibbonControlEventArgs e)
         {
-            imageProcessor.ConvertToBitmap_Click(sender, e);
+            Globals.ThisAddIn.ExecuteWithUndoRecord("图片位图化", () =>
+            {
+                imageProcessor.ConvertToBitmap_Click(sender, e);
+            });
         }
 
         private void 导出图片_Click(object sender, RibbonControlEventArgs e)
@@ -311,22 +371,34 @@ namespace WordMan
 
         private void 域名高亮_Click(object sender, RibbonControlEventArgs e)
         {
-            documentProcessor.HighlightFields(true);
+            Globals.ThisAddIn.ExecuteWithUndoRecord("域名高亮", () =>
+            {
+                documentProcessor.HighlightFields(true);
+            });
         }
 
         private void 取消高亮_Click(object sender, RibbonControlEventArgs e)
         {
-            documentProcessor.HighlightFields(false);
+            Globals.ThisAddIn.ExecuteWithUndoRecord("取消高亮", () =>
+            {
+                documentProcessor.HighlightFields(false);
+            });
         }
 
         private void 上标_Click(object sender, RibbonControlEventArgs e)
         {
-            documentProcessor.SetFieldSuperscript(true);
+            Globals.ThisAddIn.ExecuteWithUndoRecord("设置上标", () =>
+            {
+                documentProcessor.SetFieldSuperscript(true);
+            });
         }
 
         private void 正常_Click(object sender, RibbonControlEventArgs e)
         {
-            documentProcessor.SetFieldSuperscript(false);
+            Globals.ThisAddIn.ExecuteWithUndoRecord("取消上标", () =>
+            {
+                documentProcessor.SetFieldSuperscript(false);
+            });
         }
 
         private void 另存PDF_Click(object sender, RibbonControlEventArgs e)
@@ -373,18 +445,28 @@ namespace WordMan
 
         private void 公开_Click(object sender, RibbonControlEventArgs e)
         {
-            documentProcessor.AddSecurityLevel("公开");
+            Globals.ThisAddIn.ExecuteWithUndoRecord("添加密级：公开", () =>
+            {
+                documentProcessor.AddSecurityLevel("公开");
+            });
         }
 
         private void 内部_Click(object sender, RibbonControlEventArgs e)
         {
-            documentProcessor.AddSecurityLevel("内部★");
+            Globals.ThisAddIn.ExecuteWithUndoRecord("添加密级：内部", () =>
+            {
+                documentProcessor.AddSecurityLevel("内部★");
+            });
         }
 
         private void 移除密级_Click(object sender, RibbonControlEventArgs e)
         {
-            documentProcessor.RemoveSecurityLevelFromCurrentPage();
+            Globals.ThisAddIn.ExecuteWithUndoRecord("移除密级", () =>
+            {
+                documentProcessor.RemoveSecurityLevelFromCurrentPage();
+            });
         }
         #endregion
+
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Microsoft.Office.Tools.Ribbon;
@@ -205,33 +206,145 @@ namespace WordMan
         #region 自动加空格功能
         public void AutoAddSpaces()
         {
-            Word.Application app = Globals.ThisAddIn.Application;
-            Word.Selection selection = app.Selection;
-
-            // 需要查找的正则：数字后紧跟单位（英文字母、μ、Ω、°、℃等），且二者之间无空格
-            string pattern = @"(\d+(?:\.\d+)?)([a-zA-ZμΩℓ‰°℃℉Å])";
-
-            // 只处理选区或当前段落
-            Word.Range range = selection.Type == Word.WdSelectionType.wdSelectionNormal
-                ? selection.Range
-                : selection.Paragraphs[1].Range;
-
-            Regex regex = new Regex(pattern);
-            string text = range.Text;
-
-            var matches = regex.Matches(text);
-            for (int i = matches.Count - 1; i >= 0; i--)
+            try
             {
-                var match = matches[i];
-                int insertPos = range.Start + match.Index + match.Groups[1].Length;
-                // 检查当前位置是否已有空格
-                if (text.Length > match.Index + match.Groups[1].Length
-                    && text[match.Index + match.Groups[1].Length] != ' ')
+                Word.Application app = Globals.ThisAddIn.Application;
+                Word.Selection selection = app.Selection;
+
+                if (selection == null)
+                {
+                    MessageBox.Show("未检测到可操作的文本。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                Word.Range range = null;
+                
+                // 确定处理范围：优先使用选区，否则使用当前段落
+                if (selection.Type == Word.WdSelectionType.wdSelectionNormal
+                    && selection.Range != null
+                    && selection.Range.Start != selection.Range.End)
+                {
+                    range = selection.Range;
+                }
+                else if (selection.Paragraphs != null && selection.Paragraphs.Count > 0)
+                {
+                    range = selection.Paragraphs[1].Range;
+                }
+                else
+                {
+                    MessageBox.Show("未检测到可操作的文本或段落。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                if (range == null || string.IsNullOrEmpty(range.Text))
+                {
+                    MessageBox.Show("未检测到可操作的文本。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                int rangeStart = range.Start;
+                string originalText = range.Text;
+                
+                // 收集所有需要插入空格的位置（基于原始文本的相对位置）
+                var insertPositions = new List<int>();
+                
+                // 复合单位列表（按长度从长到短排序，优先匹配长单位）
+                string[] compoundUnits = { "kg/m³", "g/cm³", "kg/m²", "mol/L", "mol/l", "km/h", "m/s", "km/s", "Ω·m", "cm³", "cm²", "km³", "km²", "°C", "°F", "μm", "nm", "m³", "m²" };
+                
+                // 标记已被复合单位覆盖的位置
+                var compoundPositions = new HashSet<int>();
+                
+                // 先匹配复合单位
+                foreach (string unit in compoundUnits)
+                {
+                    string pattern = @"(\d+(?:\.\d+)?)(" + Regex.Escape(unit) + @")";
+                    Regex regex = new Regex(pattern);
+                    var matches = regex.Matches(originalText);
+                    
+                    foreach (Match match in matches)
+                    {
+                        int insertPos = match.Index + match.Groups[1].Length;
+                        
+                        // 检查边界和是否已有空格
+                        if (insertPos >= 0 && insertPos < originalText.Length && originalText[insertPos] != ' ')
+                        {
+                            insertPositions.Add(insertPos);
+                            
+                            // 标记复合单位覆盖的所有字符位置
+                            for (int i = insertPos; i < insertPos + unit.Length && i < originalText.Length; i++)
+                            {
+                                compoundPositions.Add(i);
+                            }
+                        }
+                    }
+                }
+                
+                // 匹配单个单位字符（排除百分比%、角度单位'和''，以及复合单位已覆盖的位置）
+                string singleUnitPattern = @"(\d+(?:\.\d+)?)([a-zA-ZμΩℓ‰℃℉Å])";
+                Regex singleUnitRegex = new Regex(singleUnitPattern);
+                var singleMatches = singleUnitRegex.Matches(originalText);
+                
+                foreach (Match match in singleMatches)
+                {
+                    int insertPos = match.Index + match.Groups[1].Length;
+                    
+                    // 检查边界
+                    if (insertPos < 0 || insertPos >= originalText.Length)
+                    {
+                        continue;
+                    }
+                    
+                    // 如果已被复合单位覆盖，跳过
+                    if (compoundPositions.Contains(insertPos))
+                    {
+                        continue;
+                    }
+                    
+                    char nextChar = originalText[insertPos];
+                    
+                    // 排除百分比、角度单位
+                    if (nextChar == '%' || nextChar == '\'' || nextChar == '"')
+                    {
+                        continue;
+                    }
+                    
+                    // 如果已有空格，跳过
+                    if (nextChar == ' ')
+                    {
+                        continue;
+                    }
+                    
+                    insertPositions.Add(insertPos);
+                }
+                
+                // 去重并排序，从后往前插入
+                insertPositions = insertPositions.Distinct().OrderByDescending(p => p).ToList();
+                
+                // 从后往前插入空格
+                foreach (int pos in insertPositions)
                 {
                     Word.Range insertRange = range.Duplicate;
-                    insertRange.Start = insertRange.End = insertPos;
+                    insertRange.Start = rangeStart + pos;
+                    insertRange.End = insertRange.Start;
                     insertRange.InsertAfter(" ");
                 }
+
+                // 显示处理结果
+                if (insertPositions.Count > 0)
+                {
+                    MessageBox.Show($"已为 {insertPositions.Count} 处数字和单位之间添加空格。", "完成", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("未找到需要添加空格的位置。", "提示", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"自动加空格失败：{ex.Message}", "错误", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         #endregion

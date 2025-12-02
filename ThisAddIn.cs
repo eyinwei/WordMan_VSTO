@@ -58,6 +58,45 @@ namespace WordMan
             }
         }
 
+        #region 全局工具方法
+        /// <summary>
+        /// 执行操作并将其封装为一个撤销步骤
+        /// </summary>
+        /// <param name="undoRecordName">撤销记录的名称，将显示在撤销历史中</param>
+        /// <param name="action">要执行的操作</param>
+        public void ExecuteWithUndoRecord(string undoRecordName, System.Action action)
+        {
+            if (action == null) return;
+
+            Word.UndoRecord undoRecord = null;
+            try
+            {
+                var doc = Application.ActiveDocument;
+                
+                if (doc == null) return;
+                
+                // 开始自定义撤销记录
+                undoRecord = doc.Application.UndoRecord;
+                undoRecord.StartCustomRecord(undoRecordName);
+                
+                // 执行操作
+                action();
+            }
+            finally
+            {
+                // 确保撤销记录已结束（无论是否出错）
+                if (undoRecord != null)
+                {
+                    try
+                    {
+                        undoRecord.EndCustomRecord();
+                    }
+                    catch { }
+                }
+            }
+        }
+        #endregion
+
         #region VSTO 生成的代码
 
         /// <summary>

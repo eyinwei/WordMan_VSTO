@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 using Microsoft.Office.Tools.Ribbon;
-using Microsoft.VisualBasic;
 using Word = Microsoft.Office.Interop.Word;
 
 namespace WordMan
@@ -127,14 +127,8 @@ namespace WordMan
             if (!ValidateTableSelection(sel))
                 return;
 
-            int n = GetInsertCount("请输入要插入的行数：", "插入行");
-            if (n <= 0)
-                return;
-
-            DialogResult direction = GetInsertDirection(
-                "点击\"是\"在上方插入，点击\"否\"在下方插入。\n点击\"取消\"终止操作。",
-                "选择插入方向");
-            if (direction == DialogResult.Cancel)
+            InsertOperationResult result = ShowInsertDialog("请输入要插入的行数：", "插入行", "往上插入", "往下插入");
+            if (result.Cancelled)
                 return;
 
             Word.Table table = sel.Tables[1];
@@ -142,9 +136,9 @@ namespace WordMan
 
             try
             {
-                for (int i = 0; i < n; i++)
+                for (int i = 0; i < result.Count; i++)
                 {
-                    if (direction == DialogResult.Yes)
+                    if (result.Direction == InsertDirection.Before)
                         refRow.Range.Rows.Add(refRow);
                     else
                         refRow.Range.Rows.Add(refRow.Next);
@@ -165,14 +159,8 @@ namespace WordMan
             if (!ValidateTableSelection(sel))
                 return;
 
-            int n = GetInsertCount("请输入要插入的列数：", "插入列");
-            if (n <= 0)
-                return;
-
-            DialogResult direction = GetInsertDirection(
-                "点击\"是\"在左侧插入，点击\"否\"在右侧插入。\n点击\"取消\"终止操作。",
-                "选择插入方向");
-            if (direction == DialogResult.Cancel)
+            InsertOperationResult result = ShowInsertDialog("请输入要插入的列数：", "插入列", "往左插入", "往右插入");
+            if (result.Cancelled)
                 return;
 
             Word.Table table = sel.Tables[1];
@@ -180,13 +168,16 @@ namespace WordMan
 
             try
             {
-                for (int i = 0; i < n; i++)
+                for (int i = 0; i < result.Count; i++)
                 {
-                    if (direction == DialogResult.Yes)
+                    if (result.Direction == InsertDirection.Before)
                         table.Columns.Add(refCol);
                     else
                         table.Columns.Add(refCol.Next);
                 }
+                
+                // 自动调整列宽，确保表格不超出页面
+                table.AutoFitBehavior(Word.WdAutoFitBehavior.wdAutoFitWindow);
             }
             catch (Exception ex)
             {
@@ -205,23 +196,155 @@ namespace WordMan
             return true;
         }
 
-        private int GetInsertCount(string prompt, string title)
+        /// <summary>
+        /// 插入操作结果
+        /// </summary>
+        private class InsertOperationResult
         {
-            string input = Interaction.InputBox(prompt, title, "1");
-            if (string.IsNullOrWhiteSpace(input))
-                return 0;
-
-            if (!int.TryParse(input, out int n) || n <= 0)
-            {
-                MessageBox.Show("请输入有效的正整数！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return 0;
-            }
-            return n;
+            public int Count { get; set; }
+            public InsertDirection Direction { get; set; }
+            public bool Cancelled { get; set; }
         }
 
-        private DialogResult GetInsertDirection(string message, string title)
+        /// <summary>
+        /// 插入方向
+        /// </summary>
+        private enum InsertDirection
         {
-            return MessageBox.Show(message, title, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            Before,  // 之前（上/左）
+            After    // 之后（下/右）
+        }
+
+        /// <summary>
+        /// 显示插入操作的合并对话框（包含数量输入和方向选择）
+        /// </summary>
+        /// <param name="countPrompt">数量提示文本</param>
+        /// <param name="title">窗口标题</param>
+        /// <param name="beforeButtonText">第一个按钮文本（上/左）</param>
+        /// <param name="afterButtonText">第二个按钮文本（下/右，默认选中）</param>
+        /// <returns>插入操作结果</returns>
+        private InsertOperationResult ShowInsertDialog(string countPrompt, string title, string beforeButtonText, string afterButtonText)
+        {
+            Form insertForm = new Form();
+            Label promptLabel = new Label();
+            TextBox inputTextBox = new TextBox();
+            Button beforeButton = new Button();
+            Button afterButton = new Button();
+            Button cancelButton = new Button();
+
+            insertForm.Text = title;
+            insertForm.FormBorderStyle = FormBorderStyle.FixedDialog;
+            insertForm.MaximizeBox = false;
+            insertForm.MinimizeBox = false;
+            insertForm.StartPosition = FormStartPosition.CenterScreen;
+            insertForm.ShowInTaskbar = false;
+
+            // 设置窗口宽度（足够宽以显示完整文本）
+            int formWidth = 450;
+            int padding = 30;
+            int inputWidth = 350;
+
+            // 设置提示标签
+            promptLabel.Text = countPrompt;
+            promptLabel.Font = new Font("微软雅黑", 12F, FontStyle.Regular);
+            promptLabel.Location = new Point(padding, padding);
+            promptLabel.AutoSize = true;
+            promptLabel.MaximumSize = new Size(formWidth - padding * 2, 0);
+
+            // 设置输入框
+            inputTextBox.Font = new Font("微软雅黑", 14F, FontStyle.Regular);
+            inputTextBox.Text = "1";
+            inputTextBox.Location = new Point(padding, promptLabel.Bottom + 25);
+            inputTextBox.Width = inputWidth;
+            inputTextBox.Height = 35;
+
+            // 设置按钮
+            int buttonWidth = 95;
+            int buttonHeight = 35;
+            int buttonY = inputTextBox.Bottom + 30;
+            int buttonSpacing = 10;
+            int totalButtonWidth = buttonWidth * 3 + buttonSpacing * 2;
+            int buttonStartX = (formWidth - totalButtonWidth) / 2;
+
+            beforeButton.Text = beforeButtonText;
+            beforeButton.Font = new Font("微软雅黑", 11F, FontStyle.Regular);
+            beforeButton.Size = new Size(buttonWidth, buttonHeight);
+            beforeButton.Location = new Point(buttonStartX, buttonY);
+            beforeButton.Tag = InsertDirection.Before;
+            beforeButton.Click += (s, e) => {
+                insertForm.DialogResult = DialogResult.OK;
+                insertForm.Tag = InsertDirection.Before;
+                insertForm.Close();
+            };
+
+            afterButton.Text = afterButtonText;
+            afterButton.Font = new Font("微软雅黑", 11F, FontStyle.Regular);
+            afterButton.Size = new Size(buttonWidth, buttonHeight);
+            afterButton.Location = new Point(beforeButton.Right + buttonSpacing, buttonY);
+            afterButton.Tag = InsertDirection.After;
+            afterButton.Click += (s, e) => {
+                insertForm.DialogResult = DialogResult.OK;
+                insertForm.Tag = InsertDirection.After;
+                insertForm.Close();
+            };
+
+            cancelButton.Text = "取消";
+            cancelButton.Font = new Font("微软雅黑", 11F, FontStyle.Regular);
+            cancelButton.DialogResult = DialogResult.Cancel;
+            cancelButton.Size = new Size(buttonWidth, buttonHeight);
+            cancelButton.Location = new Point(afterButton.Right + buttonSpacing, buttonY);
+
+            // 设置窗体大小
+            insertForm.Width = formWidth;
+            insertForm.Height = buttonY + buttonHeight + padding + 40;
+
+            // 添加控件
+            insertForm.Controls.Add(promptLabel);
+            insertForm.Controls.Add(inputTextBox);
+            insertForm.Controls.Add(beforeButton);
+            insertForm.Controls.Add(afterButton);
+            insertForm.Controls.Add(cancelButton);
+
+            insertForm.CancelButton = cancelButton;
+            insertForm.AcceptButton = afterButton; // 默认选中"往右/下"按钮，方便直接按回车
+
+            // 输入框回车键事件，触发默认按钮
+            inputTextBox.KeyDown += (s, e) => {
+                if (e.KeyCode == Keys.Enter)
+                {
+                    e.SuppressKeyPress = true;
+                    afterButton.PerformClick();
+                }
+            };
+
+            // 默认焦点在"往右/下"按钮上，方便直接按回车
+            insertForm.Load += (s, e) => {
+                inputTextBox.SelectAll();
+                afterButton.Focus();
+            };
+
+            InsertOperationResult result = new InsertOperationResult();
+
+            if (insertForm.ShowDialog() == DialogResult.OK)
+            {
+                // 验证输入的数量
+                if (string.IsNullOrWhiteSpace(inputTextBox.Text) || !int.TryParse(inputTextBox.Text, out int count) || count <= 0)
+                {
+                    MessageBox.Show("请输入有效的正整数！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    result.Cancelled = true;
+                    return result;
+                }
+
+                result.Count = count;
+                result.Direction = (InsertDirection)insertForm.Tag;
+                result.Cancelled = false;
+            }
+            else
+            {
+                result.Cancelled = true;
+            }
+
+            return result;
         }
 
         private Word.Row GetReferenceRow(Word.Selection sel, Word.Table table)

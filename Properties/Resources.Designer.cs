@@ -183,6 +183,16 @@ namespace WordMan.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        public static System.Drawing.Bitmap 三线表示意图 {
+            get {
+                object obj = ResourceManager.GetObject("三线表示意图", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         public static System.Drawing.Bitmap 公式 {
             get {
                 object obj = ResourceManager.GetObject("公式", resourceCulture);
@@ -206,6 +216,16 @@ namespace WordMan.Properties {
         public static System.Drawing.Bitmap 列表模式 {
             get {
                 object obj = ResourceManager.GetObject("列表模式", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap 国标表示意图 {
+            get {
+                object obj = ResourceManager.GetObject("国标表示意图", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -266,6 +286,16 @@ namespace WordMan.Properties {
         public static System.Drawing.Bitmap 彩色 {
             get {
                 object obj = ResourceManager.GetObject("彩色", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap 无线表示意图 {
+            get {
+                object obj = ResourceManager.GetObject("无线表示意图", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

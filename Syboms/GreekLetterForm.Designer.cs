@@ -124,6 +124,7 @@
             this.Controls.Add(this.chkBold);
             this.Controls.Add(this.chkUppercase);
             this.Controls.Add(this.chkItalic);
+            this.CancelButton = this.btnClose;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "GreekLetterForm";

@@ -162,19 +162,57 @@ namespace WordMan
         #endregion
 
         #region 表格处理组
-        private void 创建三线表_Click(object sender, RibbonControlEventArgs e)
+        private void 创建表格_Click(object sender, Microsoft.Office.Tools.Ribbon.RibbonControlEventArgs e)
         {
-            Globals.ThisAddIn.ExecuteWithUndoRecord("创建三线表", () =>
+            var gallery = sender as Microsoft.Office.Tools.Ribbon.RibbonGallery;
+            if (gallery == null)
+                return;
+
+            int selectedIndex = gallery.SelectedItemIndex;
+            if (selectedIndex < 0)
+                return;
+
+            Globals.ThisAddIn.ExecuteWithUndoRecord("创建表格", () =>
             {
-                tableProcessor.CreateThreeLineTable();
+                if (selectedIndex == 0)
+                {
+                    tableProcessor.CreateThreeLineTableStyle();
+                }
+                else if (selectedIndex == 1)
+                {
+                    tableProcessor.CreateGBTableStyle();
+                }
+                else if (selectedIndex == 2)
+                {
+                    tableProcessor.CreateNoBorderTableStyle();
+                }
             });
         }
 
-        private void 设为三线_Click(object sender, Microsoft.Office.Tools.Ribbon.RibbonControlEventArgs e)
+        private void 设置表格_Click(object sender, Microsoft.Office.Tools.Ribbon.RibbonControlEventArgs e)
         {
-            Globals.ThisAddIn.ExecuteWithUndoRecord("设为三线表", () =>
+            var gallery = sender as Microsoft.Office.Tools.Ribbon.RibbonGallery;
+            if (gallery == null)
+                return;
+
+            int selectedIndex = gallery.SelectedItemIndex;
+            if (selectedIndex < 0)
+                return;
+
+            Globals.ThisAddIn.ExecuteWithUndoRecord("设置表格", () =>
             {
-                tableProcessor.SetCurrentTableToThreeLine();
+                if (selectedIndex == 0)
+                {
+                    tableProcessor.SetCurrentTableToThreeLineStyle();
+                }
+                else if (selectedIndex == 1)
+                {
+                    tableProcessor.SetCurrentTableToGBStyle();
+                }
+                else if (selectedIndex == 2)
+                {
+                    tableProcessor.SetCurrentTableToNoBorderStyle();
+                }
             });
         }
 

@@ -307,7 +307,6 @@
     <Compile Include="TableProcessor.cs" />
     <AppDesigner Include="Properties\" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <None Include="Resources\pdf.png" />
   </ItemGroup>
@@ -391,6 +390,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\引用.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\国标表示意图.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\无线表示意图.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\三线表示意图1.png" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -87,10 +87,29 @@ namespace WordMan
                     return;
                 }
 
+                // 检查前一个段落是否为空
+                Word.Paragraph prevPara = para.Previous() as Word.Paragraph;
+                bool prevParaIsEmpty = false;
+                if (prevPara != null)
+                {
+                    string prevText = prevPara.Range.Text.Trim();
+                    prevParaIsEmpty = string.IsNullOrEmpty(prevText) || prevText == "\r" || prevText == "\r\n";
+                }
+
+                // 如果前一个段落为空，在删除当前段落前，先在前一个段落末尾插入一个段落
+                // 这样可以确保即使当前段落被删除，前一个空段落也会保留
+                if (prevParaIsEmpty && prevPara != null)
+                {
+                    Word.Range prevParaEnd = prevPara.Range.Duplicate;
+                    prevParaEnd.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
+                    prevParaEnd.InsertParagraphAfter();
+                }
+
                 Word.Range contentRange = para.Range.Duplicate;
                 contentRange.End = contentRange.End - 1;
                 contentRange.Cut();
 
+                // 删除当前段落（包括段落标记）
                 para.Range.Delete();
 
                 Word.Table table = CreateFormulaTable(sel, app);
@@ -314,9 +333,9 @@ namespace WordMan
                 
                 // 如果下一个段落已经是题注样式，或者已经包含"图"开头的文本，直接返回
                 if ((nextStyle != null && nextStyle.NameLocal == "题注") || nextText.StartsWith("图"))
-                {
-                    return;
-                }
+                    {
+                        return;
+                    }
                 
                 // 如果下一个段落紧挨着图片段落（开始位置等于图片段落结束位置），且是空段落，可以使用
                 if (nextPara.Range.Start == originalPicEnd && string.IsNullOrEmpty(nextText))
@@ -348,17 +367,17 @@ namespace WordMan
                 else
                 {
                     // 图片后面没有文本，直接在图片段落后插入新段落
-                    var afterPicRange = picPara.Range.Duplicate;
-                    afterPicRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
-                    afterPicRange.InsertParagraphAfter();
-                    
+            var afterPicRange = picPara.Range.Duplicate;
+            afterPicRange.Collapse(Word.WdCollapseDirection.wdCollapseEnd);
+            afterPicRange.InsertParagraphAfter();
+
                     // 查找新插入的题注段落
-                    foreach (Word.Paragraph para in doc.Paragraphs)
-                    {
+            foreach (Word.Paragraph para in doc.Paragraphs)
+            {
                         if (para.Range.Start == originalPicEnd)
-                        {
-                            captionPara = para;
-                            break;
+                {
+                    captionPara = para;
+                    break;
                         }
                     }
                 }
@@ -370,7 +389,7 @@ namespace WordMan
             Word.Range captionRange = captionPara.Range.Duplicate;
             captionRange.End = captionRange.End - 1; // 排除段落标记
             captionRange.Text = "";
-            
+
             // 在题注段落中插入内容
             captionRange = captionPara.Range.Duplicate;
             captionRange.End = captionRange.End - 1; // 排除段落标记
@@ -476,53 +495,97 @@ namespace WordMan
         private void InsertTableCaption(Word.Table table, CaptionNumberStyle numberStyle)
         {
             if (table == null) return;
-            var doc = table.Application.ActiveDocument;
-            var app = doc.Application;
-
-            Word.Range tableRange = table.Range;
-            int tableStart = tableRange.Start;
-
-            bool isInFirstCell = table.Cell(1, 1).Range.InRange(tableRange);
-            if (isInFirstCell)
+            
+            try
             {
-                tableStart = Math.Max(0, tableStart - 1);
-            }
+                var doc = table.Application.ActiveDocument;
+                var app = doc.Application;
 
-            Word.Paragraph prevPara = null;
-            Word.Range beforeTableRange = doc.Range(0, tableStart);
-            if (beforeTableRange.Paragraphs.Count > 0)
-            {
-                prevPara = beforeTableRange.Paragraphs[beforeTableRange.Paragraphs.Count];
-                string prevText = prevPara.Range.Text.TrimStart();
-                if ((prevPara.get_Style() is Word.Style style && style.NameLocal == "题注")
-                    || prevText.StartsWith("表"))
+                // 检查表格前是否已有题注
+                if (HasCaptionBeforeTable(table, doc))
                 {
                     return;
                 }
-            }
 
-            int originalTablePosition = tableRange.Start;
+                // 1. 定位到表格的第一个单元格
+                Word.Range firstCellRange = table.Cell(1, 1).Range;
+                app.Selection.SetRange(firstCellRange.Start, firstCellRange.Start);
 
-            Word.Range insertRange = doc.Range(tableStart, tableStart);
-            insertRange.Text = "";
-            insertRange.InsertParagraphBefore();
+                // 2. 按上键，检查位置是否还在第一个单元格
+                SendKeyAndWait("{UP}");
+                bool isInFirstCell = table.Cell(1, 1).Range.InRange(app.Selection.Range);
 
-            Word.Paragraph captionPara = null;
-            foreach (Word.Paragraph para in doc.Paragraphs)
-            {
-                if (para.Range.End == originalTablePosition)
+                if (isInFirstCell)
                 {
-                    captionPara = para;
-                    break;
+                    // 位置还在第一个单元格，说明前方没有段落
+                    // 使用 Ctrl+Shift+Enter 在表格前插入段落
+                    SendKeyAndWait("^+{ENTER}");
+                }
+                else
+                {
+                    // 位置不在第一个单元格了，说明前方有段落
+                    // 判断当前光标所在段落是否有内容
+                    Word.Paragraph currentPara = app.Selection.Paragraphs[1];
+                    if (currentPara != null && IsParagraphNotEmpty(currentPara))
+                    {
+                        // 段落有内容，在段落最后插入一个空行
+                        app.Selection.EndKey(Word.WdUnits.wdLine, Word.WdMovementType.wdMove);
+                        SendKeyAndWait("{ENTER}");
+                    }
+                    // 如果段落没有内容（是空段落），直接使用，不需要插入
+                }
+
+                // 3. 将光标定位到空段落开始位置
+                app.Selection.HomeKey(Word.WdUnits.wdLine, Word.WdMovementType.wdMove);
+
+                // 4. 插入编号
+                InsertTableCaptionContent(app.Selection.Range, doc, numberStyle);
+
+                // 5. 应用题注样式
+                Word.Paragraph captionPara = app.Selection.Paragraphs[1];
+                if (captionPara != null)
+                {
+                    captionPara.set_Style("题注");
                 }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"插入表编号失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
-            if (captionPara == null) return;
+        private bool HasCaptionBeforeTable(Word.Table table, Word.Document doc)
+        {
+            Word.Range tableRange = table.Range;
+            Word.Range beforeTableRange = doc.Range(0, tableRange.Start);
+            if (beforeTableRange.Paragraphs.Count > 0)
+            {
+                Word.Paragraph prevPara = beforeTableRange.Paragraphs[beforeTableRange.Paragraphs.Count];
+                string prevText = prevPara.Range.Text.TrimStart();
+                Word.Style prevStyle = prevPara.get_Style() as Word.Style;
+                
+                return (prevStyle != null && prevStyle.NameLocal == "题注") || prevText.StartsWith("表");
+            }
+            return false;
+        }
 
-            Word.Range captionRange = captionPara.Range.Duplicate;
-            captionRange.End = captionRange.Start + 1;
+        private bool IsParagraphNotEmpty(Word.Paragraph para)
+        {
+            if (para == null) return false;
+            string paraText = para.Range.Text.Trim();
+            return !string.IsNullOrEmpty(paraText) && paraText != "\r" && paraText != "\r\n";
+        }
+
+        private void SendKeyAndWait(string keys)
+        {
+            System.Windows.Forms.SendKeys.SendWait(keys);
+            System.Threading.Thread.Sleep(50);
+        }
+
+        private void InsertTableCaptionContent(Word.Range range, Word.Document doc, CaptionNumberStyle numberStyle)
+        {
+            Word.Range captionRange = range.Duplicate;
             captionRange.Text = "";
-
             var fieldRange = doc.Range(captionRange.Start, captionRange.Start);
             fieldRange.InsertAfter("表 ");
             fieldRange.SetRange(fieldRange.Start + 2, fieldRange.Start + 2);
@@ -537,8 +600,6 @@ namespace WordMan
                     InsertNumberWithStyleRef(fieldRange, "表", numberStyle == CaptionNumberStyle.Dash ? "-" : ".");
                     break;
             }
-
-            captionPara.set_Style("题注");
         }
         #endregion
 

@@ -60,7 +60,7 @@ namespace WordMan
                     return;
                 }
 
-                Word.Range rng;
+                Word.Range rng = null;
 
                 if (sel.Range != null &&
                     !string.IsNullOrWhiteSpace(sel.Range.Text) &&
@@ -72,11 +72,13 @@ namespace WordMan
                 {
                     rng = sel.Paragraphs[1].Range;
                 }
-                else
+
+                if (rng == null)
                 {
                     MessageBox.Show("未检测到可操作的文本或段落。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
+
                 rng.Find.Execute(" ", ReplaceWith: "", Replace: Word.WdReplace.wdReplaceAll);
                 rng.Find.Execute("　", ReplaceWith: "", Replace: Word.WdReplace.wdReplaceAll);
             }
@@ -130,18 +132,25 @@ namespace WordMan
             try
             {
                 var app = Globals.ThisAddIn.Application;
-                var rng = app.Selection.Range.Start != app.Selection.Range.End
-                    ? app.Selection.Range
-                    : app.Selection.Paragraphs[1].Range;
+                var sel = app.Selection;
+                Word.Range rng = null;
 
-                if (string.IsNullOrWhiteSpace(rng.Text))
+                if (sel != null && sel.Range != null && sel.Range.Start != sel.Range.End)
+                {
+                    rng = sel.Range;
+                }
+                else if (sel != null && sel.Paragraphs != null && sel.Paragraphs.Count > 0)
+                {
+                    rng = sel.Paragraphs[1].Range;
+                }
+
+                if (rng == null || string.IsNullOrWhiteSpace(rng.Text))
                 {
                     MessageBox.Show("未检测到可操作的文本或段落。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
                 app.ScreenUpdating = false;
-
 
                 // 标点符号映射
                 var dict = englishToChinese ? new Dictionary<string, string>
@@ -180,7 +189,6 @@ namespace WordMan
                         continue;
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -208,8 +216,8 @@ namespace WordMan
         {
             try
             {
-                Word.Application app = Globals.ThisAddIn.Application;
-                Word.Selection selection = app.Selection;
+                var app = Globals.ThisAddIn.Application;
+                var selection = app.Selection;
 
                 if (selection == null)
                 {
@@ -230,15 +238,10 @@ namespace WordMan
                 {
                     range = selection.Paragraphs[1].Range;
                 }
-                else
-                {
-                    MessageBox.Show("未检测到可操作的文本或段落。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
 
                 if (range == null || string.IsNullOrEmpty(range.Text))
                 {
-                    MessageBox.Show("未检测到可操作的文本。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("未检测到可操作的文本或段落。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
@@ -384,63 +387,58 @@ namespace WordMan
         /// <param name="newFont">新字体名称</param>
         public void ReplaceFont(string originalFont, string newFont)
         {
-            var app = Globals.ThisAddIn.Application;
-            var sel = app.Selection;
-            Word.Range rng;
-
-            if (sel != null && sel.Range != null && sel.Range.Start != sel.Range.End)
+            try
             {
-                rng = sel.Range.Duplicate;
-            }
-            else
-            {
-                rng = app.ActiveDocument.Range();
-            }
+                var app = Globals.ThisAddIn.Application;
+                var sel = app.Selection;
+                Word.Range rng;
 
-            rng.Find.ClearFormatting();
-            rng.Find.Replacement.ClearFormatting();
-            rng.Find.Font.Name = originalFont;
-            rng.Find.Replacement.Font.Name = newFont;
-            rng.Find.Text = "";
-            rng.Find.Replacement.Text = "";
-            rng.Find.Forward = true;
-            rng.Find.Wrap = Word.WdFindWrap.wdFindStop;
-            rng.Find.Format = true;
-            rng.Find.MatchCase = false;
-            rng.Find.MatchWholeWord = false;
-            rng.Find.MatchWildcards = false;
-            rng.Find.MatchSoundsLike = false;
-            rng.Find.MatchAllWordForms = false;
-            rng.Find.Execute(Replace: Word.WdReplace.wdReplaceAll);
+                if (sel != null && sel.Range != null && sel.Range.Start != sel.Range.End)
+                {
+                    rng = sel.Range.Duplicate;
+                }
+                else
+                {
+                    rng = app.ActiveDocument.Range();
+                }
+
+                rng.Find.ClearFormatting();
+                rng.Find.Replacement.ClearFormatting();
+                rng.Find.Font.Name = originalFont;
+                rng.Find.Replacement.Font.Name = newFont;
+                rng.Find.Text = "";
+                rng.Find.Replacement.Text = "";
+                rng.Find.Forward = true;
+                rng.Find.Wrap = Word.WdFindWrap.wdFindStop;
+                rng.Find.Format = true;
+                rng.Find.MatchCase = false;
+                rng.Find.MatchWholeWord = false;
+                rng.Find.MatchWildcards = false;
+                rng.Find.MatchSoundsLike = false;
+                rng.Find.MatchAllWordForms = false;
+                rng.Find.Execute(Replace: Word.WdReplace.wdReplaceAll);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"字体替换失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
-        /// <summary>
-        /// 将仿宋GB2312字体替换为仿宋字体
-        /// </summary>
         public void ReplaceFangSongGB2312ToFangSong()
         {
             ReplaceFont("仿宋_GB2312", "仿宋");
         }
 
-        /// <summary>
-        /// 将楷体GB2312字体替换为楷体字体
-        /// </summary>
         public void ReplaceKaiTiGB2312ToKaiTi()
         {
             ReplaceFont("楷体_GB2312", "楷体");
         }
 
-        /// <summary>
-        /// 将方正小标宋简体字体替换为黑体字体
-        /// </summary>
         public void ReplaceFZXBSToHeiTi()
         {
             ReplaceFont("方正小标宋简体", "黑体");
         }
 
-        /// <summary>
-        /// 将数字、英文大小写字母等替换为Times New Roman字体
-        /// </summary>
         public void ReplaceAllToTimesNewRoman()
         {
             try
@@ -489,9 +487,6 @@ namespace WordMan
         #endregion
 
         #region Word 内置功能
-        /// <summary>
-        /// 清除格式
-        /// </summary>
         public void ClearFormatting()
         {
             try
@@ -504,10 +499,6 @@ namespace WordMan
             }
         }
 
-        /// <summary>
-        /// 格式刷点击处理
-        /// </summary>
-        /// <param name="toggleButton">格式刷切换按钮</param>
         public void FormatPainter_Click(Microsoft.Office.Tools.Ribbon.RibbonToggleButton toggleButton)
         {
             try
@@ -551,10 +542,6 @@ namespace WordMan
             }
         }
 
-        /// <summary>
-        /// 格式刷选择变化处理
-        /// </summary>
-        /// <param name="sel">当前选择</param>
         private void FormatPainter_SelectionChange(Word.Selection sel)
         {
             try
@@ -587,9 +574,6 @@ namespace WordMan
             catch { }
         }
 
-        /// <summary>
-        /// 只留文本（粘贴为纯文本或清除格式）
-        /// </summary>
         public void PasteTextOnly()
         {
             try

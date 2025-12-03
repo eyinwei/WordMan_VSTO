@@ -118,6 +118,7 @@
             this.ClientSize = new System.Drawing.Size(584, 561);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.btnClose);
+            this.CancelButton = this.btnClose;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "CommonSymbolForm";

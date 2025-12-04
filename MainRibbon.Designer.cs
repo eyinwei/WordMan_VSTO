@@ -43,14 +43,6 @@
             Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl6 = this.Factory.CreateRibbonDropDownItem();
             this.WordMan = this.Factory.CreateRibbonTab();
             this.文本处理 = this.Factory.CreateRibbonGroup();
-            this.separator1 = this.Factory.CreateRibbonSeparator();
-            this.separator2 = this.Factory.CreateRibbonSeparator();
-            this.separator3 = this.Factory.CreateRibbonSeparator();
-            this.表格处理 = this.Factory.CreateRibbonGroup();
-            this.题注与引用 = this.Factory.CreateRibbonGroup();
-            this.图片处理 = this.Factory.CreateRibbonGroup();
-            this.全文处理 = this.Factory.CreateRibbonGroup();
-            this.separator6 = this.Factory.CreateRibbonSeparator();
             this.清除格式 = this.Factory.CreateRibbonButton();
             this.格式刷 = this.Factory.CreateRibbonToggleButton();
             this.只留文本 = this.Factory.CreateRibbonButton();
@@ -60,20 +52,24 @@
             this.英标转中标 = this.Factory.CreateRibbonButton();
             this.中标转英标 = this.Factory.CreateRibbonButton();
             this.自动加空格 = this.Factory.CreateRibbonButton();
+            this.separator1 = this.Factory.CreateRibbonSeparator();
             this.缩进2字符 = this.Factory.CreateRibbonButton();
             this.去除缩进 = this.Factory.CreateRibbonButton();
+            this.separator2 = this.Factory.CreateRibbonSeparator();
             this.希腊字母 = this.Factory.CreateRibbonButton();
             this.常用符号 = this.Factory.CreateRibbonButton();
+            this.separator3 = this.Factory.CreateRibbonSeparator();
             this.字体替换 = this.Factory.CreateRibbonMenu();
             this.仿宋替换 = this.Factory.CreateRibbonButton();
             this.楷体替换 = this.Factory.CreateRibbonButton();
-            this.方正小标宋替换 = this.Factory.CreateRibbonButton();
             this.数字替换 = this.Factory.CreateRibbonButton();
+            this.表格处理 = this.Factory.CreateRibbonGroup();
             this.创建表格 = this.Factory.CreateRibbonGallery();
             this.设置表格 = this.Factory.CreateRibbonGallery();
             this.插入N行 = this.Factory.CreateRibbonButton();
             this.插入N列 = this.Factory.CreateRibbonButton();
             this.重复标题行 = this.Factory.CreateRibbonToggleButton();
+            this.题注与引用 = this.Factory.CreateRibbonGroup();
             this.图编号 = this.Factory.CreateRibbonSplitButton();
             this.图注样式1 = this.Factory.CreateRibbonToggleButton();
             this.图注样式2 = this.Factory.CreateRibbonToggleButton();
@@ -87,15 +83,18 @@
             this.公式样式2 = this.Factory.CreateRibbonToggleButton();
             this.公式样式3 = this.Factory.CreateRibbonToggleButton();
             this.交叉引用 = this.Factory.CreateRibbonToggleButton();
+            this.图片处理 = this.Factory.CreateRibbonGroup();
             this.宽度刷 = this.Factory.CreateRibbonToggleButton();
             this.高度刷 = this.Factory.CreateRibbonToggleButton();
             this.位图化 = this.Factory.CreateRibbonButton();
             this.导出图片 = this.Factory.CreateRibbonButton();
+            this.全文处理 = this.Factory.CreateRibbonGroup();
             this.排版工具 = this.Factory.CreateRibbonButton();
             this.样式设置 = this.Factory.CreateRibbonButton();
             this.多级列表 = this.Factory.CreateRibbonButton();
             this.域名高亮 = this.Factory.CreateRibbonSplitButton();
             this.取消高亮 = this.Factory.CreateRibbonButton();
+            this.separator6 = this.Factory.CreateRibbonSeparator();
             this.另存PDF = this.Factory.CreateRibbonSplitButton();
             this.版本 = this.Factory.CreateRibbonButton();
             this.编号设置 = this.Factory.CreateRibbonMenu();
@@ -148,64 +147,6 @@
             this.文本处理.Items.Add(this.字体替换);
             this.文本处理.Label = "文本处理";
             this.文本处理.Name = "文本处理";
-            // 
-            // separator1
-            // 
-            this.separator1.Name = "separator1";
-            // 
-            // separator2
-            // 
-            this.separator2.Name = "separator2";
-            // 
-            // separator3
-            // 
-            this.separator3.Name = "separator3";
-            // 
-            // 表格处理
-            // 
-            this.表格处理.Items.Add(this.创建表格);
-            this.表格处理.Items.Add(this.设置表格);
-            this.表格处理.Items.Add(this.插入N行);
-            this.表格处理.Items.Add(this.插入N列);
-            this.表格处理.Items.Add(this.重复标题行);
-            this.表格处理.Label = "表格处理";
-            this.表格处理.Name = "表格处理";
-            // 
-            // 题注与引用
-            // 
-            this.题注与引用.Items.Add(this.图编号);
-            this.题注与引用.Items.Add(this.表编号);
-            this.题注与引用.Items.Add(this.式编号);
-            this.题注与引用.Items.Add(this.交叉引用);
-            this.题注与引用.Label = "题注与引用";
-            this.题注与引用.Name = "题注与引用";
-            // 
-            // 图片处理
-            // 
-            this.图片处理.Items.Add(this.宽度刷);
-            this.图片处理.Items.Add(this.高度刷);
-            this.图片处理.Items.Add(this.位图化);
-            this.图片处理.Items.Add(this.导出图片);
-            this.图片处理.Label = "图片处理";
-            this.图片处理.Name = "图片处理";
-            // 
-            // 全文处理
-            // 
-            this.全文处理.Items.Add(this.排版工具);
-            this.全文处理.Items.Add(this.样式设置);
-            this.全文处理.Items.Add(this.多级列表);
-            this.全文处理.Items.Add(this.域名高亮);
-            this.全文处理.Items.Add(this.separator6);
-            this.全文处理.Items.Add(this.另存PDF);
-            this.全文处理.Items.Add(this.编号设置);
-            this.全文处理.Items.Add(this.快速密级);
-            this.全文处理.Items.Add(this.文档操作);
-            this.全文处理.Label = "全文处理";
-            this.全文处理.Name = "全文处理";
-            // 
-            // separator6
-            // 
-            this.separator6.Name = "separator6";
             // 
             // 清除格式
             // 
@@ -302,6 +243,10 @@
             this.自动加空格.SuperTip = "在选中文本或当前段落中，自动在数字和单位（如cm、kg、°C等）之间添加空格，但不处理百分比和角度单位";
             this.自动加空格.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.自动加空格_Click);
             // 
+            // separator1
+            // 
+            this.separator1.Name = "separator1";
+            // 
             // 缩进2字符
             // 
             this.缩进2字符.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
@@ -325,6 +270,10 @@
             this.去除缩进.ShowImage = true;
             this.去除缩进.SuperTip = "清除选中段落或当前段落的首行缩进和左右缩进，恢复为无缩进状态";
             this.去除缩进.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.去除缩进_Click);
+            // 
+            // separator2
+            // 
+            this.separator2.Name = "separator2";
             // 
             // 希腊字母
             // 
@@ -350,13 +299,16 @@
             this.常用符号.SuperTip = "打开常用符号选择窗口，可以快速插入数学、物理等常用特殊符号";
             this.常用符号.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.常用符号_Click);
             // 
+            // separator3
+            // 
+            this.separator3.Name = "separator3";
+            // 
             // 字体替换
             // 
             this.字体替换.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
             this.字体替换.Image = global::WordMan.Properties.Resources.字体替换;
             this.字体替换.Items.Add(this.仿宋替换);
             this.字体替换.Items.Add(this.楷体替换);
-            this.字体替换.Items.Add(this.方正小标宋替换);
             this.字体替换.Items.Add(this.数字替换);
             this.字体替换.Label = "字体替换";
             this.字体替换.Name = "字体替换";
@@ -382,15 +334,6 @@
             this.楷体替换.SuperTip = "批量将选中文本或全文中的楷体GB2312字体替换为楷体字体，用于字体标准化";
             this.楷体替换.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.楷体替换_Click);
             // 
-            // 方正小标宋替换
-            // 
-            this.方正小标宋替换.Label = "方正小标宋→黑体";
-            this.方正小标宋替换.Name = "方正小标宋替换";
-            this.方正小标宋替换.ScreenTip = "将选中文本或全文中的方正小标宋字体替换为黑体字体";
-            this.方正小标宋替换.ShowImage = true;
-            this.方正小标宋替换.SuperTip = "批量将选中文本或全文中的方正小标宋字体替换为黑体字体，用于字体标准化";
-            this.方正小标宋替换.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.方正小标宋替换_Click);
-            // 
             // 数字替换
             // 
             this.数字替换.Label = "数字字母→Times New Roman";
@@ -399,6 +342,16 @@
             this.数字替换.ShowImage = true;
             this.数字替换.SuperTip = "批量将选中文本或全文中的数字、英文及希腊字母替换为Times New Roman字体，用于统一英文字体";
             this.数字替换.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.数字替换_Click);
+            // 
+            // 表格处理
+            // 
+            this.表格处理.Items.Add(this.创建表格);
+            this.表格处理.Items.Add(this.设置表格);
+            this.表格处理.Items.Add(this.插入N行);
+            this.表格处理.Items.Add(this.插入N列);
+            this.表格处理.Items.Add(this.重复标题行);
+            this.表格处理.Label = "表格处理";
+            this.表格处理.Name = "表格处理";
             // 
             // 创建表格
             // 
@@ -485,6 +438,15 @@
             this.重复标题行.ShowImage = true;
             this.重复标题行.SuperTip = "设置表格在跨页时，在每一页的顶部自动重复显示标题行";
             this.重复标题行.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.重复标题行_Click);
+            // 
+            // 题注与引用
+            // 
+            this.题注与引用.Items.Add(this.图编号);
+            this.题注与引用.Items.Add(this.表编号);
+            this.题注与引用.Items.Add(this.式编号);
+            this.题注与引用.Items.Add(this.交叉引用);
+            this.题注与引用.Label = "题注与引用";
+            this.题注与引用.Name = "题注与引用";
             // 
             // 图编号
             // 
@@ -638,6 +600,15 @@
             this.交叉引用.SuperTip = "进入交叉引用模式，可以快速插入对图、表或公式的交叉引用。点击后再次点击图表或公式即可插入引用";
             this.交叉引用.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.交叉引用_Click);
             // 
+            // 图片处理
+            // 
+            this.图片处理.Items.Add(this.宽度刷);
+            this.图片处理.Items.Add(this.高度刷);
+            this.图片处理.Items.Add(this.位图化);
+            this.图片处理.Items.Add(this.导出图片);
+            this.图片处理.Label = "图片处理";
+            this.图片处理.Name = "图片处理";
+            // 
             // 宽度刷
             // 
             this.宽度刷.Image = ((System.Drawing.Image)(resources.GetObject("宽度刷.Image")));
@@ -682,6 +653,20 @@
             this.导出图片.ShowImage = true;
             this.导出图片.SuperTip = "将文档中选中的图片以高清质量导出到指定位置，支持多种图片格式";
             this.导出图片.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.导出图片_Click);
+            // 
+            // 全文处理
+            // 
+            this.全文处理.Items.Add(this.排版工具);
+            this.全文处理.Items.Add(this.样式设置);
+            this.全文处理.Items.Add(this.多级列表);
+            this.全文处理.Items.Add(this.域名高亮);
+            this.全文处理.Items.Add(this.separator6);
+            this.全文处理.Items.Add(this.另存PDF);
+            this.全文处理.Items.Add(this.编号设置);
+            this.全文处理.Items.Add(this.快速密级);
+            this.全文处理.Items.Add(this.文档操作);
+            this.全文处理.Label = "全文处理";
+            this.全文处理.Name = "全文处理";
             // 
             // 排版工具
             // 
@@ -742,6 +727,10 @@
             this.取消高亮.SuperTip = "取消文档中交叉引用和文献引用的高亮显示，恢复正常显示状态";
             this.取消高亮.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.取消高亮_Click);
             // 
+            // separator6
+            // 
+            this.separator6.Name = "separator6";
+            // 
             // 另存PDF
             // 
             this.另存PDF.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
@@ -756,7 +745,7 @@
             // 
             // 版本
             // 
-            this.版本.Label = "版本V3.1";
+            this.版本.Label = "版本V3.2";
             this.版本.Name = "版本";
             this.版本.OfficeImageId = "Info";
             this.版本.ScreenTip = "查看WordMan插件版本信息";
@@ -766,12 +755,10 @@
             // 
             // 编号设置
             // 
-            this.编号设置.Image = global::WordMan.Properties.Resources.魔术棒;
             this.编号设置.Items.Add(this.上标);
             this.编号设置.Items.Add(this.正常);
             this.编号设置.Label = "文献编号";
             this.编号设置.Name = "编号设置";
-            this.编号设置.OfficeImageId = "ControlWizards";
             this.编号设置.ScreenTip = "设置文献编号格式";
             this.编号设置.SuperTip = "设置文献引用编号的显示格式，可以选择上标或正常格式";
             // 
@@ -950,7 +937,6 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonMenu 字体替换;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 仿宋替换;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 楷体替换;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton 方正小标宋替换;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 数字替换;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton 字母替换;
     }

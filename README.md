@@ -1,11 +1,11 @@
-# WordMan 3.0 - 专业的 Word 文档处理插件
+# WordMan 3.2 - 专业的 Word 文档处理插件
 
 <div align="center">
 
 **WordMan** 是一款专为 Microsoft Word 设计的 VSTO 增强插件，提供强大的文档处理、排版和编辑功能，让您的文档工作更加高效专业。
 
-[![Version](https://img.shields.io/badge/version-3.0-blue.svg)](https://github.com/yourusername/wordman)
-[![.NET](https://img.shields.io/badge/.NET-4.0-512BD4.svg)](https://dotnet.microsoft.com/)
+[![Version](https://img.shields.io/badge/version-3.2-blue.svg)](https://github.com/yourusername/wordman)
+[![.NET](https://img.shields.io/badge/.NET-4.5-512BD4.svg)](https://dotnet.microsoft.com/)
 [![Office](https://img.shields.io/badge/Office-2013+-D83B01.svg)](https://www.microsoft.com/microsoft-365)
 
 </div>
@@ -14,7 +14,7 @@
 
 ## ✨ 功能概览
 
-WordMan 3.0 将常用文档处理功能集成到一个统一的界面中，按功能模块划分为五个主要区域：
+WordMan 3.2 将常用文档处理功能集成到一个统一的界面中，按功能模块划分为五个主要区域：
 
 ![主功能界面](功能介绍/fig1%20主功能.png)
 
@@ -116,12 +116,12 @@ WordMan 3.0 将常用文档处理功能集成到一个统一的界面中，按�
 
 - **操作系统**：Windows 7 或更高版本
 - **Office版本**：Microsoft Office 2013 或更高版本
-- **.NET框架**：.NET Framework 4.0 或更高版本
+- **.NET框架**：.NET Framework 4.5 或更高版本
 
 ### 安装步骤
 
 1. **下载安装包**
-   - 从发布页面下载 WordMan 3.0 安装包
+   - 从发布页面下载 WordMan 3.2 安装包
 
 2. **安装插件**
    - 运行安装程序，按照提示完成安装
@@ -253,7 +253,7 @@ WordMan 3.0 将常用文档处理功能集成到一个统一的界面中，按�
 
 - **开发框架**：VSTO (Visual Studio Tools for Office)
 - **开发语言**：C# 7.3
-- **目标框架**：.NET Framework 4.0
+- **目标框架**：.NET Framework 4.5
 - **Office API**：Microsoft.Office.Interop.Word
 
 ### 设计原则
@@ -320,7 +320,7 @@ WordMan_VSTO/
 
 <div align="center">
 
-**WordMan 3.0** - 让 Word 文档处理更高效、更专业！
+**WordMan 3.2** - 让 Word 文档处理更高效、更专业！
 
 *Made with ❤️ for Word users*
 

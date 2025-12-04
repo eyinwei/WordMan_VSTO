@@ -395,7 +395,7 @@ namespace WordMan
 
                 if (sel != null && sel.Range != null && sel.Range.Start != sel.Range.End)
                 {
-                    rng = sel.Range.Duplicate;
+                    rng = sel.Range;
                 }
                 else
                 {
@@ -404,8 +404,28 @@ namespace WordMan
 
                 rng.Find.ClearFormatting();
                 rng.Find.Replacement.ClearFormatting();
-                rng.Find.Font.Name = originalFont;
-                rng.Find.Replacement.Font.Name = newFont;
+                
+                // 设置查找字体（原字体可能不存在，但文档中已使用）
+                try
+                {
+                    rng.Find.Font.Name = originalFont;
+                }
+                catch
+                {
+                    // 原字体设置失败不影响，继续
+                }
+                
+                // 设置替换字体（新字体需要存在）
+                try
+                {
+                    rng.Find.Replacement.Font.Name = newFont;
+                }
+                catch
+                {
+                    MessageBox.Show($"无法设置替换字体 '{newFont}'，该字体可能不存在。\n\n请确保系统中已安装该字体。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                
                 rng.Find.Text = "";
                 rng.Find.Replacement.Text = "";
                 rng.Find.Forward = true;
@@ -432,11 +452,6 @@ namespace WordMan
         public void ReplaceKaiTiGB2312ToKaiTi()
         {
             ReplaceFont("楷体_GB2312", "楷体");
-        }
-
-        public void ReplaceFZXBSToHeiTi()
-        {
-            ReplaceFont("方正小标宋简体", "黑体");
         }
 
         public void ReplaceAllToTimesNewRoman()

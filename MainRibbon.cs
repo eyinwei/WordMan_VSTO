@@ -144,14 +144,6 @@ namespace WordMan
             });
         }
 
-        private void 方正小标宋替换_Click(object sender, RibbonControlEventArgs e)
-        {
-            Globals.ThisAddIn.ExecuteWithUndoRecord("字体替换：方正小标宋", () =>
-            {
-                textProcessor.ReplaceFZXBSToHeiTi();
-            });
-        }
-
         private void 数字替换_Click(object sender, RibbonControlEventArgs e)
         {
             Globals.ThisAddIn.ExecuteWithUndoRecord("字体替换：数字英文", () =>
